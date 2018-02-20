@@ -28,6 +28,7 @@
         border:2px solid black;
         float: left; /* This makes the border exactly fit the canvas. */
     }
+
 </style>
 <script>
 
@@ -62,7 +63,7 @@
         
         var colorChoice;  // Integer code for the selected color in the "colorChoide"
                           // popup menu.  The value is assigned in doMouseDown.
-        
+        var shapeChoice;
         function doMouseDown(evt) {
                 // This function is called when the user presses a button on the mouse.
                 // Only the main mouse button will start a drag.
@@ -84,6 +85,7 @@
                 document.addEventListener("mouseup", doMouseUp, false);
             }
             colorChoice = Number(document.getElementById("colorChoice").value);
+			shapeChoice = Number(document.getElementById("shapeChoice").value);
             // TODO: Anything else to do when mouse is first pressed?
         }
         
@@ -116,8 +118,36 @@
             else if (colorChoice == 3) {
                 graphics.fillStyle = "blue";
             }
-            graphics.fillRect(x-20,y-20,40,40);
-            graphics.strokeRect(x-20,y-20,40,40);
+			else if (colorChoice == 4) {
+                graphics.fillStyle = "#aaaaaa";
+            }
+
+			if (shapeChoice == 0){
+            	graphics.fillRect(x-20,y-20,40,40);
+            	graphics.strokeRect(x-20,y-20,40,40);
+			}
+			else if (shapeChoice == 1){
+				graphics.fillPoly(x-20,y-20,x,y-20,x+20,y+20,x-20,x-20);
+//            	graphics.strokePoly(x-20,y-20,x,y-20,x+20,y+20,x-20,x-20);
+			}
+			else if (shapeChoice == 2){
+				graphics.strokeStyle = graphics.fillStyle;           	
+				graphics.strokeLine(prevX,prevY,x,y);
+				graphics.strokeStyle = "#000000"
+				
+			}
+			else if (shapeChoice == 3){
+            	graphics.fillCircle(startX,startY,Math.sqrt(Math.pow(Math.abs(startX-x),2) + Math.pow(Math.abs(startY-y),2)));
+            	graphics.strokeCircle(startX,startY,Math.sqrt(Math.pow(Math.abs(startX-x),2) + Math.pow(Math.abs(startY-y),2)));
+			}
+			if (shapeChoice == 4){
+				var temp = graphics.fillStyle;
+				graphics.fillStyle = "#ffffff";
+            	graphics.fillRect(x-20,y-20,40,40);
+            	graphics.strokeRect(x-20,y-20,40,40);
+				graphics.fillStyle = temp
+			}
+            
             
             /*------------------------------------------------------------*/
             
@@ -135,7 +165,8 @@
             document.removeEventListener("mouseup", doMouseMove, false);
          }
          
-         canvas.addEventListener("mousedown", doMouseDown, false);
+		 canvas.addEventListener("mousedown", doMouseDown, false);
+
 
    } // end installMouseHandler
 
@@ -234,6 +265,7 @@
         try {
             canvas = document.getElementById("canvas");
             graphics = canvas.getContext("2d");
+			document.getElementById("clearButton").onclick = doClear;
         } catch(e) {
             document.getElementById("canvasholder").innerHTML =
                "<p>Canvas graphics is not supported.<br>" +
@@ -245,6 +277,10 @@
         graphics.fillStyle = "white";
         graphics.fillRect(0,0,canvas.width,canvas.height);
     }
+
+	function doClear(){
+			graphics.clearRect(0,0,800,600);
+	}
     
 </script>
 </head>
@@ -263,9 +299,18 @@
         <option value="1">Red</option>
         <option value="2">Green</option>
         <option value="3">Blue</option>
+        <option value="4">aaaaaaaaaaaaa</option>
     </select>
+	<b>Shape:</b>
+	<select id="shapeChoice">
+        <option value="0">Square</option>
+        <option value="1">Polygon</option>
+        <option value="2">Curve</option>
+        <option value="3">Circle</option>
+        <option value="4">Erase</option>
+    </select>
+	<button id="clearButton">Clear</button>
 </p>
-
 <div id="canvasholder">
 <canvas id="canvas" width="800" height="600">
     <!-- This message is shown on the page if the browser doesn't support the canvas element. -->
