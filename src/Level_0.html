@@ -18,67 +18,12 @@ var animating = false;  // Set to true when an animation is in progress.
 var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
 var tempObject;  // A temporary animated object.  DELETE IT.
-var horse = new THREE.Object3D();
-var merryGoRound = new THREE.Group();
-var currObjectName = "";
 
-var HORSE_SCALE = 0.02;
-var NUM_HORSES = 8;
-var HORSE_BOUNCE_HIGHT = 2;
-var MERRY_GO_ROUND_RADIUS = 10.0;
-
-/**********************************************************************************************************
- * 									MY FUNCTIONS
- ***********************************************************************************************************/
-
-function loadModel(url, name){ // Call this function to load the model.
-	console.log("Loading object: " + name);
-	currObjectName = name;
-	var loader = new THREE.JSONLoader();
-	loader.load(url, modelLoaded); // Start load, call model Loaded when done.
-}
-
-function modelLoaded(geometry, materials){ //callback function for loader
-	var mat = new THREE.MeshFaceMaterial(materials);
-	var object = new THREE.Mesh(geometry, mat);
-
-	//if statements to add proper object
-	if (currObjectName == "horse"){
-		horse.add(object);
-		horse.scale.set(HORSE_SCALE, HORSE_SCALE, HORSE_SCALE);
-		horse.translateZ(MERRY_GO_ROUND_RADIUS);
-		horse.rotateY(-1*Math.PI/2);
-		console.log("Loaded horse object");
-	}
-
-	//create merry-go-round
-	for(var i = 0; i < 3/*NUM_HORSES*/; i++){
-		merryGoRound.rotateY(-2*Math.PI/NUM_HORSES);
-		console.log("merry-go-round rotation %f", i*2*Math.PI/NUM_HORSES);		
-
-		var horseCopy = horse.clone();
-		if (i%2 == 0){
-			horseCopy.translateY(HORSE_BOUNCE_HIGHT);
-		} else {
-			horseCopy.translateY(-1*HORSE_BOUNCE_HIGHT);
-		}
-		//horseCopy.rotateOnWorldAxis(new THREE.Vector3(0,1,0), -2*i*Math.PI/NUM_HORSES);		
-
-		merryGoRound.add(horseCopy);
-		console.log("horse %d added to merry-go-round", i);
-	}
-	scene.add(merryGoRound);
-	render(); //only need this if there is no animation running
-}
-/**********************************************************************************************************
-									SKELETON
- *********************************************************************************************************/
 
 /**
  *  The render function draws the scene.
  */
 function render() {
-	console.log("rendering");
     renderer.render(scene, camera);
 }
 
@@ -102,7 +47,7 @@ function createWorld() {
     scene.add(camera);
     
     //------------------- Create the scene's visible objects ----------------------
-    /**
+    
     tempObject =  new THREE.Mesh(  // DELETE THIS !
         new THREE.CylinderGeometry(2,4,8,6,1),
         new THREE.MeshPhongMaterial({
@@ -114,14 +59,7 @@ function createWorld() {
     );
     tempObject.rotation.y = Math.PI/12;
     scene.add(tempObject);
-    */
-
-	//load horse model
-	loadModel("resources/horse.js", "horse");
-
-	//scene.add(horseCopy);
-	//render();
-
+    
 } // end function createWorld()
 
 
