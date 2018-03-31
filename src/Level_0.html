@@ -19,7 +19,7 @@ var frameNumber = 0;  // Frame number is advanced by 1 for each frame while anim
 
 var tempObject;  // A temporary animated object.  DELETE IT.
 var tempAlpha;
-
+var player = new THREE.Object3D();
 /**
  *  The render function draws the scene.
  */
@@ -39,12 +39,14 @@ function createWorld() {
     // ------------------- Make a camera with viewpoint light ----------------------
     
     camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 100);
-    camera.position.z = 30;
+    //camera.position.z = 30;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
     light.position.set(0,0,1);
     camera.add(light);
-    scene.add(camera);
+    player.add(camera);
+    player.position.set(0,0,30);
+    scene.add(player);
     
     //------------------- Create the scene's visible objects ----------------------
     
@@ -69,8 +71,8 @@ function createWorld() {
             //shading: THREE.FlatShading
         })
     );
-	tempAlpha.position.set(0,0,8);
-	scene.add(tempAlpha);
+	tempAlpha.position.set(0,0,-30);
+	player.add(tempAlpha);
     
 } // end function createWorld()
 
@@ -139,23 +141,19 @@ function onDocumentKeyDown(event){
 	// Get the key code of the pressed key
 	var keyCode = event.which;
 
-	cameraDistance = camera.position.z - tempAlpha.position.z
+	console.log(keyCode);
+
 	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	if(keyCode == 38 || keyCode == 87){ // Up Arrow or "w" - camera moves forwad = speed up
-		camera.position.z -= 0.1;
-		tempAlpha.position.z -= 0.1
+		player.position.z -= 0.1;
 	}else if(keyCode == 40 || keyCode == 83){ // Down Arrow or "s" - camera moves back = speed down 
-		camera.position.z += 0.1;
-		tempAlpha.position.z += 0.1;
+		player.position.z += 0.1;
 	}else if(keyCode == 37 || keyCode == 65){ // Left Arrow or "a" - camera moves right = turn right
-		camera.rotation.y += 0.01;
-		tempAlpha.rotation.y += 0.01;
+		player.rotation.y += 0.01;
 	}else if(keyCode == 39 || keyCode == 68){ // Right Arrow or "d" - camera moves left = turn left
-		camera.rotation.y -= 0.01;
-		tempAlpha.rotation.y -= 0.01
+		player.rotation.y -= 0.01;
 	}else if(keyCode == 32){ // "Space" to fight gravity - camera moves up - alpha moves up
-		camera.position.y += 0.1; // alpha.antigrav*alpha.speed
-		tempAlpha.position.y += 0.1;
+		player.position.y += 0.1; // alpha.antigrav*alpha.speed
 	}
 }
 
@@ -211,7 +209,6 @@ function init() {
 	// keyboard controls
 	// taken from: http://www.johannes-raida.de/tutorials/three.js/tutorial07/tutorial07.htm
 	document.addEventListener("keydown", onDocumentKeyDown, false);
-
     render();
 }
 
