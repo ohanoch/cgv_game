@@ -20,8 +20,13 @@ var frameNumber = 0;  // Frame number is advanced by 1 for each frame while anim
 var tempObject;  // A temporary animated object.  DELETE IT.
 var tempAlpha;
 var player = new THREE.Object3D();
+var floor;
 
 var pressedKeys = []; //records current keys being pressed
+
+var speedY = 0;
+var speedZ = -0.01;
+var jumping = false;
 
 /**
  *  The render function draws the scene.
@@ -41,19 +46,29 @@ function createWorld() {
     
     // ------------------- Make a camera with viewpoint light ----------------------
     
-    camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 100);
+    camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 10000);
     camera.position.z = 30;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
     light.position.set(0,0,1);
     camera.add(light);
     player.add(camera);
-    //player.position.set(0,0,30);
     scene.add(player);
+	
+	var tempLight = new THREE.PointLight(0xFFFFFF,1,0,2);
+	tempLight.position.set(0,2,0);
+	scene.add(tempLight);
     
     //------------------- Create the scene's visible objects ----------------------
     
-    tempObject =  new THREE.Mesh(  // DELETE THIS !
+    var floorGeom = new THREE.PlaneGeometry(100,100,10,10);
+	var floorMat = new THREE.MeshPhongMaterial({color: "grey",shininess:2});
+	floor = new THREE.Mesh(floorGeom,floorMat);
+	floor.position.set(0,-4,0);
+	floor.rotation.x = -Math.PI / 2;
+	scene.add(floor);
+	
+	tempObject =  new THREE.Mesh(  // DELETE THIS !
         new THREE.CylinderGeometry(2,4,8,6,1),
         new THREE.MeshPhongMaterial({
             color: 0x66BBFF,
@@ -71,10 +86,8 @@ function createWorld() {
             color: 0xFF0000,
             specular: 0x222222,
             shininess: 16
-            //shading: THREE.FlatShading
         })
     );
-	//tempAlpha.position.set(0,0,-30);
 	player.add(tempAlpha);
     
 } // end function createWorld()
@@ -88,15 +101,20 @@ function createWorld() {
  */
 function updateForFrame() {
     
-    // Update size and rotation of tempObject.  DELETE THIS!
-    var loopFrame = frameNumber % 240;
-    if (loopFrame > 120) {
-        loopFrame = 240 - loopFrame;
+	if(speedZ > -0.01) {
+		speedZ = -0.01;
+	}
+	
+	if(speedZ < -0.5) {
+		speedZ = -0.5;
+	}
+    player.translateZ(speedZ);
+	player.translateY(speedY);
+	speedY -= 0.001;
+	
+	if(speedY > 0.5) {
+		speedY = 0.5;
     }
-    var scaleFactor = 1 + loopFrame/120;
-    //tempObject.scale.set(scaleFactor,scaleFactor,scaleFactor);
-    //tempObject.rotation.y += 0.01;
-    
 }
 
 
@@ -147,10 +165,16 @@ function onDocumentKeyDown(event){
 	
 	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	if(pressedKeys[38] || pressedKeys[87]){ // Up Arrow or "w" - camera moves forwad = speed up
-		player.position.z -= 0.1;
+		//player.translateZ(-0.1);
+		if (speedZ > -0.5) {
+			speedZ -= 0.05;
+		}
 	}
 	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
-		player.position.z += 0.1;
+		//player.translateZ(0.1);
+		if (speedZ < -0.01) {
+			speedZ += 0.05;
+		}
 	}
 	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
 		player.rotation.y += 0.01;
@@ -158,13 +182,21 @@ function onDocumentKeyDown(event){
 	if(pressedKeys[39] || pressedKeys[68]){ // Right Arrow or "d" - camera moves left = turn left
 		player.rotation.y -= 0.01;
 	}
-	if(pressedKeys[32]){ // "Space" to fight gravity - camera moves up - alpha moves up
-		player.position.y += 0.1; // alpha.antigrav*alpha.speed
+	//spacebar = 32, z = 90 for testing
+	if(pressedKeys[90]){ // "Space" to fight gravity - camera moves up - alpha moves up
+		//player.position.y += 0.1; // alpha.antigrav*alpha.speed
+		if (!jumping) {
+			speedY += 0.3;
+		}
+		jumping = true;
 	}
 }
 
 function onDocumentKeyUp(event){
 	pressedKeys[event.which] = false;
+	if (event.which == 90) {
+		jumping = false;
+	}
 }
 
 /*  Called when user changes settings of the Animate checkbox. */
@@ -239,11 +271,11 @@ function init() {
 
 <p>
    <label><input type="checkbox" id="animateCheckbox"><b>Animate</b></label>
-   <b style="margin-left:50px">Use the mouse to rotate the model.</b>
+   <b style="margin-left:auto">Use the mouse to rotate the model.</b>
 </p>
 
-<div id="canvas-holder" style="float:left; border: thin solid black; background-color: white">
-   <canvas width=1200 height=600 id="glcanvas"></canvas>
+<div id="canvas-holder" align = "center" style=" background-color: white">
+   <canvas width=1400 height=700 id="glcanvas"></canvas>
 </div>
 
 </body>
