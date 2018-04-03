@@ -42,13 +42,13 @@ function createWorld() {
     // ------------------- Make a camera with viewpoint light ----------------------
     
     camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 100);
-    //camera.position.z = 30;
+    camera.position.z = 30;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
     light.position.set(0,0,1);
     camera.add(light);
     player.add(camera);
-    player.position.set(0,0,30);
+    //player.position.set(0,0,30);
     scene.add(player);
     
     //------------------- Create the scene's visible objects ----------------------
@@ -74,7 +74,7 @@ function createWorld() {
             //shading: THREE.FlatShading
         })
     );
-	tempAlpha.position.set(0,0,-30);
+	//tempAlpha.position.set(0,0,-30);
 	player.add(tempAlpha);
     
 } // end function createWorld()
