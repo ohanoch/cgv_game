@@ -147,19 +147,24 @@ function onDocumentKeyDown(event){
 	
 	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	if(pressedKeys[38] || pressedKeys[87]){ // Up Arrow or "w" - camera moves forwad = speed up
-		player.position.z -= 0.1;
+		//player.position.z -= 0.1;
+		player.translateZ(-0.1);
 	}
 	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
-		player.position.z += 0.1;
+		//player.position.z += 0.1;
+		player.translateZ(0.1)
 	}
 	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
-		player.rotation.y += 0.01;
+		//player.rotation.y += 0.01;
+		player.rotateY(0.01);
 	}
 	if(pressedKeys[39] || pressedKeys[68]){ // Right Arrow or "d" - camera moves left = turn left
-		player.rotation.y -= 0.01;
+		//player.rotation.y -= 0.01;
+		player.rotateY(-0.01);
 	}
 	if(pressedKeys[32]){ // "Space" to fight gravity - camera moves up - alpha moves up
-		player.position.y += 0.1; // alpha.antigrav*alpha.speed
+		//player.position.y += 0.1; // alpha.antigrav*alpha.speed
+		player.translateY(0.1);
 	}
 }
 
