@@ -6,12 +6,6 @@
 <script src="src\OrbitControls.js"></script>
 <script>
 
-// REFERENCES
-// http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
-// https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
-// 
-
-
 "use strict";
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
@@ -79,6 +73,28 @@ function createWorld() {
 	floor.rotation.x = -Math.PI / 2;
 	scene.add(floor);
 	
+	//---------------------------------------SKYBOX-----------------------------------------------------
+	//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
+	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
+	
+	var materialArray = [];
+	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-xpos.png") }));
+	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-xneg.png") }));
+	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-ypos.png") }));
+	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-yneg.png") }));
+	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-zpos.png") }));
+	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-zneg.png") }));
+	
+	for (var i = 0; i < 6; i++) {
+		materialArray[i].side = THREE.BackSide;
+	}
+	
+	var skyboxMaterial = new THREE.MeshFaceMaterial( materialArray );
+	var skyboxGeom = new THREE.CubeGeometry( 5000, 5000, 5000, 1, 1, 1 );
+	var skybox = new THREE.Mesh( skyboxGeom, skyboxMaterial );
+	scene.add( skybox );
+	
+	
 	//----------------------------------- OTHER OBJECTS --------------------------------------------
 	
 	tempObject =  new THREE.Mesh(  // DELETE THIS !
@@ -127,11 +143,11 @@ function updateForFrame() {
     player.translateZ(speedZ);	//move player backwards or forwards by their Z velocity
 	player.translateY(speedY);	//move player up or down by their Y velocity
 	
-	if(player.position.y > -2) {	//check if player has reached the "floor"
+	if(player.position.y > -3) {	//check if player has reached the "floor"
 		speedY -= 0.01;				//if they have not, reduce speed (gravity)
 	} else {						//if they have, stop reducing speed and set position to the ground, set Y speed to zero
 		speedY = 0;
-		player.position.y = -2;
+		player.position.y = -3;
 	}
 	
 	if(speedY > 0.5) {		//max Y speed
@@ -297,7 +313,7 @@ function init() {
 </p>
 
 <div id="canvas-holder" align = "center" style=" background-color: white">
-   <canvas width=1400 height=700 id="glcanvas"></canvas>
+   <canvas width=1200 height=600 id="glcanvas"></canvas>
 </div>
 
 </body>
