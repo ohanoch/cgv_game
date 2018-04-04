@@ -24,9 +24,28 @@ var floor;
 
 var pressedKeys = []; //records current keys being pressed
 
+// Game variables
+var gameDifficultyLevel = 1
+var MAX_DIFFICULTY_LEVEL = 10
+
+// World variables
+var worldMap = new THREE.Group();
+var worldSphere;
+var WORLD_SPHERE_RADIUS = 1000;
+var GRAVITY_SPEED = 0.05;
+
+// alpha variables
+var ALPHA_RADIUS = 1;
+var MAX_SPEED = 0.003;
+var MIN_SPEED = 0.0005;
+var MAX_JUMP_SPEED = 1;
+var JUMP_STRENGTH = 0.5;
+var SPEED_CHANGE = 0.05;
+var ROTATION_SPEED = Math.PI/WORLD_SPHERE_RADIUS;
+
 //velocities of player
-var speedY = 0;
-var speedZ = -0.01;
+var speedJump = 0;
+var speedMove = 0.001;
 
 //whether player is jumping or not
 var jumping = false;
@@ -38,6 +57,37 @@ function render() {
     renderer.render(scene, camera);
 }
 
+/**
+ * The createBuildings function adds buildings in the worldMap on top of the worldSphere
+ * Input = None
+ * Output = None - the worldMap global variable will be edited inside the function
+ */
+function createBuildings() {
+	for(var i = 1;
+		i < (WORLD_SPHERE_RADIUS * MAX_DIFFICULTY_LEVEL) / (MAX_DIFFICULTY_LEVEL - gameDifficultyLevel);
+		i++){
+			// move world to random location for building
+			var buildingSpacing = WORLD_SPHERE_RADIUS*2; //need to find better variable name
+			worldMap.rotateX(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+			worldMap.rotateZ(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+			worldMap.updateMatrixWorld();
+			
+			var building = new THREE.Mesh(
+				new THREE.BoxGeometry(
+					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1,
+					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1,
+					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1
+				),
+				new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
+			);
+	
+			building.translateY(WORLD_SPHERE_RADIUS + Math.random()*3); //put building on serface of sphere
+
+			// change relative world map position (and rotation). Add building to world
+			worldMap.worldToLocal(building.position);
+			worldMap.add(building);
+		}
+}
 
 /**
  * This function is called by the init() method to create the world. 
@@ -97,7 +147,7 @@ function createWorld() {
 	
 	//----------------------------------- OTHER OBJECTS --------------------------------------------
 	
-	tempObject =  new THREE.Mesh(  // DELETE THIS !
+	/** tempObject =  new THREE.Mesh(  // DELETE THIS !
         new THREE.CylinderGeometry(2,4,8,6,1),
         new THREE.MeshPhongMaterial({
             color: 0x66BBFF,
@@ -107,20 +157,35 @@ function createWorld() {
         })
     );
     tempObject.rotation.y = Math.PI/12;
-    scene.add(tempObject);
+	tempObject.translateZ(-100);
+    scene.add(tempObject); */
 
     tempAlpha =  new THREE.Mesh(
-        new THREE.CylinderGeometry(1,0,2,64,32),
+        new THREE.CylinderGeometry(0,ALPHA_RADIUS,2,64,32),
         new THREE.MeshPhongMaterial({
             color: 0xFF0000,
             specular: 0x222222,
             shininess: 16
         })
     );
-	tempAlpha.rotation.x = Math.PI/2;
+	//tempAlpha.rotation.x = Math.PI/2;
 	player.add(tempAlpha);
+	player.translateZ(WORLD_SPHERE_RADIUS + 2);
     
+	worldSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(WORLD_SPHERE_RADIUS,WORLD_SPHERE_RADIUS / 10, WORLD_SPHERE_RADIUS / 10),
+        new THREE.MeshLambertMaterial({
+            color: "white",
+            //map: makeTexture("resources/earth.jpg")
+        })
+    );
+	worldMap.add(worldSphere);
+
+	createBuildings();
+
+	scene.add(worldMap);
 } // end function createWorld()
+
 
 
 /**
@@ -132,26 +197,26 @@ function createWorld() {
 function updateForFrame() {
     
 	// NOTE: negative Z is forwards
-	if(speedZ > -0.01) {	//min Z speed
-		speedZ = -0.01;
+	if(speedMove > MAX_SPEED) {	//max Z speed
+		speedMove = MAX_SPEED;
 	}
 	
-	if(speedZ < -0.5) {		//max Z speed
-		speedZ = -0.5;
+	if(speedMove < MIN_SPEED) {		//min Z speed
+		speedMove = MIN_SPEED;
 	}
 	
-    player.translateZ(speedZ);	//move player backwards or forwards by their Z velocity
-	player.translateY(speedY);	//move player up or down by their Y velocity
+	worldMap.rotateOnWorldAxis(new THREE.Vector3(1,0,0), speedMove); //move player backwards or forwards by their Z velocity
+	player.translateZ(speedJump);	//move player up or down by their Y velocity
 	
-	if(player.position.y > -3) {	//check if player has reached the "floor"
-		speedY -= 0.01;				//if they have not, reduce speed (gravity)
+	if(player.position.z > WORLD_SPHERE_RADIUS + ALPHA_RADIUS) {	//check if player has reached the "floor"
+		speedJump -= GRAVITY_SPEED;				//if they have not, reduce speed (gravity)
 	} else {						//if they have, stop reducing speed and set position to the ground, set Y speed to zero
-		speedY = 0;
-		player.position.y = -3;
+		speedJump = 0;
+		player.position.z = WORLD_SPHERE_RADIUS + ALPHA_RADIUS;
 	}
 	
-	if(speedY > 0.5) {		//max Y speed
-		speedY = 0.5;
+	if(speedJump > MAX_JUMP_SPEED) {		//max Y speed
+		speedJump = MAX_JUMP_SPEED;
     }
 }
 
@@ -203,28 +268,20 @@ function onDocumentKeyDown(event){
 	
 	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	if(pressedKeys[38] || pressedKeys[87]){ // Up Arrow or "w" - camera moves forwad = speed up
-		//player.translateZ(-0.1);
-		if (speedZ > -0.5) {
-			speedZ -= 0.05;
-		}
+		speedMove += SPEED_CHANGE;
 	}
 	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
-		//player.translateZ(0.1);
-		if (speedZ < -0.01) {
-			speedZ += 0.05;
-		}
+		speedMove -= SPEED_CHANGE;
 	}
 	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
-		player.rotation.y += 0.01;
+		worldMap.rotateOnWorldAxis(new THREE.Vector3(0,1,0), ROTATION_SPEED);
 	}
 	if(pressedKeys[39] || pressedKeys[68]){ // Right Arrow or "d" - camera moves left = turn left
-		player.rotation.y -= 0.01;
+		worldMap.rotateOnWorldAxis(new THREE.Vector3(0,-1,0), ROTATION_SPEED);
 	}
-	//spacebar = 32, z = 90 for testing
-	if(pressedKeys[90]){ // "Space" to fight gravity - camera moves up - alpha moves up
-		//player.position.y += 0.1; // alpha.antigrav*alpha.speed
+	if(pressedKeys[90]){ // "z" to fight gravity - camera moves up - alpha moves up
 		if (!jumping) {
-			speedY += 0.3;
+			speedJump += JUMP_STRENGTH;
 		}
 		jumping = true;
 	}
