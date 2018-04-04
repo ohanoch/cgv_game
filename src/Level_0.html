@@ -67,13 +67,9 @@ function createBuildings() {
 				new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
 			);
 	
-			// move building to random location on the sphere
-			building.translateY(WORLD_SPHERE_RADIUS + Math.random()*3);
-			//building.rotateX(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
-			//building.rotateZ(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
-			//worldMap.rotateOnWorldAxis(new THREE.Vector3(1,0,0), Math.PI * 2 / (Math.random()*buildingSpacing + 1));
-			//worldMap.rotateOnWorldAxis(new THREE.Vector3(0,0,1), Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+			building.translateY(WORLD_SPHERE_RADIUS + Math.random()*3); //put building on serface of sphere
 
+			// change relative world map position (and rotation). Add building to world
 			worldMap.worldToLocal(building.position);
 			worldMap.add(building);
 		}
