@@ -30,8 +30,11 @@ var floor;
 
 var pressedKeys = []; //records current keys being pressed
 
+//velocities of player
 var speedY = 0;
 var speedZ = -0.01;
+
+//whether player is jumping or not
 var jumping = false;
 
 /**
@@ -60,19 +63,23 @@ function createWorld() {
     camera.add(light);
     player.add(camera);
     scene.add(player);
-	
-	var tempLight = new THREE.PointLight(0xFFFFFF,1,0,2);
-	tempLight.position.set(0,2,0);
-	scene.add(tempLight);
     
     //------------------- Create the scene's visible objects ----------------------
     
+	//-------------------------------------- FLOOR -------------------------------------------------
+	
+	var floorTexture = new THREE.ImageUtils.loadTexture( "textures/floor.jpg" );	//load floor texture
+	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;					//wrap floor texture both sides
+	floorTexture.repeat.set( 20, 20 );												//how many times the image repeats
+	var floorMat = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
     var floorGeom = new THREE.PlaneGeometry(100,100,10,10);
-	var floorMat = new THREE.MeshPhongMaterial({color: "grey",shininess:2});
+	
 	floor = new THREE.Mesh(floorGeom,floorMat);
 	floor.position.set(0,-4,0);
 	floor.rotation.x = -Math.PI / 2;
 	scene.add(floor);
+	
+	//----------------------------------- OTHER OBJECTS --------------------------------------------
 	
 	tempObject =  new THREE.Mesh(  // DELETE THIS !
         new THREE.CylinderGeometry(2,4,8,6,1),
@@ -86,14 +93,15 @@ function createWorld() {
     tempObject.rotation.y = Math.PI/12;
     scene.add(tempObject);
 
-    tempAlpha =  new THREE.Mesh(  // DELETE THIS !
-        new THREE.SphereGeometry(2,64,64),
+    tempAlpha =  new THREE.Mesh(
+        new THREE.CylinderGeometry(1,0,2,64,32),
         new THREE.MeshPhongMaterial({
             color: 0xFF0000,
             specular: 0x222222,
             shininess: 16
         })
     );
+	tempAlpha.rotation.x = Math.PI/2;
 	player.add(tempAlpha);
     
 } // end function createWorld()
@@ -107,18 +115,26 @@ function createWorld() {
  */
 function updateForFrame() {
     
-	if(speedZ > -0.01) {
+	// NOTE: negative Z is forwards
+	if(speedZ > -0.01) {	//min Z speed
 		speedZ = -0.01;
 	}
 	
-	if(speedZ < -0.5) {
+	if(speedZ < -0.5) {		//max Z speed
 		speedZ = -0.5;
 	}
-    player.translateZ(speedZ);
-	player.translateY(speedY);
-	speedY -= 0.001;
 	
-	if(speedY > 0.5) {
+    player.translateZ(speedZ);	//move player backwards or forwards by their Z velocity
+	player.translateY(speedY);	//move player up or down by their Y velocity
+	
+	if(player.position.y > -2) {	//check if player has reached the "floor"
+		speedY -= 0.01;				//if they have not, reduce speed (gravity)
+	} else {						//if they have, stop reducing speed and set position to the ground, set Y speed to zero
+		speedY = 0;
+		player.position.y = -2;
+	}
+	
+	if(speedY > 0.5) {		//max Y speed
 		speedY = 0.5;
     }
 }
