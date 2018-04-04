@@ -23,6 +23,13 @@ var player = new THREE.Object3D();
 
 var pressedKeys = []; //records current keys being pressed
 
+
+// World variables
+var worldSphere;
+var WORLD_SPHERE_RADIUS = 7;
+var PLAYER_MOVEMENT_SPEED = Math.PI/100;
+
+
 /**
  *  The render function draws the scene.
  */
@@ -63,6 +70,7 @@ function createWorld() {
         })
     );
     tempObject.rotation.y = Math.PI/12;
+	tempObject.translateZ(-100);
     scene.add(tempObject);
 
     tempAlpha =  new THREE.Mesh(  // DELETE THIS !
@@ -76,9 +84,20 @@ function createWorld() {
     );
 	//tempAlpha.position.set(0,0,-30);
 	player.add(tempAlpha);
+	player.translateZ(9);
     
+	worldSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(WORLD_SPHERE_RADIUS,32,16 ),
+        new THREE.MeshLambertMaterial({
+            color: "white",
+            //map: makeTexture("resources/earth.jpg")
+        })
+    );
+	scene.add(worldSphere);
 } // end function createWorld()
 
+
+var explored = [0,0,0]
 
 /**
  *  This function is called once for each frame of the animation, before
@@ -89,13 +108,24 @@ function createWorld() {
 function updateForFrame() {
     
     // Update size and rotation of tempObject.  DELETE THIS!
-    var loopFrame = frameNumber % 240;
+    /** var loopFrame = frameNumber % 240;
     if (loopFrame > 120) {
         loopFrame = 240 - loopFrame;
     }
     var scaleFactor = 1 + loopFrame/120;
-    //tempObject.scale.set(scaleFactor,scaleFactor,scaleFactor);
-    //tempObject.rotation.y += 0.01;
+    tempObject.scale.set(scaleFactor,scaleFactor,scaleFactor);
+    tempObject.rotation.y += 0.01;
+	*/
+
+	if(player.position.x > explored[0] + 4){
+		explored[0] = player.position.x
+	}
+	if(player.position.y > explored[1]){
+		explored[1] = player.position.y
+	}
+	if(player.position.z > explored[2]){
+		explored[2] = player.position.z
+	}
     
 }
 
@@ -147,24 +177,32 @@ function onDocumentKeyDown(event){
 	
 	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	if(pressedKeys[38] || pressedKeys[87]){ // Up Arrow or "w" - camera moves forwad = speed up
-		//player.position.z -= 0.1;
-		player.translateZ(-0.1);
+		//player.translateZ(-0.1);
+
+		//player.translateZ(-1 * (WORLD_SPHERE_RADIUS + 1)/100 * Math.cos(PLAYER_MOVEMENT_SPEED));
+		//player.translateY((WORLD_SPHERE_RADIUS + 1)/100 * Math.sin(PLAYER_MOVEMENT_SPEED));
+		
+		player.rotateX(PLAYER_MOVEMENT_SPEED);
+		player.rotation.x -= PLAYER_MOVEMENT_SPEED;
 	}
 	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
-		//player.position.z += 0.1;
-		player.translateZ(0.1)
+		//player.translateZ(0.1)
+		//player.translateZ(-1 * (WORLD_SPHERE_RADIUS + 1)/100 * Math.cos(-1 * PLAYER_MOVEMENT_SPEED));
+		//player.translateY((WORLD_SPHERE_RADIUS + 1)/100 * Math.sin(-1 * PLAYER_MOVEMENT_SPEED));
+		
+		player.rotateX(-1 * PLAYER_MOVEMENT_SPEED);
+		player.rotation.x += PLAYER_MOVEMENT_SPEED;
 	}
 	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
-		//player.rotation.y += 0.01;
-		player.rotateY(0.01);
+		player.rotateY(PLAYER_MOVEMENT_SPEED);
+		player.rotation.y -= PLAYER_MOVEMENT_SPEED;
 	}
 	if(pressedKeys[39] || pressedKeys[68]){ // Right Arrow or "d" - camera moves left = turn left
-		//player.rotation.y -= 0.01;
-		player.rotateY(-0.01);
+		player.rotateY(-1 * PLAYER_MOVEMENT_SPEED);
+		player.rotation.y += PLAYER_MOVEMENT_SPEED;
 	}
 	if(pressedKeys[32]){ // "Space" to fight gravity - camera moves up - alpha moves up
-		//player.position.y += 0.1; // alpha.antigrav*alpha.speed
-		player.translateY(0.1);
+		player.translateZ(PLAYER_MOVEMENT_SPEED);
 	}
 }
 
