@@ -23,11 +23,17 @@ var player = new THREE.Object3D();
 
 var pressedKeys = []; //records current keys being pressed
 
+// Game variables
+var gameDifficultyLevel = 1
+var MAX_DIFFICULTY_LEVEL = 10
 
 // World variables
+var worldMap = new THREE.Group();
 var worldSphere;
-var WORLD_SPHERE_RADIUS = 7;
-var PLAYER_MOVEMENT_SPEED = Math.PI/100;
+var WORLD_SPHERE_RADIUS = 1000;
+var PLAYER_MOVEMENT_SPEED = Math.PI/WORLD_SPHERE_RADIUS;
+
+
 
 
 /**
@@ -37,6 +43,41 @@ function render() {
     renderer.render(scene, camera);
 }
 
+/**
+ * The createBuildings function adds buildings in the worldMap on top of the worldSphere
+ * Input = None
+ * Output = None - the worldMap global variable will be edited inside the function
+ */
+function createBuildings() {
+	for(var i = 1;
+		i < (WORLD_SPHERE_RADIUS * MAX_DIFFICULTY_LEVEL) / (MAX_DIFFICULTY_LEVEL - gameDifficultyLevel);
+		i++){
+			// move world to random location for building
+			var buildingSpacing = WORLD_SPHERE_RADIUS*2; //need to find better variable name
+			worldMap.rotateX(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+			worldMap.rotateZ(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+			worldMap.updateMatrixWorld();
+			
+			var building = new THREE.Mesh(
+				new THREE.BoxGeometry(
+					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1,
+					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1,
+					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1
+				),
+				new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
+			);
+	
+			// move building to random location on the sphere
+			building.translateY(WORLD_SPHERE_RADIUS + Math.random()*3);
+			//building.rotateX(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+			//building.rotateZ(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+			//worldMap.rotateOnWorldAxis(new THREE.Vector3(1,0,0), Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+			//worldMap.rotateOnWorldAxis(new THREE.Vector3(0,0,1), Math.PI * 2 / (Math.random()*buildingSpacing + 1));
+
+			worldMap.worldToLocal(building.position);
+			worldMap.add(building);
+		}
+}
 
 /**
  * This function is called by the init() method to create the world. 
@@ -48,7 +89,7 @@ function createWorld() {
     
     // ------------------- Make a camera with viewpoint light ----------------------
     
-    camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 100);
+    camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 1000);
     camera.position.z = 30;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
@@ -84,7 +125,7 @@ function createWorld() {
     );
 	//tempAlpha.position.set(0,0,-30);
 	player.add(tempAlpha);
-	player.translateZ(9);
+	player.translateZ(WORLD_SPHERE_RADIUS + 2);
     
 	worldSphere = new THREE.Mesh(
         new THREE.SphereGeometry(WORLD_SPHERE_RADIUS,32,16 ),
@@ -93,11 +134,14 @@ function createWorld() {
             //map: makeTexture("resources/earth.jpg")
         })
     );
-	scene.add(worldSphere);
+	worldMap.add(worldSphere);
+
+	createBuildings();
+
+	scene.add(worldMap);
 } // end function createWorld()
 
 
-var explored = [0,0,0]
 
 /**
  *  This function is called once for each frame of the animation, before
@@ -116,16 +160,6 @@ function updateForFrame() {
     tempObject.scale.set(scaleFactor,scaleFactor,scaleFactor);
     tempObject.rotation.y += 0.01;
 	*/
-
-	if(player.position.x > explored[0] + 4){
-		explored[0] = player.position.x
-	}
-	if(player.position.y > explored[1]){
-		explored[1] = player.position.y
-	}
-	if(player.position.z > explored[2]){
-		explored[2] = player.position.z
-	}
     
 }
 
@@ -182,24 +216,34 @@ function onDocumentKeyDown(event){
 		//player.translateZ(-1 * (WORLD_SPHERE_RADIUS + 1)/100 * Math.cos(PLAYER_MOVEMENT_SPEED));
 		//player.translateY((WORLD_SPHERE_RADIUS + 1)/100 * Math.sin(PLAYER_MOVEMENT_SPEED));
 		
-		player.rotateX(PLAYER_MOVEMENT_SPEED);
-		player.rotation.x -= PLAYER_MOVEMENT_SPEED;
+		//player.rotateX(PLAYER_MOVEMENT_SPEED);
+		//player.rotation.x -= PLAYER_MOVEMENT_SPEED;
+
+		//rotateAroundObjectAxis(player, new THREE.Vector3(1,0,0), PLAYER_MOVEMENT_SPEED);
+
+		worldMap.rotateOnWorldAxis(new THREE.Vector3(1,0,0), PLAYER_MOVEMENT_SPEED);
 	}
 	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
 		//player.translateZ(0.1)
 		//player.translateZ(-1 * (WORLD_SPHERE_RADIUS + 1)/100 * Math.cos(-1 * PLAYER_MOVEMENT_SPEED));
 		//player.translateY((WORLD_SPHERE_RADIUS + 1)/100 * Math.sin(-1 * PLAYER_MOVEMENT_SPEED));
 		
-		player.rotateX(-1 * PLAYER_MOVEMENT_SPEED);
-		player.rotation.x += PLAYER_MOVEMENT_SPEED;
+		//player.rotateX(-1 * PLAYER_MOVEMENT_SPEED);
+		//player.rotation.x += PLAYER_MOVEMENT_SPEED;
+		
+		worldMap.rotateOnWorldAxis(new THREE.Vector3(-1,0,0), PLAYER_MOVEMENT_SPEED);
 	}
 	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
-		player.rotateY(PLAYER_MOVEMENT_SPEED);
-		player.rotation.y -= PLAYER_MOVEMENT_SPEED;
+		// player.rotateY(PLAYER_MOVEMENT_SPEED);
+		// player.rotation.y -= PLAYER_MOVEMENT_SPEED;
+
+		worldMap.rotateOnWorldAxis(new THREE.Vector3(0,1,0), PLAYER_MOVEMENT_SPEED);
 	}
 	if(pressedKeys[39] || pressedKeys[68]){ // Right Arrow or "d" - camera moves left = turn left
-		player.rotateY(-1 * PLAYER_MOVEMENT_SPEED);
-		player.rotation.y += PLAYER_MOVEMENT_SPEED;
+		// player.rotateY(-1 * PLAYER_MOVEMENT_SPEED);
+		// player.rotation.y += PLAYER_MOVEMENT_SPEED;
+	
+		worldMap.rotateOnWorldAxis(new THREE.Vector3(0,-1,0), PLAYER_MOVEMENT_SPEED);
 	}
 	if(pressedKeys[32]){ // "Space" to fight gravity - camera moves up - alpha moves up
 		player.translateZ(PLAYER_MOVEMENT_SPEED);
