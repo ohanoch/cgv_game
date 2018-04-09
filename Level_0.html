@@ -6,7 +6,7 @@
 <script src="src\OrbitControls.js"></script>
 <script>
 
-"use strict";
+"use strit";
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
@@ -31,20 +31,19 @@ var MAX_DIFFICULTY_LEVEL = 10
 // World variables
 var worldMap = new THREE.Group();
 var worldSphere;
-var WORLD_SPHERE_RADIUS = 10;
+var WORLD_SPHERE_RADIUS = 400;
 var GRAVITY_SPEED = 0.05;
 
 // alpha variables
 var ALPHA_RADIUS = 1;
-var MAX_SPEED = 0.003;
+var MAX_SPEED = 0.03;
 var MIN_SPEED = 0.0005;
 var MAX_JUMP_SPEED = 1;
 var JUMP_STRENGTH = 0.5;
-var SPEED_CHANGE = 0.05;
-var ROTATION_SPEED = Math.PI/WORLD_SPHERE_RADIUS;
-var ROTATION_X = ROTATION_SPEED;
-var ROTATION_Y = 0;
-var ROTATION_Z = 0;
+var SPEED_CHANGE = 0.005;
+var rotationX = Math.PI / 2;
+var rotationY = 0;
+var rotationZ = 0;
 
 //velocities of player
 var speedJump = 0;
@@ -78,35 +77,14 @@ function createBuildings() {
 				new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
 			);
 
+			//put building on serface of sphere
 			var v = Math.random() * Math.PI * 2;
 			var u = Math.random() * Math.PI * 2;
-			building.translateX(WORLD_SPHERE_RADIUS * Math.cos(v) * Math.cos(u)); //put building on serface of sphere
+			building.translateX(WORLD_SPHERE_RADIUS * Math.cos(v) * Math.cos(u)); 
 			building.translateY(WORLD_SPHERE_RADIUS * Math.cos(v) * Math.sin(u));
 			building.translateZ(WORLD_SPHERE_RADIUS * Math.sin(v));
 
 			worldMap.add(building);
-			/**
-			// move world to random location for building
-			var buildingSpacing = WORLD_SPHERE_RADIUS*2; //need to find better variable name
-			worldMap.rotateX(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
-			worldMap.rotateZ(Math.PI * 2 / (Math.random()*buildingSpacing + 1));
-			worldMap.updateMatrixWorld();
-			
-			var building = new THREE.Mesh(
-				new THREE.BoxGeometry(
-					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1,
-					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1,
-					Math.random() * Math.sqrt(WORLD_SPHERE_RADIUS) + 1
-				),
-				new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
-			);
-	
-			building.translateY(WORLD_SPHERE_RADIUS + Math.random()*3); //put building on serface of sphere
-
-			// change relative world map position (and rotation). Add building to world
-			worldMap.worldToLocal(building.position);
-			worldMap.add(building);
-			*/
 		}
 }
 
@@ -146,6 +124,8 @@ function createWorld() {
 	floor.rotation.x = -Math.PI / 2;
 	scene.add(floor);
 	*/
+
+
 
 	//---------------------------------------SKYBOX-----------------------------------------------------
 	//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
@@ -232,8 +212,26 @@ function updateForFrame() {
 	if(speedMove < MIN_SPEED) {		//min Z speed
 		speedMove = MIN_SPEED;
 	}
-	
-	worldMap.rotateOnAxis(new THREE.Vector3(ROTATION_X,ROTATION_Y,ROTATION_Z).normalize(), speedMove); //move player backwards or forwards by their Z velocity
+
+	//rotate world sphere in order to match rotation of alpha (makes turning work)
+	worldMap.rotateOnWorldAxis(
+		new THREE.Vector3(1,0,0).normalize(), 
+			speedMove *
+			Math.pow(-1, parseInt(rotationX / Math.PI)) * 
+			Math.sign(rotationX) *
+			(Math.PI/2 - Math.abs(Math.PI/2 - (Math.abs(rotationX) % Math.PI)))
+		);
+	worldMap.rotateOnWorldAxis(
+		new THREE.Vector3(0,1,0).normalize(),
+			speedMove *
+			Math.pow(-1, parseInt(rotationY / Math.PI)) * 
+			Math.sign(rotationY) *
+			(Math.PI/2 - Math.abs(Math.PI/2 - (Math.abs(rotationY) % Math.PI)))
+	);
+
+	//console.log("Rotation Y speed " + speedMove *Math.pow(-1, parseInt(rotationY / Math.PI)) *(Math.PI/2 - Math.abs(Math.PI/2 - (rotationY % Math.PI))));
+	//console.log("Rotation X speed " + speedMove *Math.pow(-1, parseInt(rotationX / Math.PI)) *Math.sign(rotationX) *(Math.PI/2 - Math.abs(Math.PI/2 - (rotationX % Math.PI))));
+
 	player.translateZ(speedJump);	//move player up or down by their Y velocity
 	
 	if(player.position.z > WORLD_SPHERE_RADIUS + ALPHA_RADIUS) {	//check if player has reached the "floor"
@@ -301,26 +299,17 @@ function onDocumentKeyDown(event){
 	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
 		speedMove -= SPEED_CHANGE;
 	}
-	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
-		//worldMap.rotateOnWorldAxis(new THREE.Vector3(0,1,0), ROTATION_SPEED);
-		player.rotateZ(ROTATION_SPEED);
 
-		ROTATION_Y += ROTATION_SPEED;
-		ROTATION_X -= ROTATION_SPEED;
-		/** worldMap.rotateOnWorldAxis(
-			new THREE.Vector3(
-				1 * (1 - (speedMove / (Math.PI / 2))),
-				1 * (speedMove / (Math.PI / 2)),
-				0
-			).normalize(), 
-			speedMove
-		); */
+	var rotationSpeed = speedMove * 3
+	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
+		player.rotateZ(rotationSpeed);
+		rotationY += rotationSpeed;
+		rotationX += rotationSpeed;
 	}
 	if(pressedKeys[39] || pressedKeys[68]){ // Right Arrow or "d" - camera moves left = turn left
-		//worldMap.rotateOnWorldAxis(new THREE.Vector3(0,-1,0), ROTATION_SPEED);
-		player.rotateZ(-1 * ROTATION_SPEED);
-		ROTATION_Y -= ROTATION_SPEED;
-		ROTATION_X -= ROTATION_SPEED;
+		player.rotateZ(-1 * rotationSpeed);
+		rotationY -= rotationSpeed;
+		rotationX -= rotationSpeed;
 	}
 	if(pressedKeys[90]){ // "z" to fight gravity - camera moves up - alpha moves up
 		if (!jumping) {
