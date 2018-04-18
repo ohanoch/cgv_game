@@ -12,6 +12,7 @@
 var WORLD_HEIGHT = 100;
 var WORLD_WIDTH = 100;
 var ATMOSPHERE_HEIGHT = 10;
+var ALPHA_CAMERA_DISTANCE = 30;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
@@ -28,6 +29,7 @@ var player = new THREE.Object3D();
 var floor;
 
 var pressedKeys = []; //records current keys being pressed
+var resetCameraFlag = false //flag to reset the camera position to original position
 
 //velocities of player
 var speedY = 0;
@@ -81,7 +83,7 @@ function createWorld() {
     // ------------------- Make a camera with viewpoint light ----------------------
     
     camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 10000);
-    camera.position.z = 30;
+    camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
     light.position.set(0,0,1);
@@ -155,6 +157,21 @@ function createWorld() {
 } // end function createWorld()
 
 
+function resetCameraPosition(){
+	var cameraRotationSpeed = 0.1;
+	camera.translateX((tempAlpha.position.x - camera.position.x) * cameraRotationSpeed);
+	camera.translateY((tempAlpha.position.y - camera.position.y) * cameraRotationSpeed);
+	camera.translateZ((tempAlpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z) * cameraRotationSpeed);
+	camera.lookAt(tempAlpha.position);
+
+	if(Math.abs(tempAlpha.position.x - camera.position.x) <= 0.01 &&
+		Math.abs(tempAlpha.position.y - camera.position.y <= 0.01) &&
+		Math.abs(tempAlpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z <= 0.01)){
+		
+		resetCameraFlag = false;
+	}
+}
+
 /**
  *  This function is called once for each frame of the animation, before
  *  the render() function is called for that frame.  It updates any
@@ -185,6 +202,11 @@ function updateForFrame() {
 	if(speedY > 0.5) {		//max Y speed
 		speedY = 0.5;
     }
+
+	// slowly moving the camera back behaind _alpha_
+	if (resetCameraFlag){
+		resetCameraPosition();
+	}
 }
 
 
@@ -323,6 +345,9 @@ function init() {
 	// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
 	document.addEventListener("keydown", onDocumentKeyDown, false);
 	document.addEventListener("keyup", onDocumentKeyUp, false);
+	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
+	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
+
     render();
 }
 
