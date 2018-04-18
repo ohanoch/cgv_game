@@ -8,6 +8,12 @@
 
 "use strict";
 
+//Globals
+var WORLD_HEIGHT = 100;
+var WORLD_WIDTH = 100;
+var ATMOSPHERE_HEIGHT = 10;
+var ALPHA_CAMERA_DISTANCE = 30;
+
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
 var controls;  // An OrbitControls object that is used to implement
@@ -23,6 +29,7 @@ var player = new THREE.Object3D();
 var floor;
 
 var pressedKeys = []; //records current keys being pressed
+var resetCameraFlag = false //flag to reset the camera position to original position
 
 //velocities of player
 var speedY = 0;
@@ -40,6 +47,32 @@ function render() {
 
 
 /**
+ * The createBuildings function adds buildings in the worldMap on top of the worldPlane
+ * Input = None
+ * Output = None - the worldMap global variable will be edited inside the function
+ */
+function createBuildings() {
+	var buildingWorldRatio = Math.pow(WORLD_HEIGHT*WORLD_WIDTH, 1/4);
+	for(var i = 1;
+		i < buildingWorldRatio * 2;
+		i++){
+			var building = new THREE.Mesh(
+				new THREE.BoxGeometry(
+					Math.random() * buildingWorldRatio + 1, //width
+					Math.random() * buildingWorldRatio + 1, //height
+					Math.random() * buildingWorldRatio + 1 //depth
+				),
+				new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
+			);
+			//put building on surface of world (may be a elevated)
+			building.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_WIDTH / 2); 
+			building.translateY(Math.random() * (ATMOSPHERE_HEIGHT / building.geometry.parameters.height));
+			building.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_HEIGHT / 2);
+			scene.add(building);
+		}
+}
+
+/**
  * This function is called by the init() method to create the world. 
  */
 function createWorld() {
@@ -50,7 +83,7 @@ function createWorld() {
     // ------------------- Make a camera with viewpoint light ----------------------
     
     camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 10000);
-    camera.position.z = 30;
+    camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
     light.position.set(0,0,1);
@@ -66,7 +99,7 @@ function createWorld() {
 	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;					//wrap floor texture both sides
 	floorTexture.repeat.set( 20, 20 );												//how many times the image repeats
 	var floorMat = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
-    var floorGeom = new THREE.PlaneGeometry(100,100,10,10);
+    var floorGeom = new THREE.PlaneGeometry(WORLD_WIDTH,WORLD_HEIGHT,1,1);
 	
 	floor = new THREE.Mesh(floorGeom,floorMat);
 	floor.position.set(0,-4,0);
@@ -120,8 +153,24 @@ function createWorld() {
 	tempAlpha.rotation.x = Math.PI/2;
 	player.add(tempAlpha);
     
+	createBuildings();
 } // end function createWorld()
 
+
+function resetCameraPosition(){
+	var cameraRotationSpeed = 0.1;
+	camera.translateX((tempAlpha.position.x - camera.position.x) * cameraRotationSpeed);
+	camera.translateY((tempAlpha.position.y - camera.position.y) * cameraRotationSpeed);
+	camera.translateZ((tempAlpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z) * cameraRotationSpeed);
+	camera.lookAt(tempAlpha.position);
+
+	if(Math.abs(tempAlpha.position.x - camera.position.x) <= 0.01 &&
+		Math.abs(tempAlpha.position.y - camera.position.y <= 0.01) &&
+		Math.abs(tempAlpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z <= 0.01)){
+		
+		resetCameraFlag = false;
+	}
+}
 
 /**
  *  This function is called once for each frame of the animation, before
@@ -153,6 +202,11 @@ function updateForFrame() {
 	if(speedY > 0.5) {		//max Y speed
 		speedY = 0.5;
     }
+
+	// slowly moving the camera back behaind _alpha_
+	if (resetCameraFlag){
+		resetCameraPosition();
+	}
 }
 
 
@@ -291,6 +345,9 @@ function init() {
 	// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
 	document.addEventListener("keydown", onDocumentKeyDown, false);
 	document.addEventListener("keyup", onDocumentKeyUp, false);
+	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
+	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
+
     render();
 }
 
