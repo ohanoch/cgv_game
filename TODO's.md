@@ -5,7 +5,7 @@
 - [ ] Load models (js and JSON files)
 - [ ] Movement of player with keyboard
 - [ ] Smooth keyboard multi keys
-- [ ] Camera return to default position after releasing left mouse button
+- [x] Camera return to default position after releasing left mouse button
 - [ ] Object Inheritance (classes)
 	- [ ] alpha class
 	- [ ] map class
