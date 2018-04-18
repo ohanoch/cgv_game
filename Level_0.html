@@ -8,6 +8,11 @@
 
 "use strict";
 
+//Globals
+var WORLD_HEIGHT = 100;
+var WORLD_WIDTH = 100;
+var ATMOSPHERE_HEIGHT = 10;
+
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
 var controls;  // An OrbitControls object that is used to implement
@@ -40,6 +45,32 @@ function render() {
 
 
 /**
+ * The createBuildings function adds buildings in the worldMap on top of the worldPlane
+ * Input = None
+ * Output = None - the worldMap global variable will be edited inside the function
+ */
+function createBuildings() {
+	var buildingWorldRatio = Math.pow(WORLD_HEIGHT*WORLD_WIDTH, 1/4);
+	for(var i = 1;
+		i < buildingWorldRatio * 2;
+		i++){
+			var building = new THREE.Mesh(
+				new THREE.BoxGeometry(
+					Math.random() * buildingWorldRatio + 1, //width
+					Math.random() * buildingWorldRatio + 1, //height
+					Math.random() * buildingWorldRatio + 1 //depth
+				),
+				new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
+			);
+			//put building on surface of world (may be a elevated)
+			building.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_WIDTH / 2); 
+			building.translateY(Math.random() * (ATMOSPHERE_HEIGHT / building.geometry.parameters.height));
+			building.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_HEIGHT / 2);
+			scene.add(building);
+		}
+}
+
+/**
  * This function is called by the init() method to create the world. 
  */
 function createWorld() {
@@ -66,7 +97,7 @@ function createWorld() {
 	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;					//wrap floor texture both sides
 	floorTexture.repeat.set( 20, 20 );												//how many times the image repeats
 	var floorMat = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
-    var floorGeom = new THREE.PlaneGeometry(100,100,10,10);
+    var floorGeom = new THREE.PlaneGeometry(WORLD_WIDTH,WORLD_HEIGHT,1,1);
 	
 	floor = new THREE.Mesh(floorGeom,floorMat);
 	floor.position.set(0,-4,0);
@@ -120,6 +151,7 @@ function createWorld() {
 	tempAlpha.rotation.x = Math.PI/2;
 	player.add(tempAlpha);
     
+	createBuildings();
 } // end function createWorld()
 
 
