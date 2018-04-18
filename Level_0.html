@@ -2,7 +2,9 @@
 <head>
 <meta charset="UTF-8">
 <title>CS 424 Lab 9</title>
+<script src="alpha.js"></script>
 <script src="src\three.js"></script>
+<script src="alpha1.js"></script>
 <script src="src\OrbitControls.js"></script>
 <script>
 
@@ -37,6 +39,8 @@ var speedZ = -0.01;
 
 //whether player is jumping or not
 var jumping = false;
+
+var p;
 
 /**
  *  The render function draws the scene.
@@ -151,7 +155,17 @@ function createWorld() {
         })
     );
 	tempAlpha.rotation.x = Math.PI/2;
-	player.add(tempAlpha);
+	//player.add(tempAlpha);
+	var g = new THREE.CylinderGeometry(2,2,8,6,1);
+	var m = new THREE.MeshPhongMaterial({color: 0x0000FF});
+	p = new Alpha(g,m,1,0,0,0,0,0,0);
+	player.add(p.getObj());
+	
+	var g2 = new THREE.CylinderGeometry(2,2,8,6,1);
+	var m2 = new THREE.MeshPhongMaterial({color: 0x00FF00});
+	var test = new Alpha1(g2,m2,1);
+	test.position.set(5,1,1);
+	scene.add(test);
     
 	createBuildings();
 } // end function createWorld()
@@ -189,14 +203,14 @@ function updateForFrame() {
 		speedZ = -0.5;
 	}
 	
-    player.translateZ(speedZ);	//move player backwards or forwards by their Z velocity
-	player.translateY(speedY);	//move player up or down by their Y velocity
+    player.translateZ(p.getSpeedZ());	//move player backwards or forwards by their Z velocity
+	player.translateY(p.getSpeedY());	//move player up or down by their Y velocity
 	
-	if(player.position.y > -3) {	//check if player has reached the "floor"
-		speedY -= 0.01;				//if they have not, reduce speed (gravity)
+	if(player.position.y > -2 + p.getRadius()) {	//check if player has reached the "floor"
+		p.incSpeedY(-0.01);				//if they have not, reduce speed (gravity)
 	} else {						//if they have, stop reducing speed and set position to the ground, set Y speed to zero
-		speedY = 0;
-		player.position.y = -3;
+		p.setSpeedY(0);
+		player.position.y = -2 + p.getRadius();
 	}
 	
 	if(speedY > 0.5) {		//max Y speed
@@ -261,12 +275,14 @@ function onDocumentKeyDown(event){
 		if (speedZ > -0.5) {
 			speedZ -= 0.05;
 		}
+		p.incSpeedZ(-0.05);
 	}
 	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
 		//player.translateZ(0.1);
 		if (speedZ < -0.01) {
 			speedZ += 0.05;
 		}
+		p.incSpeedZ(0.05);
 	}
 	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
 		player.rotation.y += 0.01;
@@ -279,6 +295,7 @@ function onDocumentKeyDown(event){
 		//player.position.y += 0.1; // alpha.antigrav*alpha.speed
 		if (!jumping) {
 			speedY += 0.3;
+			p.incSpeedY(0.3);
 		}
 		jumping = true;
 	}
