@@ -2,7 +2,7 @@
 
 class Map {
 	
-	constructor(width, height, depth, textureURL, skyboxURL) {		//create and initialize map
+	constructor(width, height, depth, textureURL, skyboxDirectory) {		//create and initialize map
 		
 		this.width = width;
 		this.height = height;
@@ -29,12 +29,12 @@ class Map {
     	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
 		if(skyboxURL != ""){
 			var materialArray = [];
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxURL + "-xpos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxURL + "-xneg.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxURL + "-ypos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxURL + "-yneg.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxURL + "-zpos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxURL + "-zneg.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "xpos.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "xneg.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "ypos.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "yneg.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "zpos.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "zneg.png") }));
 
 			for (var i = 0; i < 6; i++) {
 				materialArray[i].side = THREE.BackSide;
