@@ -133,7 +133,7 @@ function createWorld() {
 	
 	
 	//----------------------------------- OTHER OBJECTS --------------------------------------------
-	
+	/*8
 	tempObject =  new THREE.Mesh(  // DELETE THIS !
         new THREE.CylinderGeometry(2,4,8,6,1),
         new THREE.MeshPhongMaterial({
@@ -145,7 +145,7 @@ function createWorld() {
     );
     tempObject.rotation.y = Math.PI/12;
     scene.add(tempObject);
-
+*/
     tempAlpha =  new THREE.Mesh(
         new THREE.CylinderGeometry(1,0,2,64,32),
         new THREE.MeshPhongMaterial({
@@ -159,14 +159,14 @@ function createWorld() {
 	var g = new THREE.CylinderGeometry(2,2,8,6,1);
 	var m = new THREE.MeshPhongMaterial({color: 0x0000FF});
 	p = new Alpha(g,m,1,0,0,0,0,0,0);
-	player.add(p.getObj());
+	//player.add(p.getObj());
 	
 	var g2 = new THREE.CylinderGeometry(2,2,8,6,1);
 	var m2 = new THREE.MeshPhongMaterial({color: 0x00FF00});
 	var test = new Alpha1(g2,m2,1);
-	test.position.set(5,1,1);
-	scene.add(test);
-    
+	//test.position.set(0,1,0);
+	player.add(test);    
+
 	createBuildings();
 } // end function createWorld()
 
