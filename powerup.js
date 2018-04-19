@@ -31,7 +31,6 @@ class Powerup extends THREE.Mesh{
 					new THREE.MeshBasicMaterial( { color: 0xff0000 } )
 				)
 			);
-			console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 		} else if (this.type == 1){
 		//load model here
 			this.add(
