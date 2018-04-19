@@ -2,24 +2,25 @@
 
 class Map {
 	
-	constructor(width, height, depth, textureURL, skyboxDirectory) {		//create and initialize map
+	constructor(width, depth, atmosphereHeight, textureURL, skyboxDirectory) {		//create and initialize map
 		
-		this.width = width;
-		this.height = height;
-		this.depth = depth;
-		this.buildings = [];	
+		this.width = width; // x axis
+		this.atmosphereHeight = atmosphereHeight; // y axis
+		this.depth = depth; // z axis
+		this.buildings = [];
 
+		var textureLoader = new THREE.TextureLoader();
 		//-------------------------------------- FLOOR -------------------------------------------------
 		if(textureURL != ""){
-			var floorTexture = new THREE.ImageUtils.loadTexture( texturesURL );    //load floor texture
+			var floorTexture = textureLoader.load( textureURL );    //load floor texture
 			floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;                 //wrap floor texture both sides
 			floorTexture.repeat.set( 20, 20 );                                              //how many times the image repeats
 			this.floor = new THREE.Mesh(
-				new THREE.PlaneGeometry(this.width, this.height,1,1),
+				new THREE.PlaneGeometry(this.width, this.depth,1,1),
 				new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide })
 			);
-			floor.position.set(0,-4,0);
-			floor.rotation.x = -Math.PI / 2;
+			this.floor.position.set(0,-4,0);
+			this.floor.rotation.x = -Math.PI / 2;
 
 			console.log("Floor texture added to map");
 		}
@@ -27,22 +28,23 @@ class Map {
 		//-------------------------------------- SKYBOX -------------------------------------------------
 		//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
     	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
-		if(skyboxURL != ""){
+		if(skyboxDirectory != ""){
 			var materialArray = [];
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "xpos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "xneg.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "ypos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "yneg.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "zpos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture(skyboxDirectory + "zneg.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectory + "xpos.png") }));
+			console.log(skyboxDirectory + "xpos.png");
+			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectory + "xneg.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectory + "ypos.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectory + "yneg.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectory + "zpos.png") }));
+			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectory + "zneg.png") }));
 
 			for (var i = 0; i < 6; i++) {
 				materialArray[i].side = THREE.BackSide;
 			}
 
 			this.skybox = new THREE.Mesh(
-				new THREE.MeshFaceMaterial( materialArray ),
-				new THREE.CubeGeometry( 5000, 5000, 5000, 1, 1, 1 )
+				new THREE.CubeGeometry( 5000, 5000, 5000, 1, 1, 1 ),
+				materialArray
 			);
 
 			console.log("Skybox added to map");

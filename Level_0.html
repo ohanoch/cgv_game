@@ -112,10 +112,16 @@ function createWorld() {
 	floor.position.set(0,-4,0);
 	floor.rotation.x = -Math.PI / 2;
 */
-	var worldMap = new Map(100, 10, 100, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, depth, textureURL, skyboxDirectory
+
+	var worldMap = new Map(100, 100, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
 	
+	//add buildings to scene
+	worldMap.createBuildings(1/4); //map-buildings ratio is 1/4
+	for (var i = 0; i < worldMap.buildings.length; i++){
+		scene.add(worldMap.buildings[i]);
+	}
 	//---------------------------------------SKYBOX-----------------------------------------------------
 	//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
 	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
@@ -173,11 +179,6 @@ function createWorld() {
 	test.position.set(5,1,1);
 	scene.add(test);
     
-	//add buildings to scene
-	worldMap.createBuildings(1/4); //map-buildings ratio is 1/4
-	for (int i = 0; i < worldMap.buildings.length; i++){
-		scene.add(worldMap.buildings[i]);
-	}
 } // end function createWorld()
 
 
