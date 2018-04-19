@@ -1,85 +1,61 @@
 "use strict";
 
 
-// lives
-// rewards
-// score
-// boosts
-// speedY
-// speedZ
-// speedRotation ???
-// position -  x,y,z
-// geometry - threejs geometry, may be a model
-// material - threejs material, includes shading, may include a texture
-// radius of object
+// expiration
+// location
+// model
+// animation
+// type
+var powerupTypes = {gun: 0, invinsible: 1, gravity: 2};  
 
-class Alpha1 extends THREE.Mesh {
-	
-	constructor(geometry, material, radius) {
+class Powerup extends THREE.Mesh{
+
+	constructor(type) {
+		super(
+			new THREE.SphereGeometry( 2, 32, 32 ),
+			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0xaa00bb, transparent: true} )
+		);
+
+		this.expiration = 15;
+		this.type = powerupTypes.gun;
+
+		//this.object = new THREE.Mesh(
+		//	new THREE.SphereGeometry( 2, 32, 32 ),
+		//	new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5 } )
+		//);
+
+		if(this.type == 0){
+		//load model here	
+			this.add(
+				new THREE.Mesh(
+					new THREE.TorusKnotGeometry( 1, 0.1, 100, 16 ),
+					new THREE.MeshBasicMaterial( { color: 0xff0000 } )
+				)
+			);
+			console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+		} else if (this.type == 1){
+		//load model here
+			this.add(
+				new THREE.Mesh(
+					new THREE.TorusKnotGeometry( 1, 0.1, 100, 16 ),
+					new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
+				)
+			);
+		} else if (this.type == 2){
+		//load model
+			this.add(
+					new THREE.Mesh(
+						new THREE.TorusKnotGeometry( 1, 0.1, 100, 16 ),
+						new THREE.MeshBasicMaterial( { color: 0x0000ff } )
+					)
+			);
+		}
+
+		console.log("");
 		
-		super(geometry,material);
-		
-		this.speedY = 0;
-		this.speedZ = -0.01;
-		this.maxSpeedY = 0.5;
-		this.maxSpeedZ = -0.5;
-		this.minSpeedZ = -0.01;
-		
-		this.lives = 3;
-		this.radius = radius;
-		
-		console.log("CLASS EXTENDS");
-		
 	}
 	
-	getRadius() {
-		return this.radius;
+	animate() {
+		this.children[0].rotateX(0.1);
 	}
-	
-	getSpeedY() {
-		return this.speedY;
-	}
-	
-	getSpeedZ() {
-		return this.speedZ;
-	}
-	
-	setSpeedY(newSpeedY) {
-		if(newSpeedY < this.maxSpeedY) {
-			this.speedY = newSpeedY;
-		} else {
-			this.speedY = this.maxSpeedY;
-		}
-	}
-	
-	setSpeedZ(newSpeedZ) {
-		if(newSpeedZ > this.maxSpeedZ) {
-			this.speedZ = newSpeedZ;
-		} else {
-			this.speedZ = this.maxSpeedZ;
-		}
-		if(newSpeedZ > this.minSpeedZ) {
-			this.speedZ = this.minSpeedZ;
-		}
-	}
-	
-	incSpeedY(incY) {
-		this.speedY += incY;
-		if(this.speedY > this.maxSpeedY) {
-			this.speedY = this.maxSpeedY;
-		}
-	}
-	
-	incSpeedZ(incZ) {
-		this.speedZ += incZ;
-		if(this.speedZ <= this.maxSpeedZ) {
-			this.speedZ = this.maxSpeedZ;
-		}
-		if(this.speedZ >= this.minSpeedZ) {
-			this.speedZ = this.minSpeedZ;
-		}
-	}
-	
-	
-	
 }
