@@ -13,7 +13,7 @@
 // material - threejs material, includes shading, may include a texture
 // radius of object
 
-class Alpha1 extends THREE.Object3D {
+class Alpha1 extends THREE.Mesh {
 	
 	constructor(geometry, material, radius) {
 		
