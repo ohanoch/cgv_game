@@ -6,6 +6,7 @@
 <script src="src\three.js"></script>
 <script src="alpha1.js"></script>
 <script src="map.js"></script>
+<script src="powerup.js"></script>
 <script src="src\OrbitControls.js"></script>
 <script>
 
@@ -42,6 +43,8 @@ var speedZ = -0.01;
 var jumping = false;
 
 var p;
+
+var powerups = [];
 
 /**
  *  The render function draws the scene.
@@ -176,7 +179,17 @@ function createWorld() {
 	var g2 = new THREE.CylinderGeometry(2,2,8,6,1);
 	var m2 = new THREE.MeshPhongMaterial({color: 0x00FF00});
 	var test = new Alpha1(g2,m2,1);
-	player.add(test);    
+
+	player.add(test);
+
+	var gun = new Powerup("gun");
+	gun.position.set(3,3,3);
+	powerups.push(gun);
+	
+	for(var i = 0; i < powerups.length; i++){
+		scene.add(powerups[i]);
+	} 
+
 } // end function createWorld()
 
 
@@ -230,6 +243,10 @@ function updateForFrame() {
 	if (resetCameraFlag){
 		resetCameraPosition();
 	}
+
+	for(var i = 0; i < powerups.length; i++){
+		powerups[i].animate();
+	} 
 }
 
 
