@@ -179,6 +179,7 @@ function createWorld() {
 	var g2 = new THREE.CylinderGeometry(2,2,8,6,1);
 	var m2 = new THREE.MeshPhongMaterial({color: 0x00FF00});
 	var test = new Alpha1(g2,m2,1);
+
 	player.add(test);
 
 	var gun = new Powerup("gun");
@@ -188,6 +189,7 @@ function createWorld() {
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
 	} 
+
 } // end function createWorld()
 
 
