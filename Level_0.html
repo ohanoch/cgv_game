@@ -5,6 +5,7 @@
 <script src="alpha.js"></script>
 <script src="src\three.js"></script>
 <script src="alpha1.js"></script>
+<script src="map.js"></script>
 <script src="src\OrbitControls.js"></script>
 <script>
 
@@ -28,7 +29,7 @@ var frameNumber = 0;  // Frame number is advanced by 1 for each frame while anim
 var tempObject;  // A temporary animated object.  DELETE IT.
 var tempAlpha;
 var player = new THREE.Object3D();
-var floor;
+//var floor;
 
 var pressedKeys = []; //records current keys being pressed
 var resetCameraFlag = false //flag to reset the camera position to original position
@@ -55,6 +56,7 @@ function render() {
  * Input = None
  * Output = None - the worldMap global variable will be edited inside the function
  */
+/**
 function createBuildings() {
 	var buildingWorldRatio = Math.pow(WORLD_HEIGHT*WORLD_WIDTH, 1/4);
 	for(var i = 1;
@@ -75,6 +77,7 @@ function createBuildings() {
 			scene.add(building);
 		}
 }
+*/
 
 /**
  * This function is called by the init() method to create the world. 
@@ -99,7 +102,7 @@ function createWorld() {
     
 	//-------------------------------------- FLOOR -------------------------------------------------
 	
-	var floorTexture = new THREE.ImageUtils.loadTexture( "textures/floor.jpg" );	//load floor texture
+/**	var floorTexture = new THREE.ImageUtils.loadTexture( "textures/floor.jpg" );	//load floor texture
 	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;					//wrap floor texture both sides
 	floorTexture.repeat.set( 20, 20 );												//how many times the image repeats
 	var floorMat = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
@@ -108,12 +111,21 @@ function createWorld() {
 	floor = new THREE.Mesh(floorGeom,floorMat);
 	floor.position.set(0,-4,0);
 	floor.rotation.x = -Math.PI / 2;
-	scene.add(floor);
+*/
+
+	var worldMap = new Map(100, 100, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	scene.add(worldMap.floor);
+	scene.add(worldMap.skybox);
 	
+	//add buildings to scene
+	worldMap.createBuildings(1/4); //map-buildings ratio is 1/4
+	for (var i = 0; i < worldMap.buildings.length; i++){
+		scene.add(worldMap.buildings[i]);
+	}
 	//---------------------------------------SKYBOX-----------------------------------------------------
 	//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
 	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
-	
+	/**
 	var materialArray = [];
 	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-xpos.png") }));
 	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-xneg.png") }));
@@ -130,7 +142,7 @@ function createWorld() {
 	var skyboxGeom = new THREE.CubeGeometry( 5000, 5000, 5000, 1, 1, 1 );
 	var skybox = new THREE.Mesh( skyboxGeom, skyboxMaterial );
 	scene.add( skybox );
-	
+	*/
 	
 	//----------------------------------- OTHER OBJECTS --------------------------------------------
 	/*8
@@ -164,10 +176,7 @@ function createWorld() {
 	var g2 = new THREE.CylinderGeometry(2,2,8,6,1);
 	var m2 = new THREE.MeshPhongMaterial({color: 0x00FF00});
 	var test = new Alpha1(g2,m2,1);
-	//test.position.set(0,1,0);
 	player.add(test);    
-
-	createBuildings();
 } // end function createWorld()
 
 
