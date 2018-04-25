@@ -25,6 +25,7 @@
 - [ ] Update alpha attributes on collisions (death, lives, powerups, points, etc)
 - [ ] Minimap
 - [ ] Win/Loose state (and notification/ transition to menu or something...)
+- [ ] Change camera so player is unable to look under floor
 
 ## Level 0+
 - [ ] Menu (using ray casting) * ASK RICHARD IF THIS IS SUFFICIENT TO GET ALL THE MARKS
