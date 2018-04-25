@@ -2,14 +2,20 @@
 <head>
 <meta charset="UTF-8">
 <title>_alpha_</title>
-<script src="src\three.js"></script>
+<script src="src\js\three.js"></script>
+<script src="src\js\OrbitControls.js"></script>
+<script src="src\js\Detector.js"></script>
+<script src="src\js\libs\stats.min.js"></script>
+
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
 <script src="src\powerup.js"></script>
-<script src="src\OrbitControls.js"></script>
+
 <script>
 
 "use strict";
+
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 //Globals
 var WORLD_HEIGHT = 100;
@@ -19,7 +25,7 @@ var ALPHA_CAMERA_DISTANCE = 30;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
-var container;
+var container, stats;
 
 var controls;  // An OrbitControls object that is used to implement
                // rotation of the scene using the mouse.  (It actually rotates
@@ -60,7 +66,7 @@ function render() {
 	renderer.setViewport( 10, h - minimapHeight - 10, minimapWidth, minimapHeight );
 	minimapCamera.aspect = w / h;
 	minimapCamera.updateProjectionMatrix();
-	//renderer.render( scene, minimapCamera );
+	renderer.render( scene, minimapCamera );
 	console.log("rendered minimap")
 }
 
@@ -268,6 +274,7 @@ function doFrame() {
         frameNumber++;
         updateForFrame();
         render();
+		stats.update();
         requestAnimationFrame(doFrame);
     }
 }
@@ -288,6 +295,10 @@ function init() {
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		container.appendChild( renderer.domElement );
+
+		stats = new Stats();
+		container.appendChild( stats.dom );
+
     }
     catch (e) {
         document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
