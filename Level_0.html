@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
-<title>CS 424 Lab 9</title>
-<script src="alpha.js"></script>
+<title>_alpha_</title>
 <script src="src\three.js"></script>
-<script src="alpha1.js"></script>
-<script src="map.js"></script>
-<script src="powerup.js"></script>
+<script src="src\alpha.js"></script>
+<script src="src\map.js"></script>
+<script src="src\powerup.js"></script>
 <script src="src\OrbitControls.js"></script>
 <script>
 
@@ -27,22 +26,15 @@ var controls;  // An OrbitControls object that is used to implement
 var animating = false;  // Set to true when an animation is in progress.
 var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
-var tempObject;  // A temporary animated object.  DELETE IT.
-var tempAlpha;
 var player = new THREE.Object3D();
-//var floor;
 
 var pressedKeys = []; //records current keys being pressed
 var resetCameraFlag = false //flag to reset the camera position to original position
 
-//velocities of player
-var speedY = 0;
-var speedZ = -0.01;
-
 //whether player is jumping or not
 var jumping = false;
 
-var p;
+var alpha;
 
 var powerups = [];
 
@@ -53,34 +45,6 @@ function render() {
     renderer.render(scene, camera);
 }
 
-
-/**
- * The createBuildings function adds buildings in the worldMap on top of the worldPlane
- * Input = None
- * Output = None - the worldMap global variable will be edited inside the function
- */
-/**
-function createBuildings() {
-	var buildingWorldRatio = Math.pow(WORLD_HEIGHT*WORLD_WIDTH, 1/4);
-	for(var i = 1;
-		i < buildingWorldRatio * 2;
-		i++){
-			var building = new THREE.Mesh(
-				new THREE.BoxGeometry(
-					Math.random() * buildingWorldRatio + 1, //width
-					Math.random() * buildingWorldRatio + 1, //height
-					Math.random() * buildingWorldRatio + 1 //depth
-				),
-				new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
-			);
-			//put building on surface of world (may be a elevated)
-			building.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_WIDTH / 2); 
-			building.translateY(Math.random() * (ATMOSPHERE_HEIGHT / building.geometry.parameters.height));
-			building.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_HEIGHT / 2);
-			scene.add(building);
-		}
-}
-*/
 
 /**
  * This function is called by the init() method to create the world. 
@@ -101,20 +65,8 @@ function createWorld() {
     player.add(camera);
     scene.add(player);
     
-    //------------------- Create the scene's visible objects ----------------------
+    //---------------------------------- CREATE THE WORLD -------------------------------------------
     
-	//-------------------------------------- FLOOR -------------------------------------------------
-	
-/**	var floorTexture = new THREE.ImageUtils.loadTexture( "textures/floor.jpg" );	//load floor texture
-	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;					//wrap floor texture both sides
-	floorTexture.repeat.set( 20, 20 );												//how many times the image repeats
-	var floorMat = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
-    var floorGeom = new THREE.PlaneGeometry(WORLD_WIDTH,WORLD_HEIGHT,1,1);
-	
-	floor = new THREE.Mesh(floorGeom,floorMat);
-	floor.position.set(0,-4,0);
-	floor.rotation.x = -Math.PI / 2;
-*/
 
 	var worldMap = new Map(100, 100, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
@@ -125,62 +77,14 @@ function createWorld() {
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
-	//---------------------------------------SKYBOX-----------------------------------------------------
-	//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
-	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
-	/**
-	var materialArray = [];
-	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-xpos.png") }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-xneg.png") }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-ypos.png") }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-yneg.png") }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-zpos.png") }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture("textures/dawnmountain-zneg.png") }));
 	
-	for (var i = 0; i < 6; i++) {
-		materialArray[i].side = THREE.BackSide;
-	}
+	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 	
-	var skyboxMaterial = new THREE.MeshFaceMaterial( materialArray );
-	var skyboxGeom = new THREE.CubeGeometry( 5000, 5000, 5000, 1, 1, 1 );
-	var skybox = new THREE.Mesh( skyboxGeom, skyboxMaterial );
-	scene.add( skybox );
-	*/
-	
-	//----------------------------------- OTHER OBJECTS --------------------------------------------
-	/*8
-	tempObject =  new THREE.Mesh(  // DELETE THIS !
-        new THREE.CylinderGeometry(2,4,8,6,1),
-        new THREE.MeshPhongMaterial({
-            color: 0x66BBFF,
-            specular: 0x222222,
-            shininess: 16,
-            shading: THREE.FlatShading
-        })
-    );
-    tempObject.rotation.y = Math.PI/12;
-    scene.add(tempObject);
-*/
-    tempAlpha =  new THREE.Mesh(
-        new THREE.CylinderGeometry(1,0,2,64,32),
-        new THREE.MeshPhongMaterial({
-            color: 0xFF0000,
-            specular: 0x222222,
-            shininess: 16
-        })
-    );
-	tempAlpha.rotation.x = Math.PI/2;
-	//player.add(tempAlpha);
-	var g = new THREE.CylinderGeometry(2,2,8,6,1);
-	var m = new THREE.MeshPhongMaterial({color: 0x0000FF});
-	p = new Alpha(g,m,1,0,0,0,0,0,0);
-	//player.add(p.getObj());
-	
-	var g2 = new THREE.CylinderGeometry(2,2,8,6,1);
-	var m2 = new THREE.MeshPhongMaterial({color: 0x00FF00});
-	var test = new Alpha1(g2,m2,1);
+	var AlphaGeometry = new THREE.CylinderGeometry(2,2,8,6,1);
+	var AlphaMaterial = new THREE.MeshPhongMaterial({color: 0x00FF00});
+	alpha = new Alpha(AlphaGeometry, AlphaMaterial, 2);
 
-	player.add(test);
+	player.add(alpha);
 
 	var gun = new Powerup("gun");
 	gun.position.set(3,3,3);
@@ -195,14 +99,14 @@ function createWorld() {
 
 function resetCameraPosition(){
 	var cameraRotationSpeed = 0.1;
-	camera.translateX((tempAlpha.position.x - camera.position.x) * cameraRotationSpeed);
-	camera.translateY((tempAlpha.position.y - camera.position.y) * cameraRotationSpeed);
-	camera.translateZ((tempAlpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z) * cameraRotationSpeed);
-	camera.lookAt(tempAlpha.position);
+	camera.translateX((alpha.position.x - camera.position.x) * cameraRotationSpeed);
+	camera.translateY((alpha.position.y - camera.position.y) * cameraRotationSpeed);
+	camera.translateZ((alpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z) * cameraRotationSpeed);
+	camera.lookAt(alpha.position);
 
-	if(Math.abs(tempAlpha.position.x - camera.position.x) <= 0.01 &&
-		Math.abs(tempAlpha.position.y - camera.position.y <= 0.01) &&
-		Math.abs(tempAlpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z <= 0.01)){
+	if(Math.abs(alpha.position.x - camera.position.x) <= 0.01 &&
+		Math.abs(alpha.position.y - camera.position.y <= 0.01) &&
+		Math.abs(alpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z <= 0.01)){
 		
 		resetCameraFlag = false;
 	}
@@ -215,30 +119,17 @@ function resetCameraPosition(){
  *  is incrementd 1 before this function is called.
  */
 function updateForFrame() {
-    
-	// NOTE: negative Z is forwards
-	if(speedZ > -0.01) {	//min Z speed
-		speedZ = -0.01;
-	}
 	
-	if(speedZ < -0.5) {		//max Z speed
-		speedZ = -0.5;
-	}
+    player.translateZ(alpha.getSpeedZ());	//move player backwards or forwards by their Z velocity
+	player.translateY(alpha.getSpeedY());	//move player up or down by their Y velocity
 	
-    player.translateZ(p.getSpeedZ());	//move player backwards or forwards by their Z velocity
-	player.translateY(p.getSpeedY());	//move player up or down by their Y velocity
-	
-	if(player.position.y > -2 + p.getRadius()) {	//check if player has reached the "floor"
-		p.incSpeedY(-0.01);				//if they have not, reduce speed (gravity)
+	if(player.position.y > -2 + alpha.getRadius()) {	//check if player has reached the "floor"
+		alpha.incSpeedY(-0.01);				//if they have not, reduce speed (gravity)
 	} else {						//if they have, stop reducing speed and set position to the ground, set Y speed to zero
-		p.setSpeedY(0);
-		player.position.y = -2 + p.getRadius();
+		alpha.setSpeedY(0);
+		player.position.y = -2 + alpha.getRadius();
 	}
 	
-	if(speedY > 0.5) {		//max Y speed
-		speedY = 0.5;
-    }
-
 	// slowly moving the camera back behaind _alpha_
 	if (resetCameraFlag){
 		resetCameraPosition();
@@ -264,9 +155,9 @@ function updateForFrame() {
  */
 function installOrbitControls() {
     controls = new THREE.OrbitControls(camera,canvas);
-    controls.noPan = true; 
-    controls.noZoom = true;
-    controls.staticMoving = true;
+    controls.enablePan = true; 
+    controls.enableZoom = true;
+    controls.enableDamping = true;
     function move() {
         controls.update();
         if (! animating) {
@@ -297,18 +188,10 @@ function onDocumentKeyDown(event){
 	
 	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	if(pressedKeys[38] || pressedKeys[87]){ // Up Arrow or "w" - camera moves forwad = speed up
-		//player.translateZ(-0.1);
-		if (speedZ > -0.5) {
-			speedZ -= 0.05;
-		}
-		p.incSpeedZ(-0.05);
+		alpha.incSpeedZ(-0.05);
 	}
 	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
-		//player.translateZ(0.1);
-		if (speedZ < -0.01) {
-			speedZ += 0.05;
-		}
-		p.incSpeedZ(0.05);
+		alpha.incSpeedZ(0.05);
 	}
 	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
 		player.rotation.y += 0.01;
@@ -318,10 +201,8 @@ function onDocumentKeyDown(event){
 	}
 	//spacebar = 32, z = 90 for testing
 	if(pressedKeys[90]){ // "Space" to fight gravity - camera moves up - alpha moves up
-		//player.position.y += 0.1; // alpha.antigrav*alpha.speed
 		if (!jumping) {
-			speedY += 0.3;
-			p.incSpeedY(0.3);
+			alpha.incSpeedY(0.3);
 		}
 		jumping = true;
 	}

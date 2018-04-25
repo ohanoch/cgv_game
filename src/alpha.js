@@ -13,9 +13,11 @@
 // material - threejs material, includes shading, may include a texture
 // radius of object
 
-class Alpha {
+class Alpha extends THREE.Mesh {
 	
-	constructor(geometry, material, radius, x, y, z, initRotateX, initRotateY, initRotateZ) {		//initial rotation, making the object face different ways
+	constructor(geometry, material, radius) {
+		
+		super(geometry,material);
 		
 		this.speedY = 0;
 		this.speedZ = -0.01;
@@ -26,36 +28,12 @@ class Alpha {
 		this.lives = 3;
 		this.radius = radius;
 		
-		this.obj = new THREE.Mesh(geometry,material);
-		this.obj.position.set(x,y + radius,z);
-		this.obj.rotation.x = initRotateX;
-		this.obj.rotation.y = initRotateY;
-		this.obj.rotation.z = initRotateZ;
+		console.log("Alpha created");
 		
-		//scene.add(this.obj);
-		
-		console.log("CLASS");
-		
-	}
-	
-	getObj() {
-		return this.obj;
 	}
 	
 	getRadius() {
 		return this.radius;
-	}
-	
-	getX() {
-		return this.obj.position.x;
-	}
-	
-	getY() {
-		return this.obj.position.y;
-	}
-	
-	getX() {
-		return this.obj.position.z;
 	}
 	
 	getSpeedY() {
@@ -64,18 +42,6 @@ class Alpha {
 	
 	getSpeedZ() {
 		return this.speedZ;
-	}
-	
-	setX(newX) {
-		this.obj.position.x = newX;
-	}
-	
-	setY(newY) {
-		this.obj.position.y = newY;
-	}
-	
-	setZ(newZ) {
-		this.obj.position.z = newZ;
 	}
 	
 	setSpeedY(newSpeedY) {
