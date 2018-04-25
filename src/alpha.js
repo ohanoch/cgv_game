@@ -13,11 +13,11 @@
 // material - threejs material, includes shading, may include a texture
 // radius of object
 
-class Alpha extends THREE.Mesh {
+class Alpha extends THREE.Mesh{
 	
-	constructor(geometry, material, radius) {
+	constructor(geometry, material) {
 		
-		super(geometry,material);
+		super(geometry, material);
 		
 		this.speedY = 0;
 		this.speedZ = -0.01;
@@ -26,7 +26,7 @@ class Alpha extends THREE.Mesh {
 		this.minSpeedZ = -0.01;
 		
 		this.lives = 3;
-		this.radius = radius;
+		this.radius = 1;
 		
 		console.log("Alpha created");
 		
@@ -34,6 +34,10 @@ class Alpha extends THREE.Mesh {
 	
 	getRadius() {
 		return this.radius;
+	}
+	
+	setRadius(rad) {
+		this.radius = rad;
 	}
 	
 	getSpeedY() {

@@ -39,6 +39,8 @@ var alpha;
 
 var powerups = [];
 
+var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
+
 /**
  *  The render function draws the scene.
  */
@@ -61,7 +63,7 @@ function createWorld() {
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
-    light.position.set(0,0,1);
+    light.position.set(0,-1,0);
     camera.add(light);
     player.add(camera);
     scene.add(player);
@@ -80,12 +82,13 @@ function createWorld() {
 	}
 	
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
-	
-	var AlphaGeometry = new THREE.CylinderGeometry(2,2,8,6,1);
-	var AlphaMaterial = new THREE.MeshPhongMaterial({color: 0x00FF00});
-	alpha = new Alpha(AlphaGeometry, AlphaMaterial, 2);
 
-	player.add(alpha);
+// alpha is created by model_loader function and added to player
+	
+	var loader = new THREE.JSONLoader();					// create loader for .js models
+	loader.load("models/stork.js", model_loader);		// load model and call model_loader
+	
+	alpha.setRadius(1);
 
 	var gun = new Powerup("gun");
 	gun.position.set(3,3,3);
@@ -98,7 +101,32 @@ function createWorld() {
 } // end function createWorld()
 
 
+function model_loader(geometry, materials) {
 
+	var material = new THREE.MeshLambertMaterial( {
+        vertexColors: THREE.FaceColors,  	// use colors from the geometry
+        morphTargets: true							// for animation
+    });
+	
+	alpha = new Alpha(geometry,material);	// create alpha object
+	
+// TRANSFORMS
+
+	alpha.scale.set(0.05,0.05,0.05);
+	alpha.position.set(0,-2,0);
+	alpha.rotateY(Math.PI);
+	
+	player.add(alpha);				// add alpha to player
+	
+// ANIMATION STUFF
+	
+	mixer = new THREE.AnimationMixer( alpha );
+	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
+    var animationAction = mixer.clipAction(clip);
+    animationAction.setDuration(1);
+    animationAction.play(); 
+	render();
+}
 
 /*<<<<<<<<<<<<<<<<<<<<<< C U S T O M 	S U B   R O U T I N E S >>>>>>>>>>>>>>>>>>>>>>>>>>>
 			                                 |_
@@ -111,6 +139,7 @@ function createWorld() {
 /*///////////////////////////////////////////////////////////////////////////////// 
 Reset the camera's to be behind the player (chase cam), after viewing the world.
 //////////////////////////////////////////////////////////////////////////////////*/
+
 function resetCameraPosition(){
 	var cameraRotationSpeed = 0.1;
 	camera.translateX((alpha.position.x - camera.position.x) * cameraRotationSpeed);
@@ -234,6 +263,12 @@ function updateForFrame() {
 		powerups[i].animate();
 	} 
 
+	
+	if(mixer) {
+		mixer.update(0.02);			// update model animation
+	}
+	
+
 	// Summon keyboard control lookups in one line.
 	key_check(); 		
 
@@ -278,8 +313,6 @@ function installOrbitControls() {
     canvas.addEventListener("mousedown", down, false);
     canvas.addEventListener("touchmove", touch, false);
 }
-
-
 
 /*  Called when user changes settings of the Animate checkbox. */
 function doAnimateCheckbox() {
