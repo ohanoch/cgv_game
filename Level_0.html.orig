@@ -47,10 +47,14 @@ var alpha;
 
 var powerups = [];
 
+<<<<<<< HEAD
 var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 
+||||||| merged common ancestors
+=======
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
 
+>>>>>>> minimap_take2
 /**
  *  The render function draws the scene.
  */
@@ -92,7 +96,13 @@ function createWorld() {
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
+<<<<<<< HEAD
+    light.position.set(0,-1,0);
+||||||| merged common ancestors
+    light.position.set(0,0,1);
+=======
     light.position.set(0,50,0);
+>>>>>>> minimap_take2
     camera.add(light);
     player.add(camera);
     scene.add(player);
@@ -205,8 +215,7 @@ function resetCameraPosition(){
 window.addEventListener("keydown", keysPressed, false);
 window.addEventListener("keyup", keysReleased, false);
 
-function key_check(){
-
+function key_check(){           
 	// Up Arrow or "w" - camera moves forwad = speed up
 	if(keys[38] || keys[87]){ 
 		alpha.incSpeedZ(-0.05);
@@ -247,30 +256,17 @@ function key_check(){
 
 // This function gets called when a key is pressed
 function keysPressed(e) {
-	console.log("key pressed");
-	// "p" for pause and play           
-	if(e.keyCode == 80){
-		console.log("pressed p");
-		if(animating == false){
-			animating = true;
-			requestAnimationFrame(doFrame);
-			console.log("animating " + animating);
-		} else {
-			animating = false;
-		}
-		return;
-	}
-
     // store an entry for every key pressed
     keys[e.keyCode] = true;
         // NB: prevent default browser behavior
-        e.preventDefault();
+        e.preventDefault(); 
+
 }
 
 function keysReleased(e) {
     // mark keys that were released
     keys[e.keyCode] = false;
-    if (e.keyCode == 90) {
+    	if (e.keyCode == 90) {
 		jumping = false;
 	}
 }
@@ -369,8 +365,118 @@ function installOrbitControls() {
     document.addEventListener("touchmove", touch, false);
 }
 
+<<<<<<< HEAD
+/*  Called when user changes settings of the Animate checkbox. */
+function doAnimateCheckbox() {
+   var run = document.getElementById("animateCheckbox").checked;
+   if (run != animating) {
+       animating = run;
+       if (animating) {
+           requestAnimationFrame(doFrame);
+       }
+   }
+}
 
+||||||| merged common ancestors
+// This function gets called when a key is pressed
 // It determines _alpha_'s movements ("Space" with arrow keys or WASD). 
+function onDocumentKeyDown(event){
+	// Get the key code of the pressed key
+	var keyCode = event.which;
+	pressedKeys[keyCode] = true;
+	
+	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+	if(pressedKeys[38] || pressedKeys[87]){ // Up Arrow or "w" - camera moves forwad = speed up
+		alpha.incSpeedZ(-0.05);
+	}
+	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
+		alpha.incSpeedZ(0.05);
+	}
+	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
+		player.rotation.y += 0.01;
+	}
+	if(pressedKeys[39] || pressedKeys[68]){ // Right Arrow or "d" - camera moves left = turn left
+		player.rotation.y -= 0.01;
+	}
+	//spacebar = 32, z = 90 for testing
+	if(pressedKeys[90]){ // "Space" to fight gravity - camera moves up - alpha moves up
+		if (!jumping) {
+			alpha.incSpeedY(0.3);
+		}
+		jumping = true;
+	}
+}
+
+function onDocumentKeyUp(event){
+	pressedKeys[event.which] = false;
+	if (event.which == 90) {
+		jumping = false;
+	}
+}
+
+/*  Called when user changes settings of the Animate checkbox. */
+function doAnimateCheckbox() {
+   var run = document.getElementById("animateCheckbox").checked;
+   if (run != animating) {
+       animating = run;
+       if (animating) {
+           requestAnimationFrame(doFrame);
+       }
+   }
+}
+
+=======
+// This function gets called when a key is pressed
+// It determines _alpha_'s movements ("Space" with arrow keys or WASD). 
+function onDocumentKeyDown(event){
+	// Get the key code of the pressed key
+	var keyCode = event.which;
+	
+	// "p" to play and pause animation
+	if(keyCode == 80){
+		console.log("pressed p");
+		if(animating == false){
+			animating = true;
+			requestAnimationFrame(doFrame);
+			console.log("animating " + animating);
+		} else {
+			animating = false;
+		}
+		return;
+	}
+
+	pressedKeys[keyCode] = true;
+	
+	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+	if(pressedKeys[38] || pressedKeys[87]){ // Up Arrow or "w" - camera moves forwad = speed up
+		alpha.incSpeedZ(-0.05);
+	}
+	if(pressedKeys[40] || pressedKeys[83]){ // Down Arrow or "s" - camera moves back = speed down 
+		alpha.incSpeedZ(0.05);
+	}
+	if(pressedKeys[37] || pressedKeys[65]){ // Left Arrow or "a" - camera moves right = turn right
+		player.rotation.y += 0.01;
+	}
+	if(pressedKeys[39] || pressedKeys[68]){ // Right Arrow or "d" - camera moves left = turn left
+		player.rotation.y -= 0.01;
+	}
+	//spacebar = 32, z = 90 for testing
+	if(pressedKeys[90]){ // "Space" to fight gravity - camera moves up - alpha moves up
+		if (!jumping) {
+			alpha.incSpeedY(0.3);
+		}
+		jumping = true;
+	}
+}
+
+function onDocumentKeyUp(event){
+	pressedKeys[event.which] = false;
+	if (event.which == 90) {
+		jumping = false;
+	}
+}
+
+>>>>>>> minimap_take2
 /*  Drives the animation, called by system through requestAnimationFrame() */
 function doFrame() {
     if (animating) {
@@ -414,6 +520,8 @@ function init() {
 	// keyboard controls
 	// taken from: http://www.johannes-raida.de/tutorials/three.js/tutorial07/tutorial07.htm
 	// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
+	//document.addEventListener("keydown", onDocumentKeyDown, false);
+	//document.addEventListener("keyup", onDocumentKeyUp, false);
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
 	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
 
