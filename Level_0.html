@@ -19,6 +19,8 @@ var ALPHA_CAMERA_DISTANCE = 30;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
+var container;
+
 var controls;  // An OrbitControls object that is used to implement
                // rotation of the scene using the mouse.  (It actually rotates
                // the camera around the scene.)
@@ -38,11 +40,28 @@ var alpha;
 
 var powerups = [];
 
+var minimapCamera, minimapWidth = 240, minimapHeight = 160; //
+
 /**
  *  The render function draws the scene.
  */
 function render() {
+	var w = window.innerWidth, h = window.innerHeight;
+	renderer.setSize(w,h);
+
+	// Render main camera on entire screen
+	renderer.setViewport( 0, 0, w, h );
+	camera.aspect = w / h;
+	camera.updateProjectionMatrix();
     renderer.render(scene, camera);
+	console.log("rendered camera")
+
+	// Render minimap camera in bottom left corner
+	renderer.setViewport( 10, h - minimapHeight - 10, minimapWidth, minimapHeight );
+	minimapCamera.aspect = w / h;
+	minimapCamera.updateProjectionMatrix();
+	renderer.render( scene, minimapCamera );
+	console.log("rendered minimap")
 }
 
 
@@ -56,19 +75,33 @@ function createWorld() {
     
     // ------------------- Make a camera with viewpoint light ----------------------
     
-    camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 10000);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
-    light.position.set(0,0,1);
+    light.position.set(0,50,0);
     camera.add(light);
     player.add(camera);
     scene.add(player);
     
+	//---------------------- Minimap ----------------------------------------------
+	minimapCamera = new THREE.OrthographicCamera(
+	    window.innerWidth / -2,		// Left
+		window.innerWidth / 2,		// Right
+    	window.innerHeight / 2,		// Top
+    	window.innerHeight / -2,	// Bottom
+    	-5000,            			// Near 
+    	10000 );           			// Far 
+	minimapCamera.up = new THREE.Vector3(0,0,-1);
+	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
+	scene.add(minimapCamera);
+
+
+
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
-	var worldMap = new Map(100, 100, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	var worldMap = new Map(5000, 5000, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
 	
@@ -175,8 +208,8 @@ function installOrbitControls() {
             move();
         }
     }
-    canvas.addEventListener("mousedown", down, false);
-    canvas.addEventListener("touchmove", touch, false);
+    document.addEventListener("mousedown", down, false);
+    document.addEventListener("touchmove", touch, false);
 }
 
 // This function gets called when a key is pressed
@@ -184,6 +217,17 @@ function installOrbitControls() {
 function onDocumentKeyDown(event){
 	// Get the key code of the pressed key
 	var keyCode = event.which;
+	
+	// "p" to play and pause animation
+	if(keyCode == 80){
+		if(animating == false){
+			animating = true;
+		} else {
+			animating = false;
+		}
+		return;
+	}
+
 	pressedKeys[keyCode] = true;
 	
 	// keycodes found on: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
@@ -247,20 +291,17 @@ function doFrame() {
  */
 function init() {
     try {
-        canvas = document.getElementById("glcanvas");
-        renderer = new THREE.WebGLRenderer({
-            canvas: canvas,
-            antialias: true,
-            alpha: false
-        });
+		container = document.getElementById( 'container' );
+		renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		container.appendChild( renderer.domElement );
     }
     catch (e) {
         document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
                 e + "</b>";
         return;
     }
-    document.getElementById("animateCheckbox").checked = false;
-    document.getElementById("animateCheckbox").onchange = doAnimateCheckbox;
     createWorld();
     installOrbitControls();
 
@@ -278,24 +319,13 @@ function init() {
 </script>
 </head>
 <body onload="init()">
+	<noscript>
+   		<p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
+	</noscript>
 
-<h2>Three.js Demo</h2>
+	<p style="color:#AA0000; font-weight: bold" id="message"> </p>
 
-<noscript>
-   <p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
-</noscript>
-
-<p style="color:#AA0000; font-weight: bold" id="message">
-</p>
-
-<p>
-   <label><input type="checkbox" id="animateCheckbox"><b>Animate</b></label>
-   <b style="margin-left:auto">Use the mouse to rotate the model.</b>
-</p>
-
-<div id="canvas-holder" align = "center" style=" background-color: white">
-   <canvas width=1200 height=600 id="glcanvas"></canvas>
-</div>
+	<div id="container"></div>
 
 </body>
 </html>
