@@ -18,8 +18,8 @@
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 //Globals
-var WORLD_HEIGHT = 100;
-var WORLD_WIDTH = 100;
+var WORLD_WIDTH = 5000;
+var WORLD_DEPTH = 5000;
 var ATMOSPHERE_HEIGHT = 10;
 var ALPHA_CAMERA_DISTANCE = 30;
 
@@ -46,7 +46,7 @@ var alpha;
 
 var powerups = [];
 
-var minimapCamera, minimapWidth = 240, minimapHeight = 160; //
+var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
 
 /**
  *  The render function draws the scene.
@@ -57,13 +57,17 @@ function render() {
 
 	// Render main camera on entire screen
 	renderer.setViewport( 0, 0, w, h );
+	renderer.setScissor( 0, 0, w, h );
+	renderer.setScissorTest( true );
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
     renderer.render(scene, camera);
-	console.log("rendered camera")
+	console.log("rendered camera " + camera.position.x + " , " + camera.position.y + " , " + camera.position.z);
 
 	// Render minimap camera in bottom left corner
-	renderer.setViewport( 10, h - minimapHeight - 10, minimapWidth, minimapHeight );
+	renderer.setViewport( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
+	renderer.setScissor( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
+	renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
 	minimapCamera.aspect = w / h;
 	minimapCamera.updateProjectionMatrix();
 	renderer.render( scene, minimapCamera );
@@ -92,22 +96,22 @@ function createWorld() {
     
 	//---------------------- Minimap ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(
-	    window.innerWidth / -2,		// Left
-		window.innerWidth / 2,		// Right
-    	window.innerHeight / 2,		// Top
-    	window.innerHeight / -2,	// Bottom
+	    window.innerHeight / -5,		// Left
+		window.innerHeight / 5,		// Right
+    	window.innerHeight / 5,		// Top
+    	window.innerHeight / -5,	// Bottom
     	-5000,            			// Near 
     	10000 );           			// Far 
 	minimapCamera.up = new THREE.Vector3(0,0,-1);
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
-	scene.add(minimapCamera);
+	player.add(minimapCamera);
 
 
 
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
-	var worldMap = new Map(5000, 5000, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	var worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
 	
