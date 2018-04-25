@@ -2,22 +2,30 @@
 <head>
 <meta charset="UTF-8">
 <title>_alpha_</title>
-<script src="src\three.js"></script>
+<script src="src\js\three.js"></script>
+<script src="src\js\OrbitControls.js"></script>
+<script src="src\js\Detector.js"></script>
+<script src="src\js\libs\stats.min.js"></script>
+
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
 <script src="src\powerup.js"></script>
-<script src="src\OrbitControls.js"></script>
+
 <script>
 
 "use strict";
 
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
 //Globals
-var WORLD_HEIGHT = 100;
-var WORLD_WIDTH = 100;
+var WORLD_WIDTH = 5000;
+var WORLD_DEPTH = 5000;
 var ATMOSPHERE_HEIGHT = 10;
 var ALPHA_CAMERA_DISTANCE = 20;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
+
+var container, stats;
 
 var controls;  // An OrbitControls object that is used to implement
                // rotation of the scene using the mouse.  (It actually rotates
@@ -41,11 +49,32 @@ var powerups = [];
 
 var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 
+var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
+
 /**
  *  The render function draws the scene.
  */
 function render() {
+	var w = window.innerWidth, h = window.innerHeight;
+	renderer.setSize(w,h);
+
+	// Render main camera on entire screen
+	renderer.setViewport( 0, 0, w, h );
+	renderer.setScissor( 0, 0, w, h );
+	renderer.setScissorTest( true );
+	camera.aspect = w / h;
+	camera.updateProjectionMatrix();
     renderer.render(scene, camera);
+	console.log("rendered camera " + camera.position.x + " , " + camera.position.y + " , " + camera.position.z);
+
+	// Render minimap camera in bottom left corner
+	renderer.setViewport( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
+	renderer.setScissor( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
+	renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
+	minimapCamera.aspect = w / h;
+	minimapCamera.updateProjectionMatrix();
+	renderer.render( scene, minimapCamera );
+	console.log("rendered minimap")
 }
 
 
@@ -59,19 +88,33 @@ function createWorld() {
     
     // ------------------- Make a camera with viewpoint light ----------------------
     
-    camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 10000);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
-    light.position.set(0,-1,0);
+    light.position.set(0,50,0);
     camera.add(light);
     player.add(camera);
     scene.add(player);
     
+	//---------------------- Minimap ----------------------------------------------
+	minimapCamera = new THREE.OrthographicCamera(
+	    window.innerHeight / -5,		// Left
+		window.innerHeight / 5,		// Right
+    	window.innerHeight / 5,		// Top
+    	window.innerHeight / -5,	// Bottom
+    	-5000,            			// Near 
+    	10000 );           			// Far 
+	minimapCamera.up = new THREE.Vector3(0,0,-1);
+	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
+	player.add(minimapCamera);
+
+
+
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
-	var worldMap = new Map(100, 100, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	var worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
 	
@@ -162,7 +205,21 @@ function resetCameraPosition(){
 window.addEventListener("keydown", keysPressed, false);
 window.addEventListener("keyup", keysReleased, false);
 
-function key_check(){           
+function key_check(){
+	// "p" for pause and play           
+	if(keyCode == 80){
+		console.log("pressed p");
+		if(animating == false){
+			animating = true;
+			requestAnimationFrame(doFrame);
+			console.log("animating " + animating);
+		} else {
+			animating = false;
+		}
+		return;
+	}
+
+
 	// Up Arrow or "w" - camera moves forwad = speed up
 	if(keys[38] || keys[87]){ 
 		alpha.incSpeedZ(-0.05);
@@ -308,27 +365,19 @@ function installOrbitControls() {
             move();
         }
     }
-    canvas.addEventListener("mousedown", down, false);
-    canvas.addEventListener("touchmove", touch, false);
+    document.addEventListener("mousedown", down, false);
+    document.addEventListener("touchmove", touch, false);
 }
 
-/*  Called when user changes settings of the Animate checkbox. */
-function doAnimateCheckbox() {
-   var run = document.getElementById("animateCheckbox").checked;
-   if (run != animating) {
-       animating = run;
-       if (animating) {
-           requestAnimationFrame(doFrame);
-       }
-   }
-}
 
+// It determines _alpha_'s movements ("Space" with arrow keys or WASD). 
 /*  Drives the animation, called by system through requestAnimationFrame() */
 function doFrame() {
     if (animating) {
         frameNumber++;
         updateForFrame();
         render();
+		stats.update();
         requestAnimationFrame(doFrame);
     }
 }
@@ -344,28 +393,27 @@ function doFrame() {
  */
 function init() {
     try {
-        canvas = document.getElementById("glcanvas");
-        renderer = new THREE.WebGLRenderer({
-            canvas: canvas,
-            antialias: true,
-            alpha: false
-        });
+		container = document.getElementById( 'container' );
+		renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		container.appendChild( renderer.domElement );
+
+		stats = new Stats();
+		container.appendChild( stats.dom );
+
     }
     catch (e) {
         document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
                 e + "</b>";
         return;
     }
-    document.getElementById("animateCheckbox").checked = false;
-    document.getElementById("animateCheckbox").onchange = doAnimateCheckbox;
     createWorld();
     installOrbitControls();
 
 	// keyboard controls
 	// taken from: http://www.johannes-raida.de/tutorials/three.js/tutorial07/tutorial07.htm
 	// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
-	//document.addEventListener("keydown", onDocumentKeyDown, false);
-	//document.addEventListener("keyup", onDocumentKeyUp, false);
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
 	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
 
@@ -375,24 +423,13 @@ function init() {
 </script>
 </head>
 <body onload="init()">
+	<noscript>
+   		<p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
+	</noscript>
 
-<h2>Three.js Demo</h2>
+	<p style="color:#AA0000; font-weight: bold" id="message"> </p>
 
-<noscript>
-   <p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
-</noscript>
-
-<p style="color:#AA0000; font-weight: bold" id="message">
-</p>
-
-<p>
-   <label><input type="checkbox" id="animateCheckbox"><b>Animate</b></label>
-   <b style="margin-left:auto">Use the mouse to rotate the model.</b>
-</p>
-
-<div id="canvas-holder" align = "center" style=" background-color: white">
-   <canvas width=1200 height=600 id="glcanvas"></canvas>
-</div>
+	<div id="container"></div>
 
 </body>
 </html>

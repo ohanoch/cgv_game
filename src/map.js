@@ -59,7 +59,7 @@ class Map {
 	 * Output = None - the worldMap global variable will be edited inside the function
 	 */
 	createBuildings(ratio) {
-		var buildingMapRatio = Math.pow(WORLD_HEIGHT*WORLD_WIDTH, ratio);
+		var buildingMapRatio = Math.pow(WORLD_DEPTH*WORLD_WIDTH, ratio);
 		for(var i = 1;
 			i < buildingMapRatio * 2;
 			i++){
@@ -74,7 +74,7 @@ class Map {
 				//put building on surface of world (may be a elevated)
 				building.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_WIDTH / 2); 
 				building.translateY(Math.random() * (ATMOSPHERE_HEIGHT / building.geometry.parameters.height));
-				building.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_HEIGHT / 2);
+				building.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_DEPTH / 2);
 				this.buildings.push(building);
 			}
 	}
