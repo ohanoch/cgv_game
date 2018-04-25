@@ -38,6 +38,11 @@ var alpha;
 
 var powerups = [];
 
+var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
+var prevMixerTime; // Used to record time of last update of mixer
+var prevTime;
+var model = new THREE.Object3D();
+
 /**
  *  The render function draws the scene.
  */
@@ -60,7 +65,7 @@ function createWorld() {
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
-    light.position.set(0,0,1);
+    light.position.set(0,-1,0);
     camera.add(light);
     player.add(camera);
     scene.add(player);
@@ -80,9 +85,9 @@ function createWorld() {
 	
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 	
-	var AlphaGeometry = new THREE.CylinderGeometry(2,2,8,6,1);
-	var AlphaMaterial = new THREE.MeshPhongMaterial({color: 0x00FF00});
-	alpha = new Alpha(AlphaGeometry, AlphaMaterial, 2);
+	//var AlphaGeometry = new THREE.CylinderGeometry(2,2,8,6,1);
+	//var AlphaMaterial = new THREE.MeshPhongMaterial({color: 0x00FF00});
+	alpha = new Alpha("models/stork.js");
 
 	player.add(alpha);
 
@@ -93,8 +98,29 @@ function createWorld() {
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
 	} 
+	
+	var loader = new THREE.JSONLoader();
+	loader.load("models/Suzanne.js", model_loader);
 
 } // end function createWorld()
+
+
+function model_loader(geometry, materials) {
+	var material = new THREE.MeshLambertMaterial( {
+        vertexColors: THREE.FaceColors,  // use colors from the geometry
+        morphTargets: true
+    });
+	var mesh = new THREE.Mesh(geometry, material);
+	model.add(mesh);
+	model.scale.set(0.1,0.1,0.1);
+	scene.add(model);
+	mixer = new THREE.AnimationMixer( mesh );
+	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
+    var animationAction = mixer.clipAction(clip);
+    animationAction.setDuration(1);
+    animationAction.play(); 
+	render();
+}
 
 
 function resetCameraPosition(){
@@ -138,6 +164,11 @@ function updateForFrame() {
 	for(var i = 0; i < powerups.length; i++){
 		powerups[i].animate();
 	} 
+	
+	if(mixer) {
+		mixer.update(0.02);
+	}
+	
 }
 
 
@@ -215,12 +246,23 @@ function onDocumentKeyUp(event){
 	}
 }
 
+function startAnimation() {
+    if (!animating) {
+       prevTime = Date.now();
+	   animating = true;
+       prevMixerTime = Date.now();
+	   requestAnimationFrame(doFrame);
+	}
+}
+
+
 /*  Called when user changes settings of the Animate checkbox. */
 function doAnimateCheckbox() {
    var run = document.getElementById("animateCheckbox").checked;
    if (run != animating) {
        animating = run;
        if (animating) {
+		   //startAnimation();
            requestAnimationFrame(doFrame);
        }
    }
@@ -231,6 +273,14 @@ function doFrame() {
     if (animating) {
         frameNumber++;
         updateForFrame();
+		
+		//if(mixer) {
+		    //var time = Date.now();
+			//mixer.update( ( time - prevMixerTime ) * 0.001 );
+			//mixer.update(0.01);
+			//prevMixerTime = time;
+		//}
+		
         render();
         requestAnimationFrame(doFrame);
     }
