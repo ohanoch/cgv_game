@@ -15,7 +15,7 @@
 
 class Alpha extends THREE.Mesh{
 	
-	constructor(geometry, material) {
+	constructor(geometry, material, radius) {
 		
 		super(geometry, material);
 		
@@ -26,7 +26,7 @@ class Alpha extends THREE.Mesh{
 		this.minSpeedZ = -0.01;
 		
 		this.lives = 3;
-		this.radius = 1;
+		this.radius = radius;
 		
 		console.log("Alpha created");
 		

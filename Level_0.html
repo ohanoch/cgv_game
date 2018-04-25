@@ -88,8 +88,6 @@ function createWorld() {
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 	loader.load("models/stork.js", model_loader);		// load model and call model_loader
 	
-	alpha.setRadius(1);
-
 	var gun = new Powerup("gun");
 	gun.position.set(3,3,3);
 	powerups.push(gun);
@@ -108,7 +106,7 @@ function model_loader(geometry, materials) {
         morphTargets: true							// for animation
     });
 	
-	alpha = new Alpha(geometry,material);	// create alpha object
+	alpha = new Alpha(geometry,material, 1);	// create alpha object
 	
 // TRANSFORMS
 
