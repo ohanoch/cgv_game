@@ -39,9 +39,6 @@ var alpha;
 var powerups = [];
 
 var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
-var prevMixerTime; // Used to record time of last update of mixer
-var prevTime;
-var model = new THREE.Object3D();
 
 /**
  *  The render function draws the scene.
@@ -84,12 +81,13 @@ function createWorld() {
 	}
 	
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
-	
-	//var AlphaGeometry = new THREE.CylinderGeometry(2,2,8,6,1);
-	//var AlphaMaterial = new THREE.MeshPhongMaterial({color: 0x00FF00});
-	alpha = new Alpha("models/stork.js");
 
-	player.add(alpha);
+// alpha is created by model_loader function and added to player
+	
+	var loader = new THREE.JSONLoader();					// create loader for .js models
+	loader.load("models/stork.js", model_loader);		// load model and call model_loader
+	
+	alpha.setRadius(1);
 
 	var gun = new Powerup("gun");
 	gun.position.set(3,3,3);
@@ -98,23 +96,30 @@ function createWorld() {
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
 	} 
-	
-	var loader = new THREE.JSONLoader();
-	loader.load("models/Suzanne.js", model_loader);
 
 } // end function createWorld()
 
 
 function model_loader(geometry, materials) {
+
 	var material = new THREE.MeshLambertMaterial( {
-        vertexColors: THREE.FaceColors,  // use colors from the geometry
-        morphTargets: true
+        vertexColors: THREE.FaceColors,  	// use colors from the geometry
+        morphTargets: true							// for animation
     });
-	var mesh = new THREE.Mesh(geometry, material);
-	model.add(mesh);
-	model.scale.set(0.1,0.1,0.1);
-	scene.add(model);
-	mixer = new THREE.AnimationMixer( mesh );
+	
+	alpha = new Alpha(geometry,material);	// create alpha object
+	
+// TRANSFORMS
+
+	alpha.scale.set(0.05,0.05,0.05);
+	alpha.position.set(0,-2,0);
+	alpha.rotateY(Math.PI);
+	
+	player.add(alpha);				// add alpha to player
+	
+// ANIMATION STUFF
+	
+	mixer = new THREE.AnimationMixer( alpha );
 	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
     var animationAction = mixer.clipAction(clip);
     animationAction.setDuration(1);
@@ -166,7 +171,7 @@ function updateForFrame() {
 	} 
 	
 	if(mixer) {
-		mixer.update(0.02);
+		mixer.update(0.02);			// update model animation
 	}
 	
 }
@@ -233,7 +238,7 @@ function onDocumentKeyDown(event){
 	//spacebar = 32, z = 90 for testing
 	if(pressedKeys[90]){ // "Space" to fight gravity - camera moves up - alpha moves up
 		if (!jumping) {
-			alpha.incSpeedY(0.3);
+			alpha.incSpeedY(0.5);
 		}
 		jumping = true;
 	}
@@ -246,15 +251,6 @@ function onDocumentKeyUp(event){
 	}
 }
 
-function startAnimation() {
-    if (!animating) {
-       prevTime = Date.now();
-	   animating = true;
-       prevMixerTime = Date.now();
-	   requestAnimationFrame(doFrame);
-	}
-}
-
 
 /*  Called when user changes settings of the Animate checkbox. */
 function doAnimateCheckbox() {
@@ -262,7 +258,6 @@ function doAnimateCheckbox() {
    if (run != animating) {
        animating = run;
        if (animating) {
-		   //startAnimation();
            requestAnimationFrame(doFrame);
        }
    }
@@ -273,14 +268,6 @@ function doFrame() {
     if (animating) {
         frameNumber++;
         updateForFrame();
-		
-		//if(mixer) {
-		    //var time = Date.now();
-			//mixer.update( ( time - prevMixerTime ) * 0.001 );
-			//mixer.update(0.01);
-			//prevMixerTime = time;
-		//}
-		
         render();
         requestAnimationFrame(doFrame);
     }
