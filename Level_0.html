@@ -17,7 +17,7 @@
 //Globals
 var WORLD_WIDTH = 5000;
 var WORLD_DEPTH = 5000;
-var ATMOSPHERE_HEIGHT = 10;
+var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
@@ -28,6 +28,7 @@ var controls;  // An OrbitControls object that is used to implement
                // rotation of the scene using the mouse.  (It actually rotates
                // the camera around the scene.)
 
+var fullscreen = false;
 var animating = false;  // Set to true when an animation is in progress.
 var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
@@ -109,7 +110,7 @@ function createWorld() {
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
-	var worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, 10, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	var worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
 	
@@ -201,6 +202,7 @@ window.addEventListener("keydown", keysPressed, false);
 window.addEventListener("keyup", keysReleased, false);
 
 function key_check(){
+	//keycodes taken from: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes	
 
 	// Up Arrow or "w" - camera moves forwad = speed up
 	if(keys[38] || keys[87]){ 
@@ -244,7 +246,7 @@ function key_check(){
 function keysPressed(e) {
 	// "p" for pause and play           
 	if(e.keyCode == 80){
-		if(animating == false){
+		if(!animating){
 			animating = true;
 			requestAnimationFrame(doFrame);
 		} else {
@@ -253,6 +255,23 @@ function keysPressed(e) {
 		return;
 	}
 
+	// F11 to enter and exit fullscreen
+	if(e.keyCode == 122){
+		if(!fullscreen){
+			fullscreen = true;
+			document.requestFullscreen();
+		} else {
+			fullscreen = false
+			document.exitFullscreen();
+		}
+		return;
+	}
+
+	// F5 to refresh page
+	if(e.keyCode == 116){
+		window.location.reload(false); 
+		return
+	}
     // store an entry for every key pressed
     keys[e.keyCode] = true;
         // NB: prevent default browser behavior
