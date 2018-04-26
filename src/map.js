@@ -66,14 +66,14 @@ class Map {
 				var building = new THREE.Mesh(
 					new THREE.BoxGeometry(
 						Math.random() * buildingMapRatio + 1, //width
-						Math.random() * buildingMapRatio + 1, //height
+						Math.min(this.atmosphereHeight, Math.random() * buildingMapRatio + 1), //height
 						Math.random() * buildingMapRatio + 1 //depth
 					),
 					new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
 				);
 				//put building on surface of world (may be a elevated)
 				building.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_WIDTH / 2); 
-				building.translateY(Math.random() * (ATMOSPHERE_HEIGHT / building.geometry.parameters.height));
+				building.translateY(Math.random() * (this.atmosphereHeight - building.geometry.parameters.height) + building.geometry.parameters.height / 2);
 				building.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_DEPTH / 2);
 				this.buildings.push(building);
 			}
