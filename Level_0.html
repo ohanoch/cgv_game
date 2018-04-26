@@ -45,12 +45,12 @@ var resetCameraFlag = false //flag to reset the camera position to original posi
 var jumping = false;
 
 var alpha;
-
 var powerups = [];
-
 var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
+
+var worldMap;
 
 /**
  *  The render function draws the scene.
@@ -113,7 +113,7 @@ function createWorld() {
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
-	var worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
 	
@@ -332,9 +332,14 @@ function updateForFrame() {
 		powerups[i].animate();
 	} 
 
-	
+	// update model animation
 	if(mixer) {
-		mixer.update(0.02);			// update model animation
+		mixer.update(0.02);
+	}
+
+	// camera can't got below floor
+	if(camera.position.y < worldMap.floorHeight + 1.1){
+		camera.position.y = worldMap.floorHeight + 1.1;
 	}
 	
 
@@ -361,7 +366,6 @@ function installOrbitControls() {
     controls.noPan = true; 
     controls.noZoom = true;
     controls.staticMoving = true;
-//controls.enableDamping = true;
     function move() {
         controls.update();
         if (! animating) {
