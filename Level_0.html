@@ -267,8 +267,14 @@ function keysPressed(e) {
 			fullscreen = false
 			document.exitFullscreen();
 		}
+		return;
 	}
 
+	// F5 to refresh page
+	if(e.keyCode == 116){
+		window.location.reload(false); 
+		return
+	}
     // store an entry for every key pressed
     keys[e.keyCode] = true;
         // NB: prevent default browser behavior
