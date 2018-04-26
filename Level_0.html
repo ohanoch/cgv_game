@@ -31,6 +31,7 @@ var controls;  // An OrbitControls object that is used to implement
                // rotation of the scene using the mouse.  (It actually rotates
                // the camera around the scene.)
 
+var fullscreen = false;
 var animating = false;  // Set to true when an animation is in progress.
 var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
@@ -204,6 +205,7 @@ window.addEventListener("keydown", keysPressed, false);
 window.addEventListener("keyup", keysReleased, false);
 
 function key_check(){
+	//keycodes taken from: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes	
 
 	// Up Arrow or "w" - camera moves forwad = speed up
 	if(keys[38] || keys[87]){ 
@@ -247,13 +249,24 @@ function key_check(){
 function keysPressed(e) {
 	// "p" for pause and play           
 	if(e.keyCode == 80){
-		if(animating == false){
+		if(!animating){
 			animating = true;
 			requestAnimationFrame(doFrame);
 		} else {
 			animating = false;
 		}
 		return;
+	}
+
+	// F11 to enter and exit fullscreen
+	if(e.keyCode == 122){
+		if(!fullscreen){
+			fullscreen = true;
+			document.requestFullscreen();
+		} else {
+			fullscreen = false
+			document.exitFullscreen();
+		}
 	}
 
     // store an entry for every key pressed
