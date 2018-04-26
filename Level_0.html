@@ -236,7 +236,7 @@ function key_check(){
    // space key: fight gravity
    if (keys[90]) {     
 		if (!jumping) {			// Set limit on jumping
-			alpha.incSpeedY(0.3);
+			alpha.incSpeedY(1);
 		}
 		jumping = true;
     }
@@ -272,6 +272,7 @@ function keysPressed(e) {
 		window.location.reload(false); 
 		return
 	}
+	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
         // NB: prevent default browser behavior
