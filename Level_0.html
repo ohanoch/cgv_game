@@ -98,15 +98,16 @@ function createWorld() {
     
 	//---------------------- Minimap ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(
-	    window.innerHeight / -5,		// Left
-		window.innerHeight / 5,		// Right
-    	window.innerHeight / 5,		// Top
-    	window.innerHeight / -5,	// Bottom
-    	-5000,            			// Near 
-    	10000 );           			// Far 
+	    window.innerHeight / -5,						// Left
+		window.innerHeight / 5,							// Right
+    	window.innerHeight / 5,							// Top
+    	window.innerHeight / -5,						// Bottom
+    	-1 * ATMOSPHERE_HEIGHT + 0.001,					// Near 
+    	10000 );           								// Far 
 	minimapCamera.up = new THREE.Vector3(0,0,-1);
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
-	player.add(minimapCamera);
+
+	scene.add(minimapCamera);
 
 
 
@@ -116,7 +117,8 @@ function createWorld() {
 	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
-	
+	scene.add(worldMap.atmosphere);	
+
 	//add buildings to scene
 	worldMap.createBuildings(1/4); //map-buildings ratio is 1/4
 	for (var i = 0; i < worldMap.buildings.length; i++){
@@ -316,8 +318,12 @@ function updateForFrame() {
     player.translateZ(alpha.getSpeedZ());	
 
     //Move player up or down by their Y velocity
-	player.translateY(alpha.getSpeedY());	
-	
+	player.translateY(alpha.getSpeedY());
+
+	// move minimap camera on x,z axis according to player
+	// minimap height stays constant right and captures from right bellow the atmosphere
+	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);	
+
 	// Put player on floor if they aren't already on it.
 	// TODO:Might need to update this for dying
 	put_on_floor();
