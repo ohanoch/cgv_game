@@ -7,7 +7,7 @@ class Map {
 		this.width = width; // x axis
 		this.atmosphereHeight = atmosphereHeight; // y axis
 		this.depth = depth; // z axis
-		this.buildings = [];
+		this.buildings = []; // array of buildings
 
 		var textureLoader = new THREE.TextureLoader();
 		//-------------------------------------- FLOOR -------------------------------------------------

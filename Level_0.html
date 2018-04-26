@@ -283,6 +283,44 @@ function put_on_floor() {
 	}	
 }
 
+
+
+/*//////////////////////////////////////////////////////////////////////////
+Collisions!
+///////////////////////////////////////////////////////////////////////////*/
+
+//This must be called in updateFrame
+// credit to Lee Stemkoski for his tutorial
+// insert link to page
+
+// function appendText(txt)
+// {   document.getElementById('message').innerHTML += txt;   }
+
+//make sure you can access alpha.geometry
+// make sure you can access worldMap
+function  collissions() {
+	var originPoint = player.position.clone();	// players position
+
+	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++)
+		{		
+			var localVertex = alpha.geometry.vertices[vertexIndex].clone();
+			var globalVertex = localVertex.applyMatrix4( alpha.matrix );
+			var directionVector = globalVertex.sub( alpha.position );
+			
+			var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+			var collisionResults = ray.intersectObjects( worldMap.buildings );
+			if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) 
+				appendText(" Hit ");
+		}	
+
+}
+
+
+
+
+
+
+
 ///////////////////////////////////\				  //////////////////////////////
 //================================== end sub routines =============================
 ///////////////////////////////////////////////////////////////////////////////////
@@ -322,6 +360,9 @@ function updateForFrame() {
 	// Summon keyboard control lookups in one line.
 	key_check(); 		
 
+
+	//Collision
+	collissions();
 }
 
 
