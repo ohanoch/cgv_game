@@ -142,15 +142,15 @@ function createWorld() {
 	loader.load("models/stork.js", model_loader);		// load model and call model_loader
 	
 	var gun = new Powerup("gun");	// add a gun powerup
-	gun.position.set(3,3,3);
+	gun.position.set(3,1,3);
 	powerups.push(gun);
 
 	var inv = new Powerup("invisible");	// add invisibility powerup
-	inv.position.set(10,3,10);
+	inv.position.set(10,1,10);
 	powerups.push(inv);
 
 	var grav = new Powerup("gravity");	// add a gravity powerup
-	grav.position.set(-10,3,12);
+	grav.position.set(-10,1,12);
 	powerups.push(grav);
 
 	for(var i = 0; i < powerups.length; i++){
@@ -161,7 +161,7 @@ function createWorld() {
 		new THREE.CylinderGeometry(1,0.5,1,32),
 		new THREE.MeshPhongMaterial({color: 0xff00ff})
 	);
-	collectible0.position.set(-3,3,3);
+	collectible0.position.set(-3,1,3);
 	collectibles.push(collectible0);
 	
 	var collectible1 = new Collectible(
@@ -408,20 +408,21 @@ function  collissions() {
 			//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
 			if (PowerupsCollisionResults.length > 0 && PowerupsCollisionResults[0].distance < directionVector.length()){
 				//Check what type of powerup it was
-				if(PowerupsCollisionResults[0].object.type == "gun"){
+				if(PowerupsCollisionResults[0].object.type == powerupTypes["gun"]){
 					console.log("Gun"); //TODO: update alpha stats
-				}else if(PowerupsCollisionResults[0].object.type == "invisible"){
+				}else if(PowerupsCollisionResults[0].object.type == powerupTypes["invisible"]){
 					console.log("Invisible"); //TODO: update alpha stats
-
-				}else if(PowerupsCollisionResults[0].object.type == "gravity"){
+				}else if(PowerupsCollisionResults[0].object.type == powerupTypes["gravity"]){
 					console.log("Gravity"); //TODO: update alpha stats
-
 				}
+				
+				powerups.splice(powerups.indexOf (PowerupsCollisionResults[0].object), 1 );
+				scene.remove(PowerupsCollisionResults[0].object);
 			}
 			
 			if ( CollectibleCollisionResults.length > 0 && CollectibleCollisionResults[0].distance < directionVector.length() ){ 
-				console.log("collectible");
-				collectibles.splice(CollectibleCollisionResults[0].object);
+				console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
+				collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
 				scene.remove(CollectibleCollisionResults[0].object);
 			}
 
