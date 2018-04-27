@@ -13,18 +13,18 @@ class Powerup extends THREE.Mesh{
 
 	constructor(type) {
 		super(
-			new THREE.SphereGeometry( 2, 32, 32 ),
+			new THREE.SphereGeometry( 4, 32, 32 ),
 			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0xaa00bb, transparent: true} )
 		);
 
-		this.expiration = 15;
+		this.expiration = 300;
 		this.type = powerupTypes[type];
 
 		if(this.type == 0){	//gun type
 		//load model here	
 			this.add(
 				new THREE.Mesh(
-					new THREE.TorusKnotGeometry( 1, 0.1, 100, 16 ),
+					new THREE.TorusKnotGeometry( 2, 0.1, 100, 16, 4, 13 ),
 					new THREE.MeshBasicMaterial( { color: 0xff0000 } )
 				)
 			);
@@ -33,7 +33,7 @@ class Powerup extends THREE.Mesh{
 		//load model here
 			this.add(
 				new THREE.Mesh(
-					new THREE.TorusKnotGeometry( 1, 0.1, 100, 16 ),
+					new THREE.TorusKnotGeometry( 2, 0.1, 100, 16, 4, 13 ),
 					new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
 				)
 			);
@@ -41,7 +41,7 @@ class Powerup extends THREE.Mesh{
 		//load model
 			this.add(
 					new THREE.Mesh(
-						new THREE.TorusKnotGeometry( 1, 0.1, 100, 16 ),
+						new THREE.TorusKnotGeometry( 2, 0.1, 100, 16, 4, 13 ),
 						new THREE.MeshBasicMaterial( { color: 0x0000ff } )
 					)
 			);
@@ -49,6 +49,28 @@ class Powerup extends THREE.Mesh{
 
 		console.log("");
 		
+	}
+	
+	getExpiration() {
+		return this.expiration;
+	}
+	
+	activatePower( ) {
+	// test powerup. make your own!
+	
+		if (this.type == powerupTypes["gravity"] ) {
+			alpha.setMinSpeedY(0);
+		}
+	}
+	
+	deactivatePower() {
+		if(this.type == powerupTypes["gravity"]) {
+			alpha.setMinSpeedY(-1000);
+		}
+	}
+	
+	decrementExpiration() {
+		this.expiration--;
 	}
 	
 	animate() {
