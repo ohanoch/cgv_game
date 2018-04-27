@@ -9,6 +9,7 @@
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
 <script src="src\powerup.js"></script>
+<script src="src\collectible.js"></script>
 
 <script>
 
@@ -42,7 +43,9 @@ var resetCameraFlag = false //flag to reset the camera position to original posi
 var jumping = false;
 
 var alpha;
-var powerups = [];
+var powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
+var collectibles = [];			// the items that the player needs to collect in order to progress to the next level
+//var collectiblesLeft = 0;			// the number of collectibles left to collect. when this reaches zero, go to next level
 var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
@@ -134,6 +137,15 @@ function createWorld() {
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
 	} 
+	
+	var collectible0 = new Collectible(
+		new THREE.CylinderGeometry(1,0.5,1,32),
+		new THREE.MeshPhongMaterial({color: 0xff00ff})
+	);
+	collectible0.position.set(-3,3,3);
+	collectibles.push(collectible0);
+	//collectiblesLeft += 1;
+	scene.add(collectible0);
 
 } // end function createWorld()
 
@@ -329,6 +341,10 @@ function updateForFrame() {
 	for(var i = 0; i < powerups.length; i++){
 		powerups[i].animate();
 	} 
+	
+	for(var j = 0; j < collectibles.length; j++) {
+		collectibles[j].animate();
+	}
 
 	// update model animation
 	if(mixer) {
