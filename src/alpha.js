@@ -25,9 +25,10 @@ class Alpha extends THREE.Mesh{
 		this.maxSpeedZ = -0.5;
 		this.minSpeedZ = -0.01;
 		
-		this.lives = 3;
+		this.lives = 3; //TODO: make a cat that gives you 9 lives
 		this.radius = radius;
 		
+		this.geometry = geometry;	// save geometry of model so that it can be accessed later by collision fn.
 		console.log("Alpha created");
 		
 	}

@@ -41,12 +41,17 @@ var keys = []; //records current keys being pressed
 
 var resetCameraFlag = false //flag to reset the camera position to original position
 
-//whether player is jumping or not
-var jumping = false;
+var jumping = false;	//whether player is jumping or not
 
-var alpha;
+var alpha;	// player stats tracking + model  object
 
-var powerups = [];
+var gameOver = false; //updates to true when lives == 0
+
+var worldMap; // make global so it can be accessed by collision function
+
+var powerups = [];	
+
+var collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
 
 var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 
@@ -98,7 +103,7 @@ function createWorld() {
     
 	//---------------------- Minimap ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(
-	    window.innerHeight / -5,		// Left
+	    window.innerHeight / -5,	// Left
 		window.innerHeight / 5,		// Right
     	window.innerHeight / 5,		// Top
     	window.innerHeight / -5,	// Bottom
@@ -113,7 +118,7 @@ function createWorld() {
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
-	var worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
 	
@@ -141,32 +146,7 @@ function createWorld() {
 } // end function createWorld()
 
 
-function model_loader(geometry, materials) {
 
-	var material = new THREE.MeshLambertMaterial( {
-        vertexColors: THREE.FaceColors,  	// use colors from the geometry
-        morphTargets: true							// for animation
-    });
-	
-	alpha = new Alpha(geometry,material, 1);	// create alpha object
-	
-// TRANSFORMS
-
-	alpha.scale.set(0.05,0.05,0.05);
-	alpha.position.set(0,-2,0);
-	alpha.rotateY(Math.PI);
-	
-	player.add(alpha);				// add alpha to player
-	
-// ANIMATION STUFF
-	
-	mixer = new THREE.AnimationMixer( alpha );
-	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
-    var animationAction = mixer.clipAction(clip);
-    animationAction.setDuration(1);
-    animationAction.play(); 
-	render();
-}
 
 /*<<<<<<<<<<<<<<<<<<<<<< C U S T O M 	S U B   R O U T I N E S >>>>>>>>>>>>>>>>>>>>>>>>>>>
 			                                 |_
@@ -277,8 +257,8 @@ function keysPressed(e) {
 	}
     // store an entry for every key pressed
     keys[e.keyCode] = true;
-        // NB: prevent default browser behavior
-        e.preventDefault();
+        // NB: prevent default browser behavior - disable during testing
+        //e.preventDefault();
 }
 
 function keysReleased(e) {
@@ -305,6 +285,60 @@ function put_on_floor() {
 
 
 /*//////////////////////////////////////////////////////////////////////////
+Model Loader
+///////////////////////////////////////////////////////////////////////////*/
+
+function model_loader(geometry, materials) {
+
+	var material = new THREE.MeshLambertMaterial( {
+        vertexColors: THREE.FaceColors,  	// use colors from the geometry
+        morphTargets: true							// for animation
+    });
+	
+	alpha = new Alpha(geometry,material, 1);	// create alpha object
+	
+// TRANSFORMS
+
+	alpha.scale.set(0.05,0.05,0.05);
+	alpha.position.set(0,-2,0);
+	alpha.rotateY(Math.PI);
+	
+	player.add(alpha);				// add alpha to player
+	
+// ANIMATION STUFF
+	
+	mixer = new THREE.AnimationMixer( alpha );
+	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
+    var animationAction = mixer.clipAction(clip);
+    animationAction.setDuration(1);
+    animationAction.play(); 
+	render();
+}
+
+
+
+
+/*//////////////////////////////////////////////////////////////////////////
+Crash: Explosion, respawn from crash site, decrement lives, game over
+///////////////////////////////////////////////////////////////////////////*/
+function Crash() {
+	// Update Alpha stats
+	alpha.lives -= 1;
+	// if no more lives, game over
+	if (alpha.lives == 0){
+		gameOver = true;
+		//do other stuff
+	}else{
+	// TODO : Crash animation, respawn
+	animating = false;
+	// respawning:
+	// player.position = legal position
+	// 
+	}
+
+}
+
+/*//////////////////////////////////////////////////////////////////////////
 Collisions!
 ///////////////////////////////////////////////////////////////////////////*/
 
@@ -327,9 +361,24 @@ function  collissions() {
 			var directionVector = globalVertex.sub( alpha.position );
 			
 			var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-			var collisionResults = ray.intersectObjects( worldMap.buildings );
-			if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) 
-				appendText(" Hit ");
+			
+			// Check building collisions
+			var BuildingcollisionResults = ray.intersectObjects( worldMap.buildings );
+			
+			// Check Powerup 0 collisions
+				// TODO
+
+			// Check Powerup 1 collisions
+				// TODO
+
+			// Check Powerup 2 collisions
+				// TODO
+
+			if ( BuildingcollisionResults.length > 0 && BuildingcollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
+				Crash();
+			}
+			//TODO: if powerup 0,1,2 do stuff to alpha.stats etc
+
 		}	
 
 }
@@ -382,6 +431,8 @@ function updateForFrame() {
 
 	//Collision
 	collissions();
+
+	
 }
 
 
