@@ -376,7 +376,6 @@ function  collissions() {
 			var BuildingcollisionResults = ray.intersectObjects( worldMap.buildings );
 			
 			// Check Powerups[] collisions
-				// TODO
 			var PowerupscollisionResults = ray.intersectObjects(powerups);
 
 			if ( BuildingcollisionResults.length > 0 && BuildingcollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
@@ -389,8 +388,7 @@ function  collissions() {
 				if(PowerupscollisionResults[0].type == "gun"){
 					console.log("Gun"); //TODO: update alpha stats
 				}else if(PowerupscollisionResults[0].type == "invisible"){
-					console.log("Invisible"); //TODO: update alpha stats
-
+					console.log("Invisible"); //TODO: update alpha stat
 				}else if(PowerupscollisionResults[0].type == "gravity"){
 					console.log("Gravity"); //TODO: update alpha stats
 
