@@ -386,12 +386,11 @@ function  collissions() {
 			//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
 			if (PowerupscollisionResults.length > 0 && PowerupscollisionResults[0].distance < directionVector.length()){
 				//Check what type of powerup it was
-				if(PowerupscollisionResults[0].type == "gun"){
+				if(PowerupscollisionResults[0].object.type == powerupTypes["gun"]){
 					console.log("Gun"); //TODO: update alpha stats
-				}else if(PowerupscollisionResults[0].type == "invisible"){
+				}else if(PowerupscollisionResults[0].object.type == powerupTypes["invisible"]){
 					console.log("Invisible"); //TODO: update alpha stats
-
-				}else if(PowerupscollisionResults[0].type == "gravity"){
+				}else if(PowerupscollisionResults[0].object.type == powerupTypes["gravity"]){
 					console.log("Gravity"); //TODO: update alpha stats
 
 				}
