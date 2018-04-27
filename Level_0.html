@@ -57,6 +57,8 @@ var mixer = null;  // The object that animates the model, of type THREE.Animatio
 
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
 
+var worldMap;
+
 /**
  *  The render function draws the scene.
  */
@@ -103,15 +105,16 @@ function createWorld() {
     
 	//---------------------- Minimap ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(
-	    window.innerHeight / -5,	// Left
-		window.innerHeight / 5,		// Right
-    	window.innerHeight / 5,		// Top
-    	window.innerHeight / -5,	// Bottom
-    	-5000,            			// Near 
-    	10000 );           			// Far 
+	    window.innerHeight / -5,						// Left
+		window.innerHeight / 5,							// Right
+    	window.innerHeight / 5,							// Top
+    	window.innerHeight / -5,						// Bottom
+    	-1 * ATMOSPHERE_HEIGHT + 0.001,					// Near 
+    	10000 );           								// Far 
 	minimapCamera.up = new THREE.Vector3(0,0,-1);
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
-	player.add(minimapCamera);
+
+	scene.add(minimapCamera);
 
 
 
@@ -121,7 +124,8 @@ function createWorld() {
 	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
-	
+	scene.add(worldMap.atmosphere);	
+
 	//add buildings to scene
 	worldMap.createBuildings(1/4); //map-buildings ratio is 1/4
 	for (var i = 0; i < worldMap.buildings.length; i++){
@@ -135,10 +139,19 @@ function createWorld() {
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 	loader.load("models/stork.js", model_loader);		// load model and call model_loader
 	
-	var gun = new Powerup("gun");
+	var gun = new Powerup("gun");	// add a gun powerup
 	gun.position.set(3,3,3);
 	powerups.push(gun);
 	
+
+	var inv = new Powerup("invisible");	// add invisibility powerup
+	inv.position.set(10,3,10);
+	powerups.push(inv);
+
+	var grav = new Powerup("gravity");	// add a gravity powerup
+	grav.position.set(-10,3,12);
+	powerups.push(grav);
+
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
 	} 
@@ -327,6 +340,7 @@ function Crash() {
 	// if no more lives, game over
 	if (alpha.lives == 0){
 		gameOver = true;
+		window.alert("G A M E    O V E R");
 		//do other stuff
 	}else{
 	// TODO : Crash animation, respawn
@@ -346,11 +360,7 @@ Collisions!
 // credit to Lee Stemkoski for his tutorial
 // insert link to page
 
-// function appendText(txt)
-// {   document.getElementById('message').innerHTML += txt;   }
 
-//make sure you can access alpha.geometry
-// make sure you can access worldMap
 function  collissions() {
 	var originPoint = player.position.clone();	// players position
 
@@ -365,23 +375,31 @@ function  collissions() {
 			// Check building collisions
 			var BuildingcollisionResults = ray.intersectObjects( worldMap.buildings );
 			
-			// Check Powerup 0 collisions
+			// Check Powerups[] collisions
 				// TODO
-
-			// Check Powerup 1 collisions
-				// TODO
-
-			// Check Powerup 2 collisions
-				// TODO
+			var PowerupscollisionResults = ray.intersectObjects(powerups);
 
 			if ( BuildingcollisionResults.length > 0 && BuildingcollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
+				console.log("hit");
 				Crash();
 			}
-			//TODO: if powerup 0,1,2 do stuff to alpha.stats etc
+			//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
+			if (PowerupscollisionResults.length > 0 && PowerupscollisionResults[0].distance < directionVector.length()){
+				//Check what type of powerup it was
+				if(PowerupscollisionResults[0].type == "gun"){
+					console.log("Gun"); //TODO: update alpha stats
+				}else if(PowerupscollisionResults[0].type == "invisible"){
+					console.log("Invisible"); //TODO: update alpha stats
 
-		}	
+				}else if(PowerupscollisionResults[0].type == "gravity"){
+					console.log("Gravity"); //TODO: update alpha stats
 
-}
+				}
+			}
+
+		}// end for loop	
+
+} // end collision function
 
 
 
@@ -403,8 +421,12 @@ function updateForFrame() {
     player.translateZ(alpha.getSpeedZ());	
 
     //Move player up or down by their Y velocity
-	player.translateY(alpha.getSpeedY());	
-	
+	player.translateY(alpha.getSpeedY());
+
+	// move minimap camera on x,z axis according to player
+	// minimap height stays constant right and captures from right bellow the atmosphere
+	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);	
+
 	// Put player on floor if they aren't already on it.
 	// TODO:Might need to update this for dying
 	put_on_floor();
@@ -419,9 +441,14 @@ function updateForFrame() {
 		powerups[i].animate();
 	} 
 
-	
+	// update model animation
 	if(mixer) {
-		mixer.update(0.02);			// update model animation
+		mixer.update(0.02);
+	}
+
+	// camera can't got below floor
+	if(camera.position.y < worldMap.floorHeight + 1.1){
+		camera.position.y = worldMap.floorHeight + 1.1;
 	}
 	
 
@@ -453,7 +480,6 @@ function installOrbitControls() {
     controls.noPan = true; 
     controls.noZoom = true;
     controls.staticMoving = true;
-//controls.enableDamping = true;
     function move() {
         controls.update();
         if (! animating) {

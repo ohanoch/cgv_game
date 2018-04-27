@@ -6,7 +6,7 @@
 // model
 // animation
 // type
-var powerupTypes = {gun: 0, invinsible: 1, gravity: 2};  
+var powerupTypes = {gun: 0, invisible: 1, gravity: 2};  
 
 class Powerup extends THREE.Mesh{
 

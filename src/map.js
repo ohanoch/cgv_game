@@ -9,6 +9,21 @@ class Map {
 		this.depth = depth; // z axis
 		this.buildings = []; // array of buildings
 
+		//------------------------------------- Atmosphere --------------------------------------------
+		this.atmosphere = new THREE.Mesh(
+				new THREE.PlaneGeometry(this.width, this.depth,100,100),
+				new THREE.MeshBasicMaterial({ 
+					side: THREE.DoubleSide, 
+					wireframe: true, 
+					wireframeLinewidth: 2,
+					opacity: 0.4, 
+					color: 0xcc0000, 
+					transparent: true,
+				})
+			);
+		this.atmosphere.position.set(0,this.atmosphereHeight,0);
+		this.atmosphere.rotation.x = -Math.PI / 2;
+
 		var textureLoader = new THREE.TextureLoader();
 		//-------------------------------------- FLOOR -------------------------------------------------
 		if(floorTextureURL != ""){
@@ -19,7 +34,8 @@ class Map {
 				new THREE.PlaneGeometry(this.width, this.depth,1,1),
 				new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide })
 			);
-			this.floor.position.set(0,-4,0);
+			this.floorHeight = -4;
+			this.floor.position.set(0,this.floorHeight,0);
 			this.floor.rotation.x = -Math.PI / 2;
 
 			console.log("Floor texture added to map");
@@ -50,7 +66,7 @@ class Map {
 		}
 
 		console.log("Map Created");
-		
+	
 	}
 
 	/**
