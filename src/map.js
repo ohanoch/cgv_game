@@ -7,7 +7,22 @@ class Map {
 		this.width = width; // x axis
 		this.atmosphereHeight = atmosphereHeight; // y axis
 		this.depth = depth; // z axis
-		this.buildings = [];
+		this.buildings = []; // array of buildings
+
+		//------------------------------------- Atmosphere --------------------------------------------
+		this.atmosphere = new THREE.Mesh(
+				new THREE.PlaneGeometry(this.width, this.depth,100,100),
+				new THREE.MeshBasicMaterial({ 
+					side: THREE.DoubleSide, 
+					wireframe: true, 
+					wireframeLinewidth: 2,
+					opacity: 0.4, 
+					color: 0xcc0000, 
+					transparent: true,
+				})
+			);
+		this.atmosphere.position.set(0,this.atmosphereHeight,0);
+		this.atmosphere.rotation.x = -Math.PI / 2;
 
 		var textureLoader = new THREE.TextureLoader();
 		//-------------------------------------- FLOOR -------------------------------------------------
@@ -51,7 +66,7 @@ class Map {
 		}
 
 		console.log("Map Created");
-		
+	
 	}
 
 	/**

@@ -39,8 +39,17 @@ var keys = []; //records current keys being pressed
 
 var resetCameraFlag = false //flag to reset the camera position to original position
 
-//whether player is jumping or not
-var jumping = false;
+var jumping = false;	//whether player is jumping or not
+
+var alpha;	// player stats tracking + model  object
+
+var gameOver = false; //updates to true when lives == 0
+
+var worldMap; // make global so it can be accessed by collision function
+
+var powerups = [];	
+
+var collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
 
 var alpha;
 var powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
@@ -98,15 +107,16 @@ function createWorld() {
     
 	//---------------------- Minimap ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(
-	    window.innerHeight / -5,		// Left
-		window.innerHeight / 5,		// Right
-    	window.innerHeight / 5,		// Top
-    	window.innerHeight / -5,	// Bottom
-    	-5000,            			// Near 
-    	10000 );           			// Far 
+	    window.innerHeight / -5,						// Left
+		window.innerHeight / 5,							// Right
+    	window.innerHeight / 5,							// Top
+    	window.innerHeight / -5,						// Bottom
+    	-1 * ATMOSPHERE_HEIGHT + 0.001,					// Near 
+    	10000 );           								// Far 
 	minimapCamera.up = new THREE.Vector3(0,0,-1);
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
-	player.add(minimapCamera);
+
+	scene.add(minimapCamera);
 
 
 
@@ -116,7 +126,8 @@ function createWorld() {
 	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.add(worldMap.skybox);
-	
+	scene.add(worldMap.atmosphere);	
+
 	//add buildings to scene
 	worldMap.createBuildings(1/4); //map-buildings ratio is 1/4
 	for (var i = 0; i < worldMap.buildings.length; i++){
@@ -130,10 +141,18 @@ function createWorld() {
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 	loader.load("models/stork.js", model_loader);		// load model and call model_loader
 	
-	var gun = new Powerup("gun");
+	var gun = new Powerup("gun");	// add a gun powerup
 	gun.position.set(3,3,3);
 	powerups.push(gun);
-	
+
+	var inv = new Powerup("invisible");	// add invisibility powerup
+	inv.position.set(10,3,10);
+	powerups.push(inv);
+
+	var grav = new Powerup("gravity");	// add a gravity powerup
+	grav.position.set(-10,3,12);
+	powerups.push(grav);
+
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
 	} 
@@ -144,38 +163,22 @@ function createWorld() {
 	);
 	collectible0.position.set(-3,3,3);
 	collectibles.push(collectible0);
-	//collectiblesLeft += 1;
-	scene.add(collectible0);
+	
+	var collectible1 = new Collectible(
+		new THREE.CylinderGeometry(1,0.5,1,32),
+		new THREE.MeshPhongMaterial({color: 0x00ffff})
+	);
+	collectible1.position.set(4,1,-4);
+	collectibles.push(collectible1);
+	
+	for (var j = 0; j < collectibles.length; j++) {
+		scene.add(collectibles[j]);
+	}
 
 } // end function createWorld()
 
 
-function model_loader(geometry, materials) {
 
-	var material = new THREE.MeshLambertMaterial( {
-        vertexColors: THREE.FaceColors,  	// use colors from the geometry
-        morphTargets: true							// for animation
-    });
-	
-	alpha = new Alpha(geometry,material, 1);	// create alpha object
-	
-// TRANSFORMS
-
-	alpha.scale.set(0.05,0.05,0.05);
-	alpha.position.set(0,-2,0);
-	alpha.rotateY(Math.PI);
-	
-	player.add(alpha);				// add alpha to player
-	
-// ANIMATION STUFF
-	
-	mixer = new THREE.AnimationMixer( alpha );
-	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
-    var animationAction = mixer.clipAction(clip);
-    animationAction.setDuration(1);
-    animationAction.play(); 
-	render();
-}
 
 /*<<<<<<<<<<<<<<<<<<<<<< C U S T O M 	S U B   R O U T I N E S >>>>>>>>>>>>>>>>>>>>>>>>>>>
 			                                 |_
@@ -287,8 +290,8 @@ function keysPressed(e) {
 	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
-        // NB: prevent default browser behavior
-        e.preventDefault();
+        // NB: prevent default browser behavior - disable during testing
+        //e.preventDefault();
 }
 
 function keysReleased(e) {
@@ -312,6 +315,126 @@ function put_on_floor() {
 	}	
 }
 
+
+
+/*//////////////////////////////////////////////////////////////////////////
+Model Loader
+///////////////////////////////////////////////////////////////////////////*/
+
+function model_loader(geometry, materials) {
+
+	var material = new THREE.MeshLambertMaterial( {
+        vertexColors: THREE.FaceColors,  	// use colors from the geometry
+        morphTargets: true							// for animation
+    });
+	
+	alpha = new Alpha(geometry,material, 1);	// create alpha object
+	
+// TRANSFORMS
+
+	alpha.scale.set(0.05,0.05,0.05);
+	alpha.position.set(0,-2,0);
+	alpha.rotateY(Math.PI);
+	
+	player.add(alpha);				// add alpha to player
+	
+// ANIMATION STUFF
+	
+	mixer = new THREE.AnimationMixer( alpha );
+	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
+    var animationAction = mixer.clipAction(clip);
+    animationAction.setDuration(1);
+    animationAction.play(); 
+	render();
+}
+
+
+
+
+/*//////////////////////////////////////////////////////////////////////////
+Crash: Explosion, respawn from crash site, decrement lives, game over
+///////////////////////////////////////////////////////////////////////////*/
+function Crash() {
+	// Update Alpha stats
+	alpha.lives -= 1;
+	// if no more lives, game over
+	if (alpha.lives == 0){
+		gameOver = true;
+		window.alert("G A M E    O V E R");
+		//do other stuff
+	}else{
+	// TODO : Crash animation, respawn
+		animating = false;
+	// respawning:
+	// player.position = legal position
+	// 
+	}
+
+}
+
+/*//////////////////////////////////////////////////////////////////////////
+Collisions!
+///////////////////////////////////////////////////////////////////////////*/
+
+//This must be called in updateFrame
+// credit to Lee Stemkoski for his tutorial
+// insert link to page
+
+
+function  collissions() {
+	var originPoint = player.position.clone();	// players position
+
+	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++)
+		{		
+			var localVertex = alpha.geometry.vertices[vertexIndex].clone();
+			var globalVertex = localVertex.applyMatrix4( alpha.matrix );
+			var directionVector = globalVertex.sub( alpha.position );
+			
+			var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+			
+			// Check building collisions
+			var BuildingCollisionResults = ray.intersectObjects( worldMap.buildings );
+			
+			// Check Powerups[] collisions
+				// TODO
+			var PowerupsCollisionResults = ray.intersectObjects(powerups);
+			
+			var CollectibleCollisionResults = ray.intersectObjects(collectibles);
+
+			if ( BuildingCollisionResults.length > 0 && BuildingCollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
+				console.log("hit");
+				Crash();
+			}
+			//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
+			if (PowerupsCollisionResults.length > 0 && PowerupsCollisionResults[0].distance < directionVector.length()){
+				//Check what type of powerup it was
+				if(PowerupsCollisionResults[0].object.type == "gun"){
+					console.log("Gun"); //TODO: update alpha stats
+				}else if(PowerupsCollisionResults[0].object.type == "invisible"){
+					console.log("Invisible"); //TODO: update alpha stats
+
+				}else if(PowerupsCollisionResults[0].object.type == "gravity"){
+					console.log("Gravity"); //TODO: update alpha stats
+
+				}
+			}
+			
+			if ( CollectibleCollisionResults.length > 0 && CollectibleCollisionResults[0].distance < directionVector.length() ){ 
+				console.log("collectible");
+				collectibles.splice(CollectibleCollisionResults[0].object);
+				scene.remove(CollectibleCollisionResults[0].object);
+			}
+
+		}// end for loop	
+
+} // end collision function
+
+
+
+
+
+
+
 ///////////////////////////////////\				  //////////////////////////////
 //================================== end sub routines =============================
 ///////////////////////////////////////////////////////////////////////////////////
@@ -326,8 +449,12 @@ function updateForFrame() {
     player.translateZ(alpha.getSpeedZ());	
 
     //Move player up or down by their Y velocity
-	player.translateY(alpha.getSpeedY());	
-	
+	player.translateY(alpha.getSpeedY());
+
+	// move minimap camera on x,z axis according to player
+	// minimap height stays constant right and captures from right bellow the atmosphere
+	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);	
+
 	// Put player on floor if they aren't already on it.
 	// TODO:Might need to update this for dying
 	put_on_floor();
@@ -360,6 +487,11 @@ function updateForFrame() {
 	// Summon keyboard control lookups in one line.
 	key_check(); 		
 
+
+	//Collision
+	collissions();
+
+	
 }
 
 
