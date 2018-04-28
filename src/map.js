@@ -75,38 +75,98 @@ class Map {
 	 * Output = None - the worldMap global variable will be edited inside the function
 	 */
 	createBuildings(ratio) {
-		var buildingMapRatio = Math.pow(WORLD_DEPTH*WORLD_WIDTH, ratio);
+		var buildingMapRatio = WORLD_DEPTH*WORLD_WIDTH / ratio;
+		var materialLoader = new THREE.MTLLoader();
+		
+		
 		for(var i = 1;
 			i < 2 /*buildingMapRatio * 2*/;
 			i++){
-		/**			console.log("loading toilet 1111111111111111111111111111111111");
-				var loader = new THREE.ObjectLoader();
-					console.log("loading toilet 2222222222222222222222222222222222");
-	            loader.load( '/home/ash/Documents/cgv_game/models/tiefighter.json',
-					function ( object ) {
-						console.log("loading toilet 3333333333333333333333333333333333");
-						var resizeNum = Math.random() * buildingMapRatio;
-						object.scale.set(2,2,2);
+
+						console.log("111111111111111")
+				materialLoader.load( 'models/mill/mill.mtl' ,
+					function(materials){
+						console.log("222222222222222")
+						materials.preload();
+						
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);				
+						console.log("33333333333")
+						objLoader.load( 'models/mill/mill.obj',
+							function ( object ) {
+							/**	object.traverse( function ( child ) {
+										console.log("111111111111")
+									if ( child instanceof THREE.Mesh ) {
+										console.log("222222222222222")
+										child.material.map = texture;
+									}
+								} );*/
+
+								var resizeNum = 0.08//Math.random() * buildingMapRatio;
+								object.scale.set(
+									resizeNum, //width
+									resizeNum, //height
+									resizeNum  //depth
+								);
+								console.log("55555555555555555")
+								scene.add( object );
+							}
+						);
+					}
+				);
+
+			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//	var loader = new THREE.ObjectLoader(manager);
+	//	for(var i = 1;
+	//		i < 2 /*buildingMapRatio * 2*/;
+	//		i++){
+	//				console.log("loading toilet 1111111111111111111111111111111111");
+	//				console.log("loading toilet 2222222222222222222222222222222222");
+	 //           loader.load( 'mill.obj',
+	//				function ( object ) {
+	//					console.log("loading toilet 3333333333333333333333333333333333");
+	//					var resizeNum = Math.random() * buildingMapRatio;
+	//					object.scale.set(2,2,2);
 					//		resizeNum, //width
 					//		resizeNum, //height
 					//		resizeNum //depth
 					//	);
-						object.position.set(
-							Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2,
-							Math.random() * worldMap.atmosphereHeight,
-							Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2
-						);
-						console.log("444444444444444444444444444444");
+					//	object.position.set(
+					//		Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2,
+					//		Math.random() * worldMap.atmosphereHeight,
+					//		Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2
+					//	);
+	//					console.log("444444444444444444444444444444");
 						//object.position.set(3,3,3);
-						worldMap.buildings.push( object );
-						scene.add(object);
-					}, 
-			 		function (){console.log("loading building in progress...")}, 
-					function(e){
-					alert("JSONLoader failed! because of error " + e.target.status + ", " + e.target.statusText);
-					}
-				);*/
-
+	//					worldMap.buildings.push( object );
+	//					scene.add(object);
+	//				} 
+	//			);
+/**
 				var building = new THREE.Mesh(
 					new THREE.BoxGeometry(
 						Math.random() * buildingMapRatio + 1, //width
@@ -120,8 +180,8 @@ class Map {
 				building.translateY(Math.random() * (this.atmosphereHeight - building.geometry.parameters.height) + building.geometry.parameters.height / 2);
 				building.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_DEPTH / 2);
 				this.buildings.push(building);
-
-			}
+*/
+	//		}
 	}
 
 }
