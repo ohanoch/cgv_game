@@ -115,7 +115,12 @@ function createWorld() {
     
     // ------------------- Make a camera with viewpoint light ----------------------
     
-    camera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, Math.max(WORLD_WIDTH, WORLD_DEPTH));
+    camera = new THREE.PerspectiveCamera(
+		30, 
+		window.innerWidth/window.innerHeight, 
+		0.1, 
+		Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
+	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
     light = new THREE.DirectionalLight();
