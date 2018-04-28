@@ -57,8 +57,9 @@ class Map {
 				materialArray[i].side = THREE.BackSide;
 			}
 
+			var cubeSize = Math.max(this.width, this.atmosphereHeight, this.depth);
 			this.skybox = new THREE.Mesh(
-				new THREE.CubeGeometry( 5000, 5000, 5000, 1, 1, 1 ),
+				new THREE.CubeGeometry( cubeSize, cubeSize, cubeSize, 1, 1, 1 ),
 				materialArray
 			);
 
@@ -75,121 +76,54 @@ class Map {
 	 * Output = None - the worldMap global variable will be edited inside the function
 	 */
 	createBuildings(ratio) {
-		var buildingMapRatio = this.depth * this.width * ratio;
+		console.log("adding " + Math.pow(this.width*this.depth,ratio/1.3) + " buildings to map")
 		var materialLoader = new THREE.MTLLoader();
 		
-		
 		for(var i = 1;
-			i < 200; /*buildingMapRatio * 2; */
+			i < Math.pow(this.width*this.depth,ratio/1.3);
 			i++){
 
-				materialLoader.load( 'models/mill/mill.mtl' ,
-					function(materials){
-						materials.preload();
-						
-						var objLoader = new THREE.OBJLoader();
-						objLoader.setMaterials(materials);				
-						objLoader.load( 'models/mill/mill.obj',
-							function ( object ) {
+			materialLoader.load( 'models/mill/mill.mtl' ,
+				function(materials){
+					materials.preload();
+					
+					var objLoader = new THREE.OBJLoader();
+					objLoader.setMaterials(materials);				
+					objLoader.load( 'models/mill/mill.obj',
+						function ( object ) {
 
-								// get model geometry.
-								// Note modules from .obj files are of type GeometryBuffer
-								var objectGeo;
-								object.traverse( function ( child ) {
-									if ( child instanceof THREE.Mesh ) {
-										objectGeo = child.geometry;
-									}
-								} );
+							// get model geometry.
+							// Note modules from .obj files are of type GeometryBuffer
+							var objectGeo;
+							object.traverse( function ( child ) {
+								if ( child instanceof THREE.Mesh ) {
+									objectGeo = child.geometry;
+								}
+							} );
 
-								objectGeo.computeBoundingSphere();
+							objectGeo.computeBoundingSphere();
 
-								//resize loaded object with relation to its size (should app;y to any object)
-								var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random() * (buildingMapRatio / 700000.0)
-								object.scale.set(
-									resizeNum, //width
-									resizeNum, //height
-									resizeNum  //depth
-								);
+							console.log((1/objectGeo.boundingSphere.radius) * Math.random() * Math.pow(worldMap.width, ratio));
 
-								//put building on surface of world (may be a elevated)
-								object.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2); 
-								object.translateY(Math.random() * (worldMap.atmosphereHeight - objectGeo.boundingSphere.radius) + objectGeo.boundingSphere.radius / 2);
-								object.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2);
-								
-								worldMap.buildings.push( object );
-								scene.add( object );
-							}
-						);
-					}
-				);
+							//resize loaded object with relation to its size (should apply to any object)
+							var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random();
+							object.scale.set(
+								resizeNum * Math.pow(worldMap.width, ratio), //width
+								resizeNum * Math.pow(worldMap.atmosphereHeight, ratio), //width
+								resizeNum * Math.pow(worldMap.depth, ratio) //depth
+							);
 
-			}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//	var loader = new THREE.ObjectLoader(manager);
-	//	for(var i = 1;
-	//		i < 2 /*buildingMapRatio * 2*/;
-	//		i++){
-	//				console.log("loading toilet 1111111111111111111111111111111111");
-	//				console.log("loading toilet 2222222222222222222222222222222222");
-	 //           loader.load( 'mill.obj',
-	//				function ( object ) {
-	//					console.log("loading toilet 3333333333333333333333333333333333");
-	//					var resizeNum = Math.random() * buildingMapRatio;
-	//					object.scale.set(2,2,2);
-					//		resizeNum, //width
-					//		resizeNum, //height
-					//		resizeNum //depth
-					//	);
-					//	object.position.set(
-					//		Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2,
-					//		Math.random() * worldMap.atmosphereHeight,
-					//		Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2
-					//	);
-	//					console.log("444444444444444444444444444444");
-						//object.position.set(3,3,3);
-	//					worldMap.buildings.push( object );
-	//					scene.add(object);
-	//				} 
-	//			);
-/**
-				var building = new THREE.Mesh(
-					new THREE.BoxGeometry(
-						Math.random() * buildingMapRatio + 1, //width
-						Math.min(this.atmosphereHeight, Math.random() * buildingMapRatio + 1), //height
-						Math.random() * buildingMapRatio + 1 //depth
-					),
-					new THREE.MeshBasicMaterial( {color: Math.random() * 0xffffff} )
-				);
-				//put building on surface of world (may be a elevated)
-				building.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_WIDTH / 2); 
-				building.translateY(Math.random() * (this.atmosphereHeight - building.geometry.parameters.height) + building.geometry.parameters.height / 2);
-				building.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * WORLD_DEPTH / 2);
-				this.buildings.push(building);
-*/
-	//		}
+							//put building on surface of world (may be a elevated)
+							object.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2); 
+							object.translateY(Math.random() * (worldMap.atmosphereHeight - objectGeo.boundingSphere.radius + objectGeo.boundingSphere.radius / 2));
+							object.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2);
+							
+							worldMap.buildings.push( object );
+							scene.add( object );
+						}
+					);
+				}
+			);
+		}
 	}
-
 }
