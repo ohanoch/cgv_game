@@ -87,6 +87,23 @@ function render() {
 	renderer.render( scene, minimapCamera );
 }
 
+//make sure alpha doesn't spawn on an object
+var alphaDone = false;
+var mapDone = false;
+function alphaStartup(){
+	if(alphaDone && mapDone){
+		while(true){
+			collissions();
+			if(alpha.lives != 3){ 
+				console.log("spawned on building - relocating");
+				player.position.set(Math.random() * (worldMap.width / 2), 0, Math.random() * (worldMap.depth / 2));
+				alpha.lives = 3;
+			} else {
+				break;
+			} 
+		}
+	}
+}
 
 /**
  * This function is called by the init() method to create the world. 
@@ -131,7 +148,7 @@ function createWorld() {
 	scene.add(worldMap.atmosphere);	
 
 	//add buildings to scene
-	worldMap.createBuildings(1/2); //map-buildings ratio is 1/4
+	worldMap.createBuildings(0.5); //map-buildings ratio is 1/2
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
@@ -143,6 +160,8 @@ function createWorld() {
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 	loader.load("models/stork.js", model_loader);		// load model and call model_loader
 	
+
+
 	var gun = new Powerup("gun");	// add a gun powerup
 	gun.position.set(3,1,3);
 	powerups.push(gun);
@@ -337,9 +356,12 @@ function model_loader(geometry, materials) {
 	alpha.scale.set(0.05,0.05,0.05);
 	alpha.position.set(0,-2,0);
 	alpha.rotateY(Math.PI);
-	
+
 	player.add(alpha);				// add alpha to player
-	
+
+	alphaDone = true;
+	alphaStartup();	
+
 // ANIMATION STUFF
 	
 	mixer = new THREE.AnimationMixer( alpha );
@@ -385,7 +407,7 @@ Collisions!
 
 function  collissions() {
 	var originPoint = player.position.clone();	// players position
-	//console.log(worldMap.buildings)
+
 	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++)
 		{		
 			var localVertex = alpha.geometry.vertices[vertexIndex].clone();
@@ -402,10 +424,10 @@ function  collissions() {
 			var PowerupsCollisionResults = ray.intersectObjects(powerups);
 			
 			var CollectibleCollisionResults = ray.intersectObjects(collectibles);
-
 			if ( BuildingCollisionResults.length > 0 && BuildingCollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
 				console.log("hit");
 				Crash();
+				return;
 			}
 			//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
 			if (PowerupsCollisionResults.length > 0 && PowerupsCollisionResults[0].distance < directionVector.length()){

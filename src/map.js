@@ -93,6 +93,14 @@ class Map {
 		numPerModel.push(currNumBuildings);
 		console.log("split of building types " + numPerModel);
 
+		var numLoaded = 0;
+		function loadingDone(){
+			numLoaded++;
+			if (numLoaded == modelList.length){
+				mapDone = true;
+				alphaStartup();
+			}
+		}
 		//load models
 		var modelLoader = function(modelURL, numModels){
 			materialLoader.load(
@@ -135,6 +143,7 @@ class Map {
 								worldMap.buildings.push( currObject );
 								scene.add( currObject );
 							}
+							loadingDone();
 						}
 					);
 				}
@@ -144,5 +153,6 @@ class Map {
 		for (var i = 0; i < modelList.length; i++){
 			modelLoader(modelList[i], numPerModel[i]);
 		}
+
 	}
 }
