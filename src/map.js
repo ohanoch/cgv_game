@@ -75,40 +75,48 @@ class Map {
 	 * Output = None - the worldMap global variable will be edited inside the function
 	 */
 	createBuildings(ratio) {
-		var buildingMapRatio = WORLD_DEPTH*WORLD_WIDTH / ratio;
+		var buildingMapRatio = this.depth * this.width * ratio;
 		var materialLoader = new THREE.MTLLoader();
 		
 		
 		for(var i = 1;
-			i < 2 /*buildingMapRatio * 2*/;
+			i < 200; /*buildingMapRatio * 2; */
 			i++){
 
-						console.log("111111111111111")
 				materialLoader.load( 'models/mill/mill.mtl' ,
 					function(materials){
-						console.log("222222222222222")
 						materials.preload();
 						
 						var objLoader = new THREE.OBJLoader();
 						objLoader.setMaterials(materials);				
-						console.log("33333333333")
 						objLoader.load( 'models/mill/mill.obj',
 							function ( object ) {
-							/**	object.traverse( function ( child ) {
-										console.log("111111111111")
-									if ( child instanceof THREE.Mesh ) {
-										console.log("222222222222222")
-										child.material.map = texture;
-									}
-								} );*/
 
-								var resizeNum = 0.08//Math.random() * buildingMapRatio;
+								// get model geometry.
+								// Note modules from .obj files are of type GeometryBuffer
+								var objectGeo;
+								object.traverse( function ( child ) {
+									if ( child instanceof THREE.Mesh ) {
+										objectGeo = child.geometry;
+									}
+								} );
+
+								objectGeo.computeBoundingSphere();
+
+								//resize loaded object with relation to its size (should app;y to any object)
+								var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random() * (buildingMapRatio / 700000.0)
 								object.scale.set(
 									resizeNum, //width
 									resizeNum, //height
 									resizeNum  //depth
 								);
-								console.log("55555555555555555")
+
+								//put building on surface of world (may be a elevated)
+								object.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2); 
+								object.translateY(Math.random() * (worldMap.atmosphereHeight - objectGeo.boundingSphere.radius) + objectGeo.boundingSphere.radius / 2);
+								object.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2);
+								
+								worldMap.buildings.push( object );
 								scene.add( object );
 							}
 						);
