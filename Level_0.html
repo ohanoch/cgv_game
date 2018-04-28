@@ -53,7 +53,6 @@ var powerups = [];
 
 var collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
 
-var alpha;
 var powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
 var collectibles = [];			// the items that the player needs to collect in order to progress to the next level
 //var collectiblesLeft = 0;			// the number of collectibles left to collect. when this reaches zero, go to next level
@@ -78,14 +77,48 @@ function render() {
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
     renderer.render(scene, camera);
+	
+	//add objects to minimap so it will be easier to see
 
-	// Render minimap camera in bottom left corner
+	//add sphere for player
+	var arrow = new THREE.Mesh(
+		new THREE.SphereGeometry( 20 ),
+		new THREE.MeshBasicMaterial( {color: 0xffff00} )	
+	);
+	arrow.translateX(player.position.x - arrow.position.x);
+	arrow.translateZ(player.position.z - arrow.position.z);
+	arrow.translateY(ATMOSPHERE_HEIGHT - 88);
+	scene.add(arrow);
+
+	var minimapPowerups = [];
+	for (var i = 0; i < powerups.length; i++){
+		var powerupCube = new THREE.Mesh(
+			new THREE.BoxGeometry( 30, 30, 30 ),
+			new THREE.MeshBasicMaterial( {color: 0xff0000} )
+		);
+		
+		powerupCube.translateX(powerups[i].position.x - powerupCube.position.x);
+		powerupCube.translateZ(powerups[i].position.z - powerupCube.position.z);
+		powerupCube.translateY(ATMOSPHERE_HEIGHT - 90);
+		minimapPowerups.push(powerupCube);
+
+		scene.add(powerupCube);
+	} 
+
+	// Render minimap camera in top right corner
 	renderer.setViewport( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
 	renderer.setScissor( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
 	renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
 	minimapCamera.aspect = w / h;
 	minimapCamera.updateProjectionMatrix();
 	renderer.render( scene, minimapCamera );
+
+	//romve arrow from scene
+	scene.remove(arrow);
+
+	for (var i = 0; i < powerups.length; i++){
+		scene.remove(minimapPowerups[i])
+	}
 }
 
 //make sure alpha doesn't spawn on an object
@@ -97,7 +130,10 @@ function alphaStartup(){
 			collissions();
 			if(alpha.lives != 3){ 
 				console.log("spawned on building - relocating");
-				player.position.set(Math.random() * (worldMap.width / 2), 0, Math.random() * (worldMap.depth / 2));
+				var randomX = Math.random();
+				var randomZ = Math.random();
+				player.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
+				minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
 				alpha.lives = 3;
 			} else {
 				break;
@@ -267,12 +303,14 @@ function key_check(){
 
     // right arrow: turn right
     if (keys[39]) {     
-        player.rotation.y -= 0.03;
+        player.rotateY(-1 * Math.PI/180);
+		minimapCamera.rotateZ(-1 * Math.PI/180);
     }
 
     // left arrow: turn left
     if (keys[37]) {     
-        player.rotation.y += 0.03;
+        player.rotateY(Math.PI/180);
+		minimapCamera.rotateZ(Math.PI/180) ;
     }
 
    // space key: fight gravity
