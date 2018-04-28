@@ -385,7 +385,7 @@ Collisions!
 
 function  collissions() {
 	var originPoint = player.position.clone();	// players position
-
+	//console.log(worldMap.buildings)
 	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++)
 		{		
 			var localVertex = alpha.geometry.vertices[vertexIndex].clone();
@@ -395,7 +395,7 @@ function  collissions() {
 			var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
 			
 			// Check building collisions
-			var BuildingCollisionResults = ray.intersectObjects( worldMap.buildings );
+			var BuildingCollisionResults = ray.intersectObjects( worldMap.buildings , true );
 			
 			// Check Powerups[] collisions
 				// TODO
