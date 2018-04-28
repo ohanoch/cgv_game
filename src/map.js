@@ -76,22 +76,34 @@ class Map {
 	 * Output = None - the worldMap global variable will be edited inside the function
 	 */
 	createBuildings(ratio) {
-		console.log("adding " + Math.pow(this.width*this.depth,ratio/1.3) + " buildings to map")
-		var materialLoader = new THREE.MTLLoader();
-		
-		for(var i = 1;
-			i < Math.pow(this.width*this.depth,ratio/1.3);
-			i++){
+		var numBuildings = Math.floor(Math.pow(worldMap.width * worldMap.depth, ratio/1.3));
+		console.log("adding " + numBuildings + " buildings to map")
 
-			materialLoader.load( 'models/mill/mill.mtl' ,
+		var materialLoader = new THREE.MTLLoader();		
+		var modelList = ['models/tree/tree', 'models/mill/mill'];
+		
+		//split numBuildings between different models
+		var numPerModel = [];
+		var currNumBuildings = numBuildings;
+		for(var i = 0; i < modelList.length -1; i++){
+			var currAmount = Math.floor(Math.random() * currNumBuildings);
+			numPerModel.push(currAmount);
+			currNumBuildings -= currAmount;
+		}
+		numPerModel.push(currNumBuildings);
+		console.log("split of building types " + numPerModel);
+
+		//load models
+		var modelLoader = function(modelURL, numModels){
+			materialLoader.load(
+				modelURL + '.mtl' ,
 				function(materials){
 					materials.preload();
-					
 					var objLoader = new THREE.OBJLoader();
-					objLoader.setMaterials(materials);				
-					objLoader.load( 'models/mill/mill.obj',
+					objLoader.setMaterials(materials);
+					objLoader.load(
+						modelURL + '.obj',
 						function ( object ) {
-
 							// get model geometry.
 							// Note modules from .obj files are of type GeometryBuffer
 							var objectGeo;
@@ -102,28 +114,35 @@ class Map {
 							} );
 
 							objectGeo.computeBoundingSphere();
-
-							console.log((1/objectGeo.boundingSphere.radius) * Math.random() * Math.pow(worldMap.width, ratio));
-
-							//resize loaded object with relation to its size (should apply to any object)
-							var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random();
-							object.scale.set(
-								resizeNum * Math.pow(worldMap.width, ratio), //width
-								resizeNum * Math.pow(worldMap.atmosphereHeight, ratio), //width
-								resizeNum * Math.pow(worldMap.depth, ratio) //depth
-							);
-
-							//put building on surface of world (may be a elevated)
-							object.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2); 
-							object.translateY(Math.random() * (worldMap.atmosphereHeight - objectGeo.boundingSphere.radius + objectGeo.boundingSphere.radius / 2));
-							object.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2);
+		
 							
-							worldMap.buildings.push( object );
-							scene.add( object );
+							for(var j = 1; j < numModels; j++){
+
+								var currObject = object.clone();
+								//resize loaded object with relation to its size (should apply to any object)
+								var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random();
+								currObject.scale.set(
+									resizeNum * Math.pow(worldMap.width, ratio), //width
+									resizeNum * Math.pow(worldMap.atmosphereHeight, ratio), //width
+									resizeNum * Math.pow(worldMap.depth, ratio) //depth
+								);
+
+								//put building on surface of world (may be a elevated)
+								currObject.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2); 
+								currObject.translateY(Math.random() * (worldMap.atmosphereHeight - objectGeo.boundingSphere.radius + objectGeo.boundingSphere.radius / 2));
+								currObject.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2);
+								
+								worldMap.buildings.push( currObject );
+								scene.add( currObject );
+							}
 						}
 					);
 				}
 			);
+		
+		}	
+		for (var i = 0; i < modelList.length; i++){
+			modelLoader(modelList[i], numPerModel[i]);
 		}
 	}
 }
