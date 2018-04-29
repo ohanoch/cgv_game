@@ -159,7 +159,7 @@ function createWorld() {
 	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
-	light = new THREE.SpotLight(0xFFAA88);
+	light = new THREE.DirectionalLight(0xFFAA88);
     light.position.set(WORLD_WIDTH / 6,ATMOSPHERE_HEIGHT * 1.1, WORLD_WIDTH / 6);
 	light.castShadow = true;
 	light.shadowCameraNear	= 0.01;
@@ -411,8 +411,15 @@ function model_loader(geometry, materials) {
 	alpha.scale.set(0.05,0.05,0.05);
 	alpha.position.set(0,-2,0);
 	alpha.rotateY(Math.PI);
-	alpha.castShadow = true;
-	alpha.receiveShadow = false;
+
+	alpha.traverse(
+		function (child){
+			if(child instanceof THREE.Mesh){
+				alpha.castShadow = true;
+				alpha.receiveShadow = false;
+			}
+		}
+	)
 
 	player.add(alpha);				// add alpha to player
 
