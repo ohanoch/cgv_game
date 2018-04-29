@@ -159,9 +159,20 @@ function createWorld() {
 	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
-    light = new THREE.DirectionalLight();
-    light.position.set(0,50,0);
-    camera.add(light);
+	light = new THREE.SpotLight(0xFFAA88);
+    light.position.set(WORLD_WIDTH / 6,ATMOSPHERE_HEIGHT * 1.1, WORLD_WIDTH / 6);
+	light.castShadow = true;
+	light.shadowCameraNear	= 0.01;
+	light.target.position.set(0, 0, 0);
+	light.shadowDarkness = 0.5;
+	/**light.shadowCameraNear = 2;
+	light.shadowCameraFar = 5;
+	light.shadowCameraLeft = -0.5;
+	light.shadowCameraRight = 0.5;
+	light.shadowCameraTop = 0.5;
+	light.shadowCameraBottom = -0.5;*/
+	light.shadowCameraVisible = true;
+    scene.add(light);
     player.add(camera);
     scene.add(player);
     
@@ -189,7 +200,8 @@ function createWorld() {
 	scene.add(worldMap.atmosphere);	
 
 	//add buildings to scene
-	worldMap.createBuildings(0.5); //map-buildings ratio is 1/2
+	worldMap.createBuildings(0.1); //map-buildings ratio is 1/2
+
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
@@ -399,6 +411,8 @@ function model_loader(geometry, materials) {
 	alpha.scale.set(0.05,0.05,0.05);
 	alpha.position.set(0,-2,0);
 	alpha.rotateY(Math.PI);
+	alpha.castShadow = true;
+	alpha.receiveShadow = false;
 
 	player.add(alpha);				// add alpha to player
 
@@ -629,6 +643,10 @@ function init() {
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
+		renderer.shadowMapEnabled = true;
+		//renderer.shadowMapSoft = true;
+		//renderer.shadowMap.enable = true;
+		//renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 		container.appendChild( renderer.domElement );
 
 		stats = new Stats();

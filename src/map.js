@@ -37,6 +37,7 @@ class Map {
 			this.floorHeight = -4;
 			this.floor.position.set(0,this.floorHeight,0);
 			this.floor.rotation.x = -Math.PI / 2;
+			this.floor.receiveShadow = true;			
 
 			console.log("Floor texture added to map");
 		}
