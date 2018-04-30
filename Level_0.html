@@ -484,11 +484,10 @@ Collisions!
 //check for collision between two bounding boxes
 //note bounding boxes have min: x,y,z, and max: x,y,z values
 function twoBoxCollision(box1, box2){
-	//check if collission between boxes does not occure
 	if(
 		(box1.max.x < box2.min.x || box1.min.x > box2.max.x) ||
 		(box1.max.y < box2.min.y || box1.min.y > box2.max.y) ||
-		(box1.max.z < box2.min.z || box1.min.z > box2.max.z) ||
+		(box1.max.z < box2.min.z || box1.min.z > box2.max.z) 
 	){
 		return false;
 	}
@@ -499,8 +498,11 @@ function twoBoxCollision(box1, box2){
 //this function checks for collision of bounding boxes of alpha nd the map buildings
 function alphaBoxCollision(){
 	var suspectObjects = [];
+	var alphaBox = new THREE.Box3();
+    alphaBox.setFromObject( alpha );
+
 	for(var i = 0; i < worldMap.buildingBoxes.length; i++){
-		if(twoBoxCollision(worldMap.buildingBoxes[i], alpha.geometry.boundingBox)){
+		if(twoBoxCollision(worldMap.buildingBoxes[i], alphaBox)){
 			suspectObjects.push(worldMap.buildings[i]);
 		}
 	}
@@ -513,6 +515,7 @@ function alphaBoxCollision(){
 // insert link to page
 function  collissions() {
 	var originPoint = player.position.clone();	// players position
+	var suspectObjects = alphaBoxCollision();
 
 	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++){		
 		var localVertex = alpha.geometry.vertices[vertexIndex].clone();
@@ -522,7 +525,7 @@ function  collissions() {
 		var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
 		
 		// Check building collisions
-		var BuildingCollisionResults = ray.intersectObjects( worldMap.buildings , true );
+		var BuildingCollisionResults = ray.intersectObjects( suspectObjects , true );
 		
 		// Check Powerups[] collisions
 			// TODO
