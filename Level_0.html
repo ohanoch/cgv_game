@@ -478,8 +478,14 @@ function  collissions() {
 		var PowerupsCollisionResults = ray.intersectObjects(powerups);
 		
 		var CollectibleCollisionResults = ray.intersectObjects(collectibles);
-		if ( BuildingCollisionResults.length > 0 && BuildingCollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
+		if ( 
+			BuildingCollisionResults.length > 0 &&
+			BuildingCollisionResults[0].distance < directionVector.length() - 1 &&
+			!BuildingCollisionResults[0].point.equals(new THREE.Vector3(0,0,0))
+		){ // TODO: adjust this offset (-1 currently)
 			console.log("hit");
+			console.log("qqqqq " + JSON.stringify(BuildingCollisionResults[0], null, 4));
+			console.log("qqqqq " + JSON.stringify(worldMap.buildings[0], null, 4));
 			Crash();
 			break;
 		}
