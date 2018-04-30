@@ -39,7 +39,6 @@ class Alpha extends THREE.Mesh{
 		this.maxSpeedY = 0.7;
 		this.maxSpeedZ = -1;
 		this.minSpeedZ = -0.01;
-		this.lives = STARTING_LIVES; //TODO: make a cat that gives you 9 lives
 		
 		console.log("alpha reset");
 	}
