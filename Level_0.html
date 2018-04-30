@@ -7,6 +7,13 @@
 <script src="src\js\libs\stats.min.js"></script>
 <script src="src\js\OBJLoader.js"></script>
 <script src="src\js\MTLLoader.js"></script>
+<script src="src\js\threex.cubecamera.js"></script>
+<script src="src\js\threex.atmospherematerial.js"></script>
+<script src="src\js\threex.atmospherematerialdatgui.js"></script>
+<script src="src\js\threex.dilategeometry.js"></script>
+<script src="src\js\threex.geometricglowmesh.js"></script>
+<script src="src\js\threex.text.js"></script>
+
 
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
@@ -65,6 +72,8 @@ var worldMap;
 
 var last_position; // Save last legal position of player. Used in respawning process Gets updated every +- 10 (?) legal positions
 
+var mesh;
+var cubeCamera;
 
 /**
  *  The render function draws the scene.
@@ -183,7 +192,6 @@ function createWorld() {
 	scene.add(minimapCamera);
 
 
-
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
@@ -198,6 +206,72 @@ function createWorld() {
 		scene.add(worldMap.buildings[i]);
 	}
 	
+	//---------------------------------- CUBE MAP OBJECT THING// TODO: DECIDE WHERE TO PUT THIS and CLEAN IT UP and TRY using NOT THREEx OR maybe keep it if Richard gives points for using extensions??--------------------------------------
+	// try using https://threejs.org/examples/#webgl_materials_cubemap_dynamic2
+
+
+	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
+
+	var geometry = new THREE.SphereGeometry(0.5, 32, 16);
+	var material = new THREE.MeshPhongMaterial({
+    color   : 'gold'
+	});
+	 mesh = new THREE.Mesh(geometry, material);
+	mesh.scale.set(10,10,10);
+	scene.add(mesh);
+
+	// using cubecamera.js library. Don't know if this is legal
+ 	cubeCamera  = new THREEx.CubeCamera(mesh);
+	scene.add(cubeCamera.object3d);
+
+	material.envMap = cubeCamera.textureCube;
+
+
+	// GLOW THING
+	// Source: https://github.com/jeromeetienne/threex.geometricglow
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		add an object and make it move					//
+	/////////////////////////////////////////////////////////////////////////////////
+
+	// var geometry	= new THREE.TorusKnotGeometry(1-0.25, 0.25, 32*3, 32);
+	// // var geometry	= new THREE.TorusGeometry(1-0.25, 0.25);
+	// // var geometry	= new THREE.SphereGeometry(1, 32, 16);
+	// // var geometry	= new THREE.CubeGeometry(1,1,1, 10, 10, 10);
+
+	// var material	= new THREE.MeshBasicMaterial({
+	// 	color	: new THREE.Color('gray')
+	// });
+	// var mesh	= new THREE.Mesh( geometry, material );
+	// mesh.position.set(4,4,4);
+	// // mesh.visible	= false
+	// scene.add( mesh );
+		
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//		add a text	https://github.com/jeromeetienne/threex.texture 			//
+///	///////////////////////////////////////////////////////////////////////////////
+	
+	var mesh	= new THREEx.Text('THREEx')
+	mesh.scale.multiplyScalar(1/2)
+	mesh.position.set(4,4,4);
+	scene.add(mesh)
+	
+
+//////////////////////////////////////////////////////////////////////////////////
+//		create the glowMesh														//
+//////////////////////////////////////////////////////////////////////////////////
+
+	// create a glowMesh
+	var glowMesh	= new THREEx.GeometricGlowMesh(mesh);
+	mesh.add(glowMesh.object3d);
+
+
+
+
+
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 
 // alpha is created by model_loader function and added to player
@@ -469,6 +543,7 @@ function SavePosition(){
 
 
 
+
 /*//////////////////////////////////////////////////////////////////////////
 Crash: Explosion, respawn from crash site, decrement lives, game over
 ///////////////////////////////////////////////////////////////////////////*/
@@ -618,7 +693,8 @@ function updateForFrame() {
 	//Collision
 	collissions();	
 
-	
+	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
+	cubeCamera.update(renderer, scene);
 	
 }
 
