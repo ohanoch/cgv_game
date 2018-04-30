@@ -8,6 +8,7 @@ class Map {
 		this.atmosphereHeight = atmosphereHeight; // y axis
 		this.depth = depth; // z axis
 		this.buildings = []; // array of buildings
+		this.buildingBoxes = [];
 
 		//------------------------------------- Atmosphere --------------------------------------------
 		this.atmosphere = new THREE.Mesh(
@@ -124,6 +125,7 @@ class Map {
 					objLoader.load(
 						modelURL + '.obj',
 						function ( object ) {
+							
 							// get model geometry.
 							// Note modules from .obj files are of type GeometryBuffer
 							var objectGeo;
@@ -132,13 +134,14 @@ class Map {
 									objectGeo = child.geometry;
 								}
 							} );
-
 							objectGeo.computeBoundingSphere();
-		
-							
+							objectGeo.computeBoundingBox();
+
 							for(var j = 1; j < numModels; j++){
 
 								var currObject = object.clone();
+								var currObjectBox = objectGeo.boundingBox;
+
 								//resize loaded object with relation to its size (should apply to any object)
 								var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random();
 								currObject.scale.set(
@@ -154,6 +157,11 @@ class Map {
 								
 								worldMap.buildings.push( currObject );
 								scene.add( currObject );
+
+								//get geometry of object after it moved to get correct bounding box coordinats
+								var box = new THREE.Box3();
+								box.setFromObject( currObject );
+								worldMap.buildingBoxes.push(box);
 							}
 							loadingDone();
 						}
