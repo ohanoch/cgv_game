@@ -65,6 +65,7 @@ var worldMap;
 
 var last_position; // Save last legal position of player. Used in respawning process Gets updated every +- 10 (?) legal positions
 
+
 /**
  *  The render function draws the scene.
  */
@@ -358,7 +359,7 @@ function keysPressed(e) {
     // store an entry for every key pressed
     keys[e.keyCode] = true;
         // NB: prevent default browser behavior - disable during testing
-        //e.preventDefault();
+        e.preventDefault();
 }
 
 function keysReleased(e) {
@@ -394,7 +395,16 @@ function model_loader(geometry, materials) {
         vertexColors: THREE.FaceColors,  	// use colors from the geometry
         morphTargets: true							// for animation
     });
-	
+
+// Testing geometry
+       // var geom2= new THREE.BoxGeometry(10,10,10);
+       //  var mar2 = new THREE.MeshPhongMaterial({
+       //      color: 0xFF0000,
+       //      specular: 0x222222,
+       //      shininess: 16
+       //      //shading: THREE.FlatShading
+       //  });
+    
 	alpha = new Alpha(geometry,material, 1);	// create alpha object
 	
 // TRANSFORMS
@@ -554,6 +564,7 @@ function  collissions() {
  *  is incrementd 1 before this function is called.
  */
 var everyNframes = 0; // Global counter to do stuff every Nth frame. 
+
 function updateForFrame() {
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
@@ -605,7 +616,7 @@ function updateForFrame() {
 	SavePosition();
 
 	//Collision
-	collissions();
+	collissions();	
 
 	
 	
