@@ -47,7 +47,7 @@ class Map {
 		//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
     	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
 		if(skyboxDirectoryURL != ""){
-			var materialArray = [];
+		/**	var materialArray = [];
 			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xpos.png") }));
 			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xneg.png") }));
 			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "ypos.png") }));
@@ -63,7 +63,18 @@ class Map {
 			this.skybox = new THREE.Mesh(
 				new THREE.CubeGeometry( cubeSize, cubeSize, cubeSize, 1, 1, 1 ),
 				materialArray
-			);
+			);*/
+			
+			this.skybox = new THREE.CubeTextureLoader()
+				.setPath(skyboxDirectoryURL)
+				.load([
+					'xpos.png',
+					'xneg.png',
+					'ypos.png',
+					'yneg.png',
+					'zpos.png',
+					'zneg.png'
+				]);
 
 			console.log("Skybox added to map");
 		}
