@@ -57,13 +57,13 @@
 
 			var text = "Josh SUCKS",
 
-				height = 20,
+				height = 2,
 				size = 70,
-				hover = 30,
+				hover = 3,
 
 				curveSegments = 4,
 
-				bevelThickness = 2,
+				bevelThickness = 1,
 				bevelSize = 1.5,
 				bevelSegments = 3,
 				bevelEnabled = true,
@@ -353,14 +353,12 @@
 				loader.load( 'fonts/Etienne/helvetiker_regular.typeface.js', function ( response ) {
 
 					font = response;
-					createText();
-					console.log("loadFont()");
+					createText()
 				} );
 
 			}
 
 			function createText() {
-				console.log("createText()");
 				textGeo = new THREE.TextGeometry( text, {
 
 					font: font,

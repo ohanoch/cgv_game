@@ -13,7 +13,7 @@
 <script src="src\js\threex.dilategeometry.js"></script>
 <script src="src\js\threex.geometricglowmesh.js"></script>
 <script src="src/js/GeometryUtils.js"></script>
-<script src="src/js/modifier.js"></script>
+<script src="src/js/BendModifier.js"></script>
 
 
 <script src="src\alpha.js"></script>
@@ -77,13 +77,12 @@ var mesh;
 
 var cubeCamera;
 
-
-
+var joshSucks; // he does
 
 
 /// TODO: Put these with global vars or somewhere else
-var text = "Josh SUCKS",
-	height = 1,
+var text = "JOSH  SUCKS",
+	height = 0.5,
 	size = 2,
 	curveSegments = 4,
 	font = undefined;
@@ -229,18 +228,19 @@ function createWorld() {
 
 
 	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
-	var joshSucks = new THREE.Object3D();
+	joshSucks = new THREE.Object3D();
 
 	var geometry = new THREE.SphereGeometry(0.5, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
-    color   : 'gold'
+    color   : 'chrome'
 	});
-	 mesh = new THREE.Mesh(geometry, material);
+	mesh = new THREE.Mesh(geometry, material);
 	mesh.scale.set(10,10,10);
-	scene.add(mesh);
+	mesh.position.set(0,0,0);	// centre obj coords of sphere
+	//scene.add(mesh);
+
 	// using cubecamera.js library. Don't know if this is legal
  	cubeCamera  = new THREEx.CubeCamera(mesh);
-	scene.add(cubeCamera.object3d);
 
 	material.envMap = cubeCamera.textureCube;
 	joshSucks.add(mesh);
@@ -253,13 +253,14 @@ function createWorld() {
 //		add  text	 			//
 ///	///////////////////////////////////////////////////////////////////////////////
 	group = new THREE.Group();
-	group.position.set(1,2,1);
+	group.position.set(-8,0,10);	// obj translation of text object onto sphere
 	//scene.add( group );
 	loadFont();	// create the text object
 	console.log("Loadfont was called");	
 	joshSucks.add(group);
-	joshSucks.position.set(3,3,3);
+	joshSucks.position.set(3,3,-30);
 	scene.add(joshSucks);
+	scene.add(cubeCamera.object3d);
 
 
 
@@ -644,9 +645,7 @@ function loadFont() {
 function createText() {
 	console.log("createText()");
 	textGeo = new THREE.TextGeometry( text, {
-
 		font: font,
-
 		size: size,
 		height: height,
 		curveSegments: curveSegments
@@ -695,6 +694,15 @@ function createText() {
 	var centerOffset = -0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
 
 	textMesh1 = new THREE.Mesh( textGeo, materials );
+
+	// bend the text - this took hours to figure out because all the docs and examples are deprecated - FUCK
+	// Had to modify a lib file (BendModifier.js)
+	var direction = new THREE.Vector3( 0, 0, -1 );
+	var axis =  new THREE.Vector3( 0, 1, 0 );
+	var angle = Math.PI / 2.5;
+	var modifier = new THREE.BendModifier();
+	modifier.set( direction, axis, angle ).modify( textMesh1.geometry );
+
 
 	group.add( textMesh1 );
 
@@ -768,6 +776,9 @@ function updateForFrame() {
 
 	//Collision
 	collissions();	
+
+	//animate josh sucks
+	joshSucks.rotateY(Math.sin(Math.PI/6));
 
 	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
 	cubeCamera.update(renderer, scene);
