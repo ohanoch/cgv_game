@@ -411,6 +411,7 @@ function model_loader(geometry, materials) {
 
 	player.add(alpha);				// add alpha to player
 
+	alpha.geometry.computeBoundingBox();
 	alphaDone = true;
 	alphaStartup();	
 
@@ -455,11 +456,36 @@ function Crash() {
 Collisions!
 ///////////////////////////////////////////////////////////////////////////*/
 
+//check for collision between two bounding boxes
+//note bounding boxes have min: x,y,z, and max: x,y,z values
+function twoBoxCollision(box1, box2){
+	//check if collission between boxes does not occure
+	if(
+		(box1.max.x < box2.min.x || box1.min.x > box2.max.x) ||
+		(box1.max.y < box2.min.y || box1.min.y > box2.max.y) ||
+		(box1.max.z < box2.min.z || box1.min.z > box2.max.z) ||
+	){
+		return false;
+	}
+	return true;
+}
+
+
+//this function checks for collision of bounding boxes of alpha nd the map buildings
+function alphaBoxCollision(){
+	var suspectObjects = [];
+	for(var i = 0; i < worldMap.buildingBoxes.length; i++){
+		if(twoBoxCollision(worldMap.buildingBoxes[i], alpha.geometry.boundingBox)){
+			suspectObjects.push(worldMap.buildings[i]);
+		}
+	}
+	return suspectObjects;
+}
+
+
 //This must be called in updateFrame
 // credit to Lee Stemkoski for his tutorial
 // insert link to page
-
-
 function  collissions() {
 	var originPoint = player.position.clone();	// players position
 
