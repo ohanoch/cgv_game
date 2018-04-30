@@ -22,6 +22,7 @@ var WORLD_WIDTH = 2000;
 var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
+var NUM_LIGHTS = 2;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
@@ -158,21 +159,32 @@ function createWorld() {
 		ALPHA_CAMERA_DISTANCE * 20//Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
 	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
-    var light;  // A light shining from the direction of the camera; moves with the camera.
-	light = new THREE.SpotLight(0xFFAA88);
-    light.position.set(WORLD_WIDTH / 6,ATMOSPHERE_HEIGHT * 1.1, WORLD_WIDTH / 6);
-	light.castShadow = true;
-	light.shadowCameraNear	= 0.01;
-	light.target.position.set(0, 0, 0);
-	light.shadowDarkness = 0.5;
-	/**light.shadowCameraNear = 2;
-	light.shadowCameraFar = 5;
-	light.shadowCameraLeft = -0.5;
-	light.shadowCameraRight = 0.5;
-	light.shadowCameraTop = 0.5;
-	light.shadowCameraBottom = -0.5;*/
-	light.shadowCameraVisible = true;
-    scene.add(light);
+
+	//------------------------------------- LIGHTING ------------------------------------------------
+	for(var i = 0; i < NUM_LIGHTS; i++){
+		var light = new THREE.PointLight(0xffffff, 1, 1000000);
+		light.position.set(
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10),
+			ATMOSPHERE_HEIGHT * (1 + Math.random()), 
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10)
+		);
+
+		//shadows for light 1
+		light.castShadow = true;
+		light.shadowDarkness = 0.5;
+		//Set up shadow properties for the light
+		light.shadow.mapSize.width = WORLD_WIDTH;  
+		light.shadow.mapSize.height = WORLD_DEPTH; 
+		light.shadow.camera.near = 0.5;    // default
+		light.shadow.camera.far = Math.sqrt(Math.pow(ATMOSPHERE_HEIGHT,2) + Math.pow(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
+
+		scene.add(light);
+	}
+
+	//Create a helper for the shadow camera (optional)
+	//var lightHelper = new THREE.CameraHelper( light1.shadow.camera );
+	//scene.add( lightHelper );
+
     player.add(camera);
     scene.add(player);
     
@@ -412,8 +424,6 @@ function model_loader(geometry, materials) {
 	alpha.position.set(0,-2,0);
 	alpha.rotateY(Math.PI);
 	alpha.castShadow = true;
-	alpha.receiveShadow = false;
-
 	player.add(alpha);				// add alpha to player
 
 	alphaDone = true;
@@ -561,7 +571,7 @@ function updateForFrame() {
 	}
 
 	// camera can't got below floor
-	if(camera.position.y < worldMap.floorHeight + 1.1){
+	if(new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld).y < worldMap.floorHeight + 1.1){
 		camera.position.y = worldMap.floorHeight + 1.1;
 	}
 	
@@ -643,10 +653,9 @@ function init() {
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
-		renderer.shadowMapEnabled = true;
-		//renderer.shadowMapSoft = true;
-		//renderer.shadowMap.enable = true;
-		//renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		renderer.shadowMap.enabled = true;
+		//renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
 		container.appendChild( renderer.domElement );
 
 		stats = new Stats();
