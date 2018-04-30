@@ -23,6 +23,7 @@ var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
 var STARTING_LIVES = 3;
+var NUM_LIGHTS = 2;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
@@ -167,10 +168,32 @@ function createWorld() {
 		Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
 	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
-    var light;  // A light shining from the direction of the camera; moves with the camera.
-    light = new THREE.DirectionalLight();
-    light.position.set(0,50,0);
-    camera.add(light);
+
+	//------------------------------------- LIGHTING ------------------------------------------------
+	for(var i = 0; i < NUM_LIGHTS; i++){
+		var light = new THREE.PointLight(0xffffff, 1, 1000000);
+		light.position.set(
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10),
+			ATMOSPHERE_HEIGHT * (1 + Math.random()), 
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10)
+		);
+
+		//shadows for light 1
+		light.castShadow = true;
+		light.shadowDarkness = 0.5;
+		//Set up shadow properties for the light
+		light.shadow.mapSize.width = WORLD_WIDTH;  
+		light.shadow.mapSize.height = WORLD_DEPTH; 
+		light.shadow.camera.near = 0.5;    // default
+		light.shadow.camera.far = Math.sqrt(Math.pow(ATMOSPHERE_HEIGHT,2) + Math.pow(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
+
+		scene.add(light);
+	}
+
+	//Create a helper for the shadow camera (optional)
+	//var lightHelper = new THREE.CameraHelper( light1.shadow.camera );
+	//scene.add( lightHelper );
+
     player.add(camera);
     scene.add(player);
     
@@ -199,6 +222,7 @@ function createWorld() {
 
 	//add buildings to scene
 	worldMap.createBuildings(0.5); //map-buildings ratio is 1/2
+
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
@@ -408,7 +432,7 @@ function model_loader(geometry, materials) {
 	alpha.scale.set(0.05,0.05,0.05);
 	alpha.position.set(0,-2,0);
 	alpha.rotateY(Math.PI);
-
+	alpha.castShadow = true;
 	player.add(alpha);				// add alpha to player
 
 	alphaDone = true;
@@ -644,6 +668,9 @@ function init() {
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
+		renderer.shadowMap.enabled = true;
+		//renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
 		container.appendChild( renderer.domElement );
 
 		stats = new Stats();

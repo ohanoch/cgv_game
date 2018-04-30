@@ -32,11 +32,12 @@ class Map {
 			floorTexture.repeat.set( 20, 20 );                                              //how many times the image repeats
 			this.floor = new THREE.Mesh(
 				new THREE.PlaneGeometry(this.width, this.depth,1,1),
-				new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide })
+				new THREE.MeshStandardMaterial({ map: floorTexture, side: THREE.DoubleSide })
 			);
 			this.floorHeight = -4;
 			this.floor.position.set(0,this.floorHeight,0);
 			this.floor.rotation.x = -Math.PI / 2;
+			this.floor.receiveShadow = true;			
 
 			console.log("Floor texture added to map");
 		}
