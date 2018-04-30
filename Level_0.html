@@ -166,7 +166,7 @@ function createWorld() {
 		30, 
 		window.innerWidth/window.innerHeight, 
 		0.1, 
-		Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
+		ALPHA_CAMERA_DISTANCE * 20//Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
 	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
 
@@ -218,7 +218,7 @@ function createWorld() {
 
 	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
-	scene.add(worldMap.skybox);
+	scene.background = worldMap.skybox;
 	scene.add(worldMap.atmosphere);	
 
 	//add buildings to scene
