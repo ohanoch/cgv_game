@@ -22,6 +22,7 @@ var WORLD_WIDTH = 2000;
 var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
+var STARTING_LIVES = 3;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
@@ -120,24 +121,32 @@ function render() {
 	}
 }
 
+function respawnAlpha(){
+	var currLives = alpha.lives;
+	while(true){
+		console.log("respawning alpha");
+		var randomX = Math.random();
+		var randomZ = Math.random();
+		player.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
+		minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
+		collissions();
+		if(alpha.lives != currLives){
+			alpha.lives = currLives;
+		} else {
+			break;
+		} 
+	}
+}
+
 //make sure alpha doesn't spawn on an object
+// this function gets called as a callback for when alpha finishes loading and for when map buildings get loaded
 var alphaDone = false;
 var mapDone = false;
 function alphaStartup(){
 	if(alphaDone && mapDone){
-		while(true){
-			collissions();
-			if(alpha.lives != 3){ 
-				console.log("spawned on building - relocating");
-				var randomX = Math.random();
-				var randomZ = Math.random();
-				player.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
-				minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
-				alpha.lives = 3;
-			} else {
-				break;
-			} 
-		}
+		console.log("checking if alpha initialized on building");
+		collissions();
+		alpha.lives = STARTING_LIVES;
 	}
 }
 
@@ -431,7 +440,9 @@ function Crash() {
 		//do other stuff
 	}else{
 	// TODO : Crash animation, respawn
-		animating = false;
+		console.log("alpha crashed...");
+		respawnAlpha();
+		//animating = false;
 	// respawning:
 	// player.position = legal position
 	// 
@@ -451,49 +462,48 @@ Collisions!
 function  collissions() {
 	var originPoint = player.position.clone();	// players position
 
-	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++)
-		{		
-			var localVertex = alpha.geometry.vertices[vertexIndex].clone();
-			var globalVertex = localVertex.applyMatrix4( alpha.matrix );
-			var directionVector = globalVertex.sub( alpha.position );
-			
-			var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-			
-			// Check building collisions
-			var BuildingCollisionResults = ray.intersectObjects( worldMap.buildings , true );
-			
-			// Check Powerups[] collisions
-				// TODO
-			var PowerupsCollisionResults = ray.intersectObjects(powerups);
-			
-			var CollectibleCollisionResults = ray.intersectObjects(collectibles);
-			if ( BuildingCollisionResults.length > 0 && BuildingCollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
-				console.log("hit");
-				Crash();
-				return;
-			}
-			//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
-			if (PowerupsCollisionResults.length > 0 && PowerupsCollisionResults[0].distance < directionVector.length()){
-				//Check what type of powerup it was
-				if(PowerupsCollisionResults[0].object.type == powerupTypes["gun"]){
-					console.log("Gun"); //TODO: update alpha stats
-				}else if(PowerupsCollisionResults[0].object.type == powerupTypes["invisible"]){
-					console.log("Invisible"); //TODO: update alpha stats
-				}else if(PowerupsCollisionResults[0].object.type == powerupTypes["gravity"]){
-					console.log("Gravity"); //TODO: update alpha stats
-				}
-				
-				powerups.splice(powerups.indexOf (PowerupsCollisionResults[0].object), 1 );
-				scene.remove(PowerupsCollisionResults[0].object);
+	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++){		
+		var localVertex = alpha.geometry.vertices[vertexIndex].clone();
+		var globalVertex = localVertex.applyMatrix4( alpha.matrix );
+		var directionVector = globalVertex.sub( alpha.position );
+		
+		var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+		
+		// Check building collisions
+		var BuildingCollisionResults = ray.intersectObjects( worldMap.buildings , true );
+		
+		// Check Powerups[] collisions
+			// TODO
+		var PowerupsCollisionResults = ray.intersectObjects(powerups);
+		
+		var CollectibleCollisionResults = ray.intersectObjects(collectibles);
+		if ( BuildingCollisionResults.length > 0 && BuildingCollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
+			console.log("hit");
+			Crash();
+			break;
+		}
+		//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
+		if (PowerupsCollisionResults.length > 0 && PowerupsCollisionResults[0].distance < directionVector.length()){
+			//Check what type of powerup it was
+			if(PowerupsCollisionResults[0].object.type == powerupTypes["gun"]){
+				console.log("Gun"); //TODO: update alpha stats
+			}else if(PowerupsCollisionResults[0].object.type == powerupTypes["invisible"]){
+				console.log("Invisible"); //TODO: update alpha stats
+			}else if(PowerupsCollisionResults[0].object.type == powerupTypes["gravity"]){
+				console.log("Gravity"); //TODO: update alpha stats
 			}
 			
-			if ( CollectibleCollisionResults.length > 0 && CollectibleCollisionResults[0].distance < directionVector.length() ){ 
-				console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
-				collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
-				scene.remove(CollectibleCollisionResults[0].object);
-			}
+			powerups.splice(powerups.indexOf (PowerupsCollisionResults[0].object), 1 );
+			scene.remove(PowerupsCollisionResults[0].object);
+		}
+		
+		if ( CollectibleCollisionResults.length > 0 && CollectibleCollisionResults[0].distance < directionVector.length() ){ 
+			console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
+			collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
+			scene.remove(CollectibleCollisionResults[0].object);
+		}
 
-		}// end for loop	
+	}// end for loop	
 
 } // end collision function
 
