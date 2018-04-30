@@ -126,18 +126,21 @@ class Map {
 						modelURL + '.obj',
 						function ( object ) {
 							
+							// get model geometry.
+							// Note modules from .obj files are of type GeometryBuffer
+							var objectGeo;
+							object.traverse( function ( child ) {
+								if ( child instanceof THREE.Mesh ) {
+									objectGeo = child.geometry;
+								}
+							} );
+							objectGeo.computeBoundingSphere();
+							objectGeo.computeBoundingBox();
+
 							for(var j = 1; j < numModels; j++){
 
 								var currObject = object.clone();
-								// get model geometry.
-								// Note modules from .obj files are of type GeometryBuffer
-								var objectGeo;
-								currObject.traverse( function ( child ) {
-									if ( child instanceof THREE.Mesh ) {
-										objectGeo = child.geometry;
-									}
-								} );
-								objectGeo.computeBoundingSphere();
+								var currObjectBox = objectGeo.boundingBox;
 
 								//resize loaded object with relation to its size (should apply to any object)
 								var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random();
@@ -155,8 +158,10 @@ class Map {
 								worldMap.buildings.push( currObject );
 								scene.add( currObject );
 
-								objectGeo.computeBoundingBox()
-								worldMap.buildingBoxes.push(objectGeo.boundingBox);
+								//get geometry of object after it moved to get correct bounding box coordinats
+								var box = new THREE.Box3();
+								box.setFromObject( currObject );
+								worldMap.buildingBoxes.push(box);
 							}
 							loadingDone();
 						}
