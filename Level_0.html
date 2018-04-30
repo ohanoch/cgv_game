@@ -155,7 +155,7 @@ function createWorld() {
 		30, 
 		window.innerWidth/window.innerHeight, 
 		0.1, 
-		ALPHA_CAMERA_DISTANCE * 30//Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
+		ALPHA_CAMERA_DISTANCE * 20//Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
 	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
     var light;  // A light shining from the direction of the camera; moves with the camera.
@@ -200,7 +200,7 @@ function createWorld() {
 	scene.add(worldMap.atmosphere);	
 
 	//add buildings to scene
-	worldMap.createBuildings(0.1); //map-buildings ratio is 1/2
+	worldMap.createBuildings(0.5); //map-buildings ratio is 1/2
 
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
