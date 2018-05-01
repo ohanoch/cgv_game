@@ -142,6 +142,20 @@ function render() {
 		scene.add(powerupCube);
 	} 
 
+	var minimapCollectibles = [];
+	for (var i = 0; i < collectibles.length; i++){
+		var collectibleDodec = new THREE.Mesh(
+			new THREE.DodecahedronGeometry( 15 ),
+			new THREE.MeshBasicMaterial( {color: 0x00ff00} )
+		);
+		
+		collectibleDodec.translateX(collectibles[i].position.x - collectibleDodec.position.x);
+		collectibleDodec.translateZ(collectibles[i].position.z - collectibleDodec.position.z);
+		collectibleDodec.translateY(ATMOSPHERE_HEIGHT - 90);
+		minimapCollectibles.push(collectibleDodec);
+
+		scene.add(collectibleDodec);
+	} 
 	// Render minimap camera in top right corner
 	renderer.setViewport( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
 	renderer.setScissor( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
@@ -155,6 +169,10 @@ function render() {
 
 	for (var i = 0; i < powerups.length; i++){
 		scene.remove(minimapPowerups[i])
+	}
+	
+	for (var i = 0; i < collectibles.length; i++){
+		scene.remove(minimapCollectibles[i])
 	}
 }
 
@@ -349,6 +367,9 @@ function createWorld() {
 	collectible1.position.set(7,3,-4);
 	collectibles.push(collectible1);
 	
+	// move collectibles to random place on map
+	//randomMoveArray(collectibles);
+
 	for (var j = 0; j < collectibles.length; j++) {
 		scene.add(collectibles[j]);
 	}
@@ -369,6 +390,25 @@ function createWorld() {
 /*///////////////////////////////////////////////////////////////////////////////// 
 Reset the camera's to be behind the player (chase cam), after viewing the world.
 //////////////////////////////////////////////////////////////////////////////////*/
+
+function randomPlace(){
+	var move = [];
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.width / 2));
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight);
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.depth / 2));
+	return new THREE.Vector3(move[0],move[1],move[2]);
+
+}
+
+function randomMoveArray( arr ){
+	for(var i = 0; i < arr.length; i++){
+		arr[i].position.set(randomPlace());
+		arr[i].geometry.computeBoundingBox();
+		while(buildingBoxCollision(arr[i]).length != 0){
+			arr[i].position.set(randomMove());
+		}
+	}
+}
 
 function resetCameraPosition(){
 	var cameraRotationSpeed = 0.1;
@@ -737,13 +777,13 @@ function twoBoxCollision(box1, box2){
 
 
 //this function checks for collision of bounding boxes of alpha nd the map buildings
-function alphaBoxCollision(){
+function buildingBoxCollision( object ){
 	var suspectObjects = [];
-	var alphaBox = new THREE.Box3();
-    alphaBox.setFromObject( alpha );
+	var objectBox = new THREE.Box3();
+    objectBox.setFromObject( object );
 
 	for(var i = 0; i < worldMap.buildingBoxes.length; i++){
-		if(twoBoxCollision(worldMap.buildingBoxes[i], alphaBox)){
+		if(twoBoxCollision(worldMap.buildingBoxes[i], objectBox)){
 			suspectObjects.push(worldMap.buildings[i]);
 		}
 	}
@@ -756,7 +796,7 @@ function alphaBoxCollision(){
 // insert link to page
 function  collissions() {
 	var originPoint = player.position.clone();	// players position
-	var suspectObjects = alphaBoxCollision();
+	var suspectObjects = buildingBoxCollision(alpha);
 
 	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++){		
 		var localVertex = alpha.geometry.vertices[vertexIndex].clone();
