@@ -32,3 +32,7 @@ Or Hanoch
 
 ## Instructor
 Dr. Richard Klein
+
+## Credits:
+2D menu buttons: Credit "Kenney.nl" or "www.kenney.nl", this is not mandatory.
+2D menu background: https://pngtree.com/
