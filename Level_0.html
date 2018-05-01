@@ -18,6 +18,7 @@
 
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
+<script src="src\menu.js"></script>
 <script src="src\powerup.js"></script>
 <script src="src\collectible.js"></script>
 
@@ -92,9 +93,7 @@ var text = "JOSH  SUCKS",
 	font = undefined;
 var group, textMesh1, textGeo, materials;
 
-
-
-
+var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
 
 
@@ -384,7 +383,24 @@ function resetCameraPosition(){
 	}
 }
 
+/*////////////////////////////////////////////////////////////////////////////////
+Display pause menu
+/////////////////////////////////////////////////////////////////////////////////*/
+function displayMenu(){
+	menu.skybox.position.x = player.position.x;
+	menu.skybox.position.y = player.position.y;
+	menu.skybox.position.z = player.position.z;
+	scene.add(menu.skybox);
 
+	for(var i = 0; i < menu.buttons.length; i++){
+		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+		menu.buttons[i].position.y = player.position.y + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+		menu.buttons[i].position.z = player.position.z + Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+
+		scene.add(menu.buttons[i]);
+	}
+	console.log("displaying menu...");
+}
 
 /*//////////////////////////////////////////////////////////////////////////
  Keyboard key lookups:  Check arrow, a,w,s,d and space keys
@@ -441,10 +457,16 @@ function keysPressed(e) {
 	// "p" for pause and play           
 	if(e.keyCode == 80){
 		if(!animating){
+			scene.remove(menu.skybox);
+			for(var i = 0; i< menu.buttons.length; i++){
+				scene.remove(menu.buttons[i]);
+			}
+
 			animating = true;
 			requestAnimationFrame(doFrame);
 		} else {
 			animating = false;
+			displayMenu();
 		}
 		return;
 	}
