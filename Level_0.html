@@ -146,7 +146,7 @@ function render() {
 	for (var i = 0; i < collectibles.length; i++){
 		var collectibleDodec = new THREE.Mesh(
 			new THREE.DodecahedronGeometry( 15 ),
-			new THREE.MeshBasicMaterial( {color: 0x00ff00} )
+			new THREE.MeshBasicMaterial( {color: 0x0000ff} )
 		);
 		
 		collectibleDodec.translateX(collectibles[i].position.x - collectibleDodec.position.x);
@@ -349,6 +349,9 @@ function createWorld() {
 	grav.position.set(0,3,-16);
 	powerups.push(grav);
 
+	// move powerups to random place on map
+	randomMoveArray(powerups);
+
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
 	} 
@@ -368,10 +371,11 @@ function createWorld() {
 	collectibles.push(collectible1);
 	
 	// move collectibles to random place on map
-	//randomMoveArray(collectibles);
+	randomMoveArray(collectibles);
 
-	for (var j = 0; j < collectibles.length; j++) {
-		scene.add(collectibles[j]);
+	for (var i = 0; i < collectibles.length; i++) {
+		scene.add(collectibles[i]);
+		console.log(collectibles[i].position);
 	}
 
 } // end function createWorld()
@@ -402,10 +406,12 @@ function randomPlace(){
 
 function randomMoveArray( arr ){
 	for(var i = 0; i < arr.length; i++){
-		arr[i].position.set(randomPlace());
+		var move = randomPlace();
+		arr[i].position.set(move.x, move.y, move.z);
 		arr[i].geometry.computeBoundingBox();
 		while(buildingBoxCollision(arr[i]).length != 0){
-			arr[i].position.set(randomMove());
+			move = randomMove();
+			arr[i].position.set(move.x, move.y, move.z);
 		}
 	}
 }
@@ -965,6 +971,8 @@ function createText() {
  */
 
 function updateForFrame() {
+	console.log(player.position)
+
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
 
@@ -1036,9 +1044,7 @@ function updateForFrame() {
 	//Collision
 	var tempCurrLevel = currLevel;
 	collissions();
-	console.log(currLevel + " asdasdas " + tempCurrLevel);
 	if(currLevel != tempCurrLevel){
-		console.log("12312123");
 		return;
 	}
 
