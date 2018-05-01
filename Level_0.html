@@ -162,7 +162,7 @@ function respawnAlpha(){
 		console.log("respawning alpha");
 		var randomX = Math.random();
 		var randomZ = Math.random();
-		player.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
+		player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
 		minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
 		collissions();
 		if(alpha.lives != currLives){
@@ -544,11 +544,12 @@ function keysReleased(e) {
 Put player on the floor
 ///////////////////////////////////////////////////////////////////////////*/
 function put_on_floor() {
-	if(player.position.y > -2 + alpha.getRadius()) {	//check if player has reached the "floor"
+	if(player.position.y > worldMap.floorHeight + alpha.getRadius() - 2) {	//check if player has reached the "floor" + some leeway
 		alpha.incSpeedY(-0.01);				//if they have not, reduce speed (gravity)
 	} else {						//if they have, stop reducing speed and set position to the ground, set Y speed to zero
-		alpha.setSpeedY(0);
-		player.position.y = -2 + alpha.getRadius();
+		//alpha.setSpeedY(0);
+		//player.position.y = -2 + alpha.getRadius();
+		Crash();
 	}	
 }
 
@@ -579,10 +580,11 @@ function model_loader(geometry, materials) {
 // TRANSFORMS
 
 	alpha.scale.set(0.05,0.05,0.05);
-	alpha.position.set(0,-2,0);
+	alpha.position.set(0,0,0);
 	alpha.rotateY(Math.PI);
 	alpha.castShadow = true;
 	player.add(alpha);				// add alpha to player
+	player.translateY(10);			// move player so that alpha doesn't crash on game start
 
 	alpha.geometry.computeBoundingBox();
 	alphaDone = true;
@@ -886,6 +888,11 @@ function updateForFrame() {
 	// TODO:Might need to update this for dying
 	put_on_floor();
 
+	//check for death by atmosphere (lasers) (height) + some leeway
+	if(player.position.y > ATMOSPHERE_HEIGHT + 1){
+		Crash();
+	}
+
 	// Slowly moving the camera back behind _alpha_
 	if (resetCameraFlag){
 		resetCameraPosition();
@@ -945,7 +952,6 @@ function updateForFrame() {
 	Score++;
  	document.getElementById("s1").innerHTML = "Score: " + Score;
  	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
-
 
 }
 
