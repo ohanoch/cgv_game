@@ -66,6 +66,7 @@ var powerups = [];
 var collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
 
 var powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
+var activePowerup = null;
 var collectibles = [];			// the items that the player needs to collect in order to progress to the next level
 //var collectiblesLeft = 0;			// the number of collectibles left to collect. when this reaches zero, go to next level
 var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
@@ -319,15 +320,15 @@ function createWorld() {
 
 
 	var gun = new Powerup("gun");	// add a gun powerup
-	gun.position.set(3,1,3);
+	gun.position.set(3,4,3);
 	powerups.push(gun);
 
 	var inv = new Powerup("invisible");	// add invisibility powerup
-	inv.position.set(10,1,10);
+	inv.position.set(10,6,10);
 	powerups.push(inv);
 
 	var grav = new Powerup("gravity");	// add a gravity powerup
-	grav.position.set(-10,1,12);
+	grav.position.set(0,3,-16);
 	powerups.push(grav);
 
 	for(var i = 0; i < powerups.length; i++){
@@ -338,14 +339,14 @@ function createWorld() {
 		new THREE.CylinderGeometry(1,0.5,1,32),
 		new THREE.MeshPhongMaterial({color: 0xff00ff})
 	);
-	collectible0.position.set(-3,1,3);
+	collectible0.position.set(-7,5,3);
 	collectibles.push(collectible0);
 	
 	var collectible1 = new Collectible(
 		new THREE.CylinderGeometry(1,0.5,1,32),
 		new THREE.MeshPhongMaterial({color: 0x00ffff})
 	);
-	collectible1.position.set(4,1,-4);
+	collectible1.position.set(7,3,-4);
 	collectibles.push(collectible1);
 	
 	for (var j = 0; j < collectibles.length; j++) {
@@ -684,6 +685,8 @@ function  collissions() {
 				console.log("Gravity"); //TODO: update alpha stats
 			}
 			
+			PowerupsCollisionResults[0].object.activatePower();
+			activePowerup = PowerupsCollisionResults[0].object;
 			powerups.splice(powerups.indexOf (PowerupsCollisionResults[0].object), 1 );
 			scene.remove(PowerupsCollisionResults[0].object);
 		}
@@ -692,6 +695,11 @@ function  collissions() {
 			console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
 			collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
 			scene.remove(CollectibleCollisionResults[0].object);
+			
+			if(collectibles.length == 0) {
+				window.alert( "You won the level!");
+				//TODO: win the level if all collectibles collected
+			}
 		}
 
 	}// end for loop	
@@ -766,7 +774,7 @@ function createText() {
 					face.vertexNormals[ j ].copy( face.normal );
 
 				}
-
+			
 			}
 
 		}
@@ -830,8 +838,19 @@ function updateForFrame() {
 	for(var i = 0; i < powerups.length; i++){
 		powerups[i].animate();
 	} 
-
-	// Animate collectibles
+	
+//check if a power has been activated
+	if(activePowerup != null) {
+		if(activePowerup.getExpiration() < 0) {
+			activePowerup.deactivatePower();
+			activePowerup = null;
+		} else {
+			activePowerup.decrementExpiration();
+		}
+		
+	}
+	
+	// animate collectibles
 	for(var j = 0; j < collectibles.length; j++) {
 		collectibles[j].animate();
 	}
