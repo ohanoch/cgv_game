@@ -30,6 +30,7 @@ var WORLD_WIDTH = 2000;
 var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
+var LEVEL = 0; //level variable mostly for display purposes at the moment
 // var SAVE_EVERY_N_FRAMES = 200; // ACHTUNG: This may need adjusting depending on layout of buildings in level ad other stuff
 var STARTING_LIVES = 3;
 var NUM_LIGHTS = 2;
@@ -81,6 +82,7 @@ var cubeCamera;
 
 var joshSucks; // he does
 
+var Score = 0;
 
 /// TODO: Put these with global vars or somewhere else
 var text = "JOSH  SUCKS",
@@ -89,6 +91,12 @@ var text = "JOSH  SUCKS",
 	curveSegments = 4,
 	font = undefined;
 var group, textMesh1, textGeo, materials;
+
+
+
+
+
+
 
 /**
  *  The render function draws the scene.
@@ -264,17 +272,18 @@ function createWorld() {
 	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
 	joshSucks = new THREE.Object3D();
 
-	var geometry = new THREE.SphereGeometry(0.5, 32, 16);
+	var geometry = new THREE.SphereGeometry(5, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
     color   : 'chrome'
 	});
 	mesh = new THREE.Mesh(geometry, material);
-	mesh.scale.set(10,10,10);
+	//mesh.scale.set(5,10,10);
 	mesh.position.set(0,0,0);	// centre obj coords of sphere
-	//scene.add(mesh);
+	scene.add(mesh);
 
 	// using cubecamera.js library. Don't know if this is legal
  	cubeCamera  = new THREEx.CubeCamera(mesh);
+	scene.add(cubeCamera.object3d);
 
 	material.envMap = cubeCamera.textureCube;
 	joshSucks.add(mesh);
@@ -284,17 +293,17 @@ function createWorld() {
 		
 
 //////////////////////////////////////////////////////////////////////////////////
-//		add  text	 			//
+//		add  text	 														//
 ///	///////////////////////////////////////////////////////////////////////////////
 	group = new THREE.Group();
-	group.position.set(-8,0,10);	// obj translation of text object onto sphere
+	group.position.set(-8,0,10);	// obj translation of text object onto sphere. Currently doesn't reflect close objects nicely 
+
 	//scene.add( group );
 	loadFont();	// create the text object
 	console.log("Loadfont was called");	
 	joshSucks.add(group);
 	joshSucks.position.set(3,3,-30);
 	scene.add(joshSucks);
-	scene.add(cubeCamera.object3d);
 
 
 
@@ -855,6 +864,12 @@ function updateForFrame() {
 	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
 	cubeCamera.update(renderer, scene);
 	
+	// Score update: TODO: ut in function and tidy up
+	Score++;
+ 	document.getElementById("s1").innerHTML = "Score: " + Score;
+ 	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
+
+
 }
 
 
@@ -921,6 +936,7 @@ function doFrame() {
 function init() {
     try {
 		container = document.getElementById( 'container' );
+		document.getElementById("s0").innerHTML = "Level: " + LEVEL;
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
@@ -946,20 +962,81 @@ function init() {
 	// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
 	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
-
     render();
 }
 
 </script>
+
+<!-- CSS -->
+<style>
+.container {
+    position: relative;
+    text-align: center;
+    color: black;
+}
+
+.bottom-left {
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+}
+
+.top-left {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+}
+
+.top-right {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+}
+
+.bottom-right {
+    position: absolute;
+    bottom: 8px;
+    right: 16px;
+}
+
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.text-block {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color:rgba(192,192,192,0.5);
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+</style>
+
+
 </head>
 <body onload="init()">
+
+
 	<noscript>
    		<p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
 	</noscript>
 
 	<p style="color:#AA0000; font-weight: bold" id="message"> </p>
-
-	<div id="container"></div>
+ 	<div class="container">
+		<div id="container"></div>
+	  	<div class="text-block">
+	    	<h4>Stats</h4>
+	    	<p id="s0"></p>
+	    	<p id="s1">Score: NaN </p>
+	    	<p id="s2">Lives: - / - </p>
+	    </div>
+	</div>
 
 </body>
 </html>
