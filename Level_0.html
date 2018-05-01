@@ -7,6 +7,14 @@
 <script src="src\js\libs\stats.min.js"></script>
 <script src="src\js\OBJLoader.js"></script>
 <script src="src\js\MTLLoader.js"></script>
+<script src="src\js\threex.cubecamera.js"></script>
+<script src="src\js\threex.atmospherematerial.js"></script>
+<script src="src\js\threex.atmospherematerialdatgui.js"></script>
+<script src="src\js\threex.dilategeometry.js"></script>
+<script src="src\js\threex.geometricglowmesh.js"></script>
+<script src="src/js/GeometryUtils.js"></script>
+<script src="src/js/BendModifier.js"></script>
+
 
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
@@ -22,6 +30,8 @@ var WORLD_WIDTH = 2000;
 var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
+var LEVEL = 0; //level variable mostly for display purposes at the moment
+// var SAVE_EVERY_N_FRAMES = 200; // ACHTUNG: This may need adjusting depending on layout of buildings in level ad other stuff
 var STARTING_LIVES = 3;
 var NUM_LIGHTS = 2;
 
@@ -63,6 +73,30 @@ var mixer = null;  // The object that animates the model, of type THREE.Animatio
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
 
 var worldMap;
+
+var last_position; // Save last legal position of player. Used in respawning process Gets updated every +- 10 (?) legal positions
+
+var mesh;
+
+var cubeCamera;
+
+var joshSucks; // he does
+
+var Score = 0;
+
+/// TODO: Put these with global vars or somewhere else
+var text = "JOSH  SUCKS",
+	height = 0.5,
+	size = 2,
+	curveSegments = 4,
+	font = undefined;
+var group, textMesh1, textGeo, materials;
+
+
+
+
+
+
 
 /**
  *  The render function draws the scene.
@@ -212,7 +246,6 @@ function createWorld() {
 	scene.add(minimapCamera);
 
 
-
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
@@ -227,7 +260,54 @@ function createWorld() {
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
+
+
+
+
 	
+	//---------------------------------- CUBE MAP OBJECT THING// TODO: DECIDE WHERE TO PUT THIS and CLEAN IT UP and TRY using NOT THREEx OR maybe keep it if Richard gives points for using extensions??--------------------------------------
+	// try using https://threejs.org/examples/#webgl_materials_cubemap_dynamic2
+
+
+	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
+	joshSucks = new THREE.Object3D();
+
+	var geometry = new THREE.SphereGeometry(5, 32, 16);
+	var material = new THREE.MeshPhongMaterial({
+    color   : 'chrome'
+	});
+	mesh = new THREE.Mesh(geometry, material);
+	//mesh.scale.set(5,10,10);
+	mesh.position.set(0,0,0);	// centre obj coords of sphere
+	scene.add(mesh);
+
+	// using cubecamera.js library. Don't know if this is legal
+ 	cubeCamera  = new THREEx.CubeCamera(mesh);
+	scene.add(cubeCamera.object3d);
+
+	material.envMap = cubeCamera.textureCube;
+	joshSucks.add(mesh);
+
+	// GLOW THING
+	// Source: https://github.com/jeromeetienne/threex.geometricglow
+		
+
+//////////////////////////////////////////////////////////////////////////////////
+//		add  text	 														//
+///	///////////////////////////////////////////////////////////////////////////////
+	group = new THREE.Group();
+	group.position.set(-8,0,10);	// obj translation of text object onto sphere. Currently doesn't reflect close objects nicely 
+
+	//scene.add( group );
+	loadFont();	// create the text object
+	console.log("Loadfont was called");	
+	joshSucks.add(group);
+	joshSucks.position.set(3,3,-30);
+	scene.add(joshSucks);
+
+
+
+
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 
 // alpha is created by model_loader function and added to player
@@ -389,7 +469,7 @@ function keysPressed(e) {
     // store an entry for every key pressed
     keys[e.keyCode] = true;
         // NB: prevent default browser behavior - disable during testing
-        //e.preventDefault();
+        e.preventDefault();
 }
 
 function keysReleased(e) {
@@ -425,7 +505,16 @@ function model_loader(geometry, materials) {
         vertexColors: THREE.FaceColors,  	// use colors from the geometry
         morphTargets: true							// for animation
     });
-	
+
+// Testing geometry
+       // var geom2= new THREE.BoxGeometry(10,10,10);
+       //  var mar2 = new THREE.MeshPhongMaterial({
+       //      color: 0xFF0000,
+       //      specular: 0x222222,
+       //      shininess: 16
+       //      //shading: THREE.FlatShading
+       //  });
+    
 	alpha = new Alpha(geometry,material, 1);	// create alpha object
 	
 // TRANSFORMS
@@ -452,6 +541,45 @@ function model_loader(geometry, materials) {
 
 
 
+/*//////////////////////////////////////////////////////////////////////////
+Respawn: Reset player position, reset alpha speed 
+///////////////////////////////////////////////////////////////////////////*/
+function Respawn(){
+	animating = false;
+	// reset player position to legal position, N frames ago (checkpoint kinda):
+	player.position.set(last_position.x,last_position.y,last_position.z);
+	console.log("player",player.position.x, player.position.y, player.position.z);
+	
+	// reset alpha speed
+	alpha.setSpeedZ(-0.01);	// We should probably have a static variable for this
+	alpha.setSpeedY(0);
+	animating = true;	
+	// 
+}
+
+
+
+/*//////////////////////////////////////////////////////////////////////////
+Save Position: Saves players legal position every N frames. avi_respawn
+///////////////////////////////////////////////////////////////////////////*/
+// function SavePosition(){
+// 	if (everyNframes == SAVE_EVERY_N_FRAMES){
+// 		// Do stuff:
+// 		console.log("N counter: ", everyNframes);
+// 		// - Store position of player
+// 		last_position = player.position.clone(); // may need to be player.position.clone()
+// 		console.log("last position",last_position);
+// 		// Reset to everyNframes counter to 0
+// 		everyNframes = 0;
+// 		console.log("N counter: ", everyNframes);
+
+// 	}else{ 
+// 		return; // necessary ??
+// 	}
+// }
+
+
+
 
 /*//////////////////////////////////////////////////////////////////////////
 Crash: Explosion, respawn from crash site, decrement lives, game over
@@ -466,6 +594,7 @@ function Crash() {
 		//do other stuff
 	}else{
 	// TODO : Crash animation, respawn
+		// Respawn(); //avi_respawn
 		console.log("alpha crashed...");
 		animating = false;
 		window.alert("C R A S H E D!\n Lives left: " + alpha.lives);
@@ -476,6 +605,8 @@ function Crash() {
 	}
 
 }
+
+
 
 /*//////////////////////////////////////////////////////////////////////////
 Collisions!
@@ -568,8 +699,99 @@ function  collissions() {
 
 
 
+/*//////////////////////////////////////////////////////////////////////////
+Fucking Text!
+///////////////////////////////////////////////////////////////////////////*/
 
 
+materials = [
+	new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } ), // front
+	new THREE.MeshPhongMaterial( { color: 0xffffff } ) // side
+];
+// get the font then run create text fn
+function loadFont() {
+
+	var loader = new THREE.FontLoader();
+	loader.load( 'fonts/Etienne/helvetiker_regular.typeface.js', function ( response ) {
+
+		font = response;
+		createText();
+		console.log("loadFont()");
+
+	} );
+
+}
+
+// create text fn
+function createText() {
+	console.log("createText()");
+	textGeo = new THREE.TextGeometry( text, {
+		font: font,
+		size: size,
+		height: height,
+		curveSegments: curveSegments
+	});
+
+	textGeo.computeBoundingBox();
+	textGeo.computeVertexNormals();
+
+	// "fix" side normals by removing z-component of normals for side faces
+	// (this doesn't work well for beveled geometry as then we lose nice curvature around z-axis)
+	var triangleAreaHeuristics = 0.1 * ( height * size );
+
+	for ( var i = 0; i < textGeo.faces.length; i ++ ) {
+
+		var face = textGeo.faces[ i ];
+
+		if ( face.materialIndex == 1 ) {
+
+			for ( var j = 0; j < face.vertexNormals.length; j ++ ) {
+
+				face.vertexNormals[ j ].z = 0;
+				face.vertexNormals[ j ].normalize();
+
+			}
+
+			var va = textGeo.vertices[ face.a ];
+			var vb = textGeo.vertices[ face.b ];
+			var vc = textGeo.vertices[ face.c ];
+
+			var s = THREE.GeometryUtils.triangleArea( va, vb, vc );
+
+			if ( s > triangleAreaHeuristics ) {
+
+				for ( var j = 0; j < face.vertexNormals.length; j ++ ) {
+
+					face.vertexNormals[ j ].copy( face.normal );
+
+				}
+
+			}
+
+		}
+
+	}
+
+	var centerOffset = -0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
+
+	textMesh1 = new THREE.Mesh( textGeo, materials );
+
+	// bend the text - this took hours to figure out because all the docs and examples are deprecated - FUCK
+	// Had to modify a lib file (BendModifier.js)
+	var direction = new THREE.Vector3( 0, 0, -1 );
+	var axis =  new THREE.Vector3( 0, 1, 0 );
+	var angle = Math.PI / 2.5;
+	var modifier = new THREE.BendModifier();
+	modifier.set( direction, axis, angle ).modify( textMesh1.geometry );
+
+
+	group.add( textMesh1 );
+
+	// create a glowMesh to make the text glow like neon
+	var glowMesh	= new THREEx.GeometricGlowMesh(textMesh1);
+	group.add(glowMesh.object3d);
+
+}
 
 
 ///////////////////////////////////\				  //////////////////////////////
@@ -581,6 +803,8 @@ function  collissions() {
  *  animated properties.  The value of the global variable frameNumber
  *  is incrementd 1 before this function is called.
  */
+var everyNframes = 0; // Global counter to do stuff every Nth frame. 
+
 function updateForFrame() {
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
@@ -605,7 +829,8 @@ function updateForFrame() {
 	for(var i = 0; i < powerups.length; i++){
 		powerups[i].animate();
 	} 
-	
+
+	// Animate collectibles
 	for(var j = 0; j < collectibles.length; j++) {
 		collectibles[j].animate();
 	}
@@ -620,15 +845,31 @@ function updateForFrame() {
 		camera.position.y = worldMap.floorHeight + 1.1;
 	}
 	
-
 	// Summon keyboard control lookups in one line.
 	key_check(); 		
 
+	// Increment Nth frame counter
+	everyNframes ++;
+	console.log("N counter: ",everyNframes);
+
+	//Every N frames, save position.
+	//SavePosition();	//avi_respawn
 
 	//Collision
-	collissions();
+	collissions();	
 
+	//animate josh sucks
+	joshSucks.rotateY(Math.sin(Math.PI/6));
+
+	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
+	cubeCamera.update(renderer, scene);
 	
+	// Score update: TODO: ut in function and tidy up
+	Score++;
+ 	document.getElementById("s1").innerHTML = "Score: " + Score;
+ 	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
+
+
 }
 
 
@@ -695,6 +936,7 @@ function doFrame() {
 function init() {
     try {
 		container = document.getElementById( 'container' );
+		document.getElementById("s0").innerHTML = "Level: " + LEVEL;
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
@@ -720,20 +962,81 @@ function init() {
 	// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
 	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
-
     render();
 }
 
 </script>
+
+<!-- CSS -->
+<style>
+.container {
+    position: relative;
+    text-align: center;
+    color: black;
+}
+
+.bottom-left {
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+}
+
+.top-left {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+}
+
+.top-right {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+}
+
+.bottom-right {
+    position: absolute;
+    bottom: 8px;
+    right: 16px;
+}
+
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.text-block {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color:rgba(192,192,192,0.5);
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+</style>
+
+
 </head>
 <body onload="init()">
+
+
 	<noscript>
    		<p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
 	</noscript>
 
 	<p style="color:#AA0000; font-weight: bold" id="message"> </p>
-
-	<div id="container"></div>
+ 	<div class="container">
+		<div id="container"></div>
+	  	<div class="text-block">
+	    	<h4>Stats</h4>
+	    	<p id="s0"></p>
+	    	<p id="s1">Score: NaN </p>
+	    	<p id="s2">Lives: - / - </p>
+	    </div>
+	</div>
 
 </body>
 </html>
