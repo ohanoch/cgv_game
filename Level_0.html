@@ -400,8 +400,8 @@ function menuInteraction(e){
 	var raycaster = new THREE.Raycaster();
 	
 	//var r = window.getBoundingClientRect();
-	var x = e.clientX// - r.left; // convert mouse location to canvas pixel coords
-	var y = e.clientY// - r.top;
+	var x = e.clientX	// take in click coordinates
+	var y = e.clientY	// 
 
 	var a = 2 * x / window.innerWidth - 1; // convert canvas pixel coords to clip coords
 	var b = 1 - 2 * y / window.innerHeight;
@@ -581,6 +581,7 @@ function restartGame(){
 	console.log("restarting game");
 	reinitializeGlobals();
 	createWorld();
+	installOrbitControls();
 	console.log("game restarted");	
 }
 
