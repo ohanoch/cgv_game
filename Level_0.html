@@ -390,6 +390,8 @@ function exitMenu(){
 		scene.remove(menu.buttons[i]);
 	}
 	document.removeEventListener("mousedown", menuInteraction);
+	animating = true;
+	requestAnimationFrame(doFrame);
 }
 /*//////////////////////////////////////////////////////////////////////////////////////////
 Waiting for user input while in menu mode
@@ -404,7 +406,6 @@ function menuInteraction(e){
 	var a = 2 * x / window.innerWidth - 1; // convert canvas pixel coords to clip coords
 	var b = 1 - 2 * y / window.innerHeight;
 
-	console.log("aaaaaaaaaaa " + a + " bbbbbbbbbbbb " + b);
 	raycaster.setFromCamera( new THREE.Vector2(a,b), camera );
 
 	var intersections = raycaster.intersectObjects( menu.buttons, true );
@@ -1046,12 +1047,9 @@ function installOrbitControls() {
 // It determines _alpha_'s movements ("Space" with arrow keys or WASD). 
 /*  Drives the animation, called by system through requestAnimationFrame() */
 function doFrame() {
-	console.log("yyyyyyyyyyyyyyyyyyyy " + animating)
     if (animating) {
         frameNumber++;
-	console.log("uuuuuuuuuuuuuuuuuuuuu " + animating)
         updateForFrame();
-	console.log("tttttttttttttttttttt " + animating)
         render();
 		stats.update();
         requestAnimationFrame(doFrame);
