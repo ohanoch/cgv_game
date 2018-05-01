@@ -22,6 +22,7 @@ class Alpha extends THREE.Mesh{
 		this.speedY = 0;
 		this.speedZ = -0.01;
 		this.maxSpeedY = 0.7;
+		this.minSpeedY = -1000;
 		this.maxSpeedZ = -1;
 		this.minSpeedZ = -0.01;
 		
@@ -51,6 +52,10 @@ class Alpha extends THREE.Mesh{
 		this.radius = rad;
 	}
 	
+	setMinSpeedY (newMinSpeed) {
+		this.minSpeedY = newMinSpeed;
+	}
+	
 	getSpeedY() {
 		return this.speedY;
 	}
@@ -64,6 +69,10 @@ class Alpha extends THREE.Mesh{
 			this.speedY = newSpeedY;
 		} else {
 			this.speedY = this.maxSpeedY;
+		}
+		
+		if(newSpeedY < this.minSpeedY) {
+			this.speedY = this.minSpeedY;
 		}
 	}
 	
@@ -82,6 +91,10 @@ class Alpha extends THREE.Mesh{
 		this.speedY += incY;
 		if(this.speedY > this.maxSpeedY) {
 			this.speedY = this.maxSpeedY;
+		}
+		
+		if(this.speedY < this.minSpeedY) {
+			this.speedY = this.minSpeedY;
 		}
 	}
 	
