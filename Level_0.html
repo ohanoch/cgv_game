@@ -5,6 +5,16 @@
 <script src="src\js\three.js"></script>
 <script src="src\js\OrbitControls.js"></script>
 <script src="src\js\libs\stats.min.js"></script>
+<script src="src\js\OBJLoader.js"></script>
+<script src="src\js\MTLLoader.js"></script>
+<script src="src\js\threex.cubecamera.js"></script>
+<script src="src\js\threex.atmospherematerial.js"></script>
+<script src="src\js\threex.atmospherematerialdatgui.js"></script>
+<script src="src\js\threex.dilategeometry.js"></script>
+<script src="src\js\threex.geometricglowmesh.js"></script>
+<script src="src/js/GeometryUtils.js"></script>
+<script src="src/js/BendModifier.js"></script>
+
 
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
@@ -16,10 +26,14 @@
 "use strict";
 
 //Globals
-var WORLD_WIDTH = 5000;
-var WORLD_DEPTH = 5000;
+var WORLD_WIDTH = 2000;
+var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
+var LEVEL = 0; //level variable mostly for display purposes at the moment
+// var SAVE_EVERY_N_FRAMES = 200; // ACHTUNG: This may need adjusting depending on layout of buildings in level ad other stuff
+var STARTING_LIVES = 3;
+var NUM_LIGHTS = 2;
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
@@ -51,7 +65,6 @@ var powerups = [];
 
 var collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
 
-var alpha;
 var powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
 var activePowerup = null;
 var collectibles = [];			// the items that the player needs to collect in order to progress to the next level
@@ -61,6 +74,30 @@ var mixer = null;  // The object that animates the model, of type THREE.Animatio
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
 
 var worldMap;
+
+var last_position; // Save last legal position of player. Used in respawning process Gets updated every +- 10 (?) legal positions
+
+var mesh;
+
+var cubeCamera;
+
+var joshSucks; // he does
+
+var Score = 0;
+
+/// TODO: Put these with global vars or somewhere else
+var text = "JOSH  SUCKS",
+	height = 0.5,
+	size = 2,
+	curveSegments = 4,
+	font = undefined;
+var group, textMesh1, textGeo, materials;
+
+
+
+
+
+
 
 /**
  *  The render function draws the scene.
@@ -76,16 +113,79 @@ function render() {
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
     renderer.render(scene, camera);
+	
+	//add objects to minimap so it will be easier to see
 
-	// Render minimap camera in bottom left corner
+	//add sphere for player
+	var arrow = new THREE.Mesh(
+		new THREE.SphereGeometry( 20 ),
+		new THREE.MeshBasicMaterial( {color: 0xffff00} )	
+	);
+	arrow.translateX(player.position.x - arrow.position.x);
+	arrow.translateZ(player.position.z - arrow.position.z);
+	arrow.translateY(ATMOSPHERE_HEIGHT - 88);
+	scene.add(arrow);
+
+	var minimapPowerups = [];
+	for (var i = 0; i < powerups.length; i++){
+		var powerupCube = new THREE.Mesh(
+			new THREE.BoxGeometry( 30, 30, 30 ),
+			new THREE.MeshBasicMaterial( {color: 0xff0000} )
+		);
+		
+		powerupCube.translateX(powerups[i].position.x - powerupCube.position.x);
+		powerupCube.translateZ(powerups[i].position.z - powerupCube.position.z);
+		powerupCube.translateY(ATMOSPHERE_HEIGHT - 90);
+		minimapPowerups.push(powerupCube);
+
+		scene.add(powerupCube);
+	} 
+
+	// Render minimap camera in top right corner
 	renderer.setViewport( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
 	renderer.setScissor( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
 	renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
 	minimapCamera.aspect = w / h;
 	minimapCamera.updateProjectionMatrix();
 	renderer.render( scene, minimapCamera );
+
+	//romve arrow from scene
+	scene.remove(arrow);
+
+	for (var i = 0; i < powerups.length; i++){
+		scene.remove(minimapPowerups[i])
+	}
 }
 
+function respawnAlpha(){
+	var currLives = alpha.lives;
+	while(true){
+		console.log("respawning alpha");
+		var randomX = Math.random();
+		var randomZ = Math.random();
+		player.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
+		minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
+		collissions();
+		if(alpha.lives != currLives){
+			alpha.lives = currLives;
+		} else {
+			break;
+		} 
+	}
+	alpha.resetAttributes();
+}
+
+//make sure alpha doesn't spawn on an object
+// this function gets called as a callback for when alpha finishes loading and for when map buildings get loaded
+var alphaDone = false;
+var mapDone = false;
+function alphaStartup(){
+	if(alphaDone && mapDone){
+		console.log("checking if alpha initialized on building");
+		collissions();
+		alpha.lives = STARTING_LIVES;
+	}
+}
 
 /**
  * This function is called by the init() method to create the world. 
@@ -97,12 +197,39 @@ function createWorld() {
     
     // ------------------- Make a camera with viewpoint light ----------------------
     
-    camera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(
+		30, 
+		window.innerWidth/window.innerHeight, 
+		0.1, 
+		ALPHA_CAMERA_DISTANCE * 20//Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
+	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
-    var light;  // A light shining from the direction of the camera; moves with the camera.
-    light = new THREE.DirectionalLight();
-    light.position.set(0,50,0);
-    camera.add(light);
+
+	//------------------------------------- LIGHTING ------------------------------------------------
+	for(var i = 0; i < NUM_LIGHTS; i++){
+		var light = new THREE.PointLight(0xffffff, 1, 1000000);
+		light.position.set(
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10),
+			ATMOSPHERE_HEIGHT * (1 + Math.random()), 
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10)
+		);
+
+		//shadows for light 1
+		light.castShadow = true;
+		light.shadowDarkness = 0.5;
+		//Set up shadow properties for the light
+		light.shadow.mapSize.width = WORLD_WIDTH;  
+		light.shadow.mapSize.height = WORLD_DEPTH; 
+		light.shadow.camera.near = 0.5;    // default
+		light.shadow.camera.far = Math.sqrt(Math.pow(ATMOSPHERE_HEIGHT,2) + Math.pow(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
+
+		scene.add(light);
+	}
+
+	//Create a helper for the shadow camera (optional)
+	//var lightHelper = new THREE.CameraHelper( light1.shadow.camera );
+	//scene.add( lightHelper );
+
     player.add(camera);
     scene.add(player);
     
@@ -120,21 +247,69 @@ function createWorld() {
 	scene.add(minimapCamera);
 
 
-
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
 	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
-	scene.add(worldMap.skybox);
+	scene.background = worldMap.skybox;
 	scene.add(worldMap.atmosphere);	
 
 	//add buildings to scene
-	worldMap.createBuildings(1/4); //map-buildings ratio is 1/4
+	worldMap.createBuildings(0.5); //map-buildings ratio is 1/2
+
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
+
+
+
+
 	
+	//---------------------------------- CUBE MAP OBJECT THING// TODO: DECIDE WHERE TO PUT THIS and CLEAN IT UP and TRY using NOT THREEx OR maybe keep it if Richard gives points for using extensions??--------------------------------------
+	// try using https://threejs.org/examples/#webgl_materials_cubemap_dynamic2
+
+
+	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
+	joshSucks = new THREE.Object3D();
+
+	var geometry = new THREE.SphereGeometry(5, 32, 16);
+	var material = new THREE.MeshPhongMaterial({
+    color   : 'chrome',
+	envMap 	: scene.background
+	});
+	mesh = new THREE.Mesh(geometry, material);
+	//mesh.scale.set(5,10,10);
+	mesh.position.set(0,0,0);	// centre obj coords of sphere
+	scene.add(mesh);
+
+	// using cubecamera.js library. Don't know if this is legal
+ 	//cubeCamera  = new THREEx.CubeCamera(mesh);
+	//scene.add(cubeCamera.object3d);
+
+	//material.envMap = cubeCamera.textureCube;
+	joshSucks.add(mesh);
+
+	// GLOW THING
+	// Source: https://github.com/jeromeetienne/threex.geometricglow
+		
+
+//////////////////////////////////////////////////////////////////////////////////
+//		add  text	 														//
+///	///////////////////////////////////////////////////////////////////////////////
+	group = new THREE.Group();
+	group.position.set(-8,0,10);	// obj translation of text object onto sphere. Currently doesn't reflect close objects nicely 
+
+	//scene.add( group );
+	loadFont();	// create the text object
+	console.log("Loadfont was called");	
+	joshSucks.add(group);
+	joshSucks.position.set(3,3,-30);
+	scene.add(joshSucks);
+
+
+
+
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 
 // alpha is created by model_loader function and added to player
@@ -142,6 +317,8 @@ function createWorld() {
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 	loader.load("models/stork.js", model_loader);		// load model and call model_loader
 	
+
+
 	var gun = new Powerup("gun");	// add a gun powerup
 	gun.position.set(3,4,3);
 	powerups.push(gun);
@@ -241,12 +418,14 @@ function key_check(){
 
     // right arrow: turn right
     if (keys[39]) {     
-        player.rotation.y -= 0.03;
+        player.rotateY(-1 * Math.PI/180);
+		minimapCamera.rotateZ(-1 * Math.PI/180);
     }
 
     // left arrow: turn left
     if (keys[37]) {     
-        player.rotation.y += 0.03;
+        player.rotateY(Math.PI/180);
+		minimapCamera.rotateZ(Math.PI/180) ;
     }
 
    // space key: fight gravity
@@ -292,7 +471,7 @@ function keysPressed(e) {
     // store an entry for every key pressed
     keys[e.keyCode] = true;
         // NB: prevent default browser behavior - disable during testing
-        //e.preventDefault();
+        e.preventDefault();
 }
 
 function keysReleased(e) {
@@ -328,7 +507,16 @@ function model_loader(geometry, materials) {
         vertexColors: THREE.FaceColors,  	// use colors from the geometry
         morphTargets: true							// for animation
     });
-	
+
+// Testing geometry
+       // var geom2= new THREE.BoxGeometry(10,10,10);
+       //  var mar2 = new THREE.MeshPhongMaterial({
+       //      color: 0xFF0000,
+       //      specular: 0x222222,
+       //      shininess: 16
+       //      //shading: THREE.FlatShading
+       //  });
+    
 	alpha = new Alpha(geometry,material, 1);	// create alpha object
 	
 // TRANSFORMS
@@ -336,9 +524,13 @@ function model_loader(geometry, materials) {
 	alpha.scale.set(0.05,0.05,0.05);
 	alpha.position.set(0,-2,0);
 	alpha.rotateY(Math.PI);
-	
+	alpha.castShadow = true;
 	player.add(alpha);				// add alpha to player
-	
+
+	alpha.geometry.computeBoundingBox();
+	alphaDone = true;
+	alphaStartup();	
+
 // ANIMATION STUFF
 	
 	mixer = new THREE.AnimationMixer( alpha );
@@ -348,6 +540,45 @@ function model_loader(geometry, materials) {
     animationAction.play(); 
 	render();
 }
+
+
+
+/*//////////////////////////////////////////////////////////////////////////
+Respawn: Reset player position, reset alpha speed 
+///////////////////////////////////////////////////////////////////////////*/
+function Respawn(){
+	animating = false;
+	// reset player position to legal position, N frames ago (checkpoint kinda):
+	player.position.set(last_position.x,last_position.y,last_position.z);
+	console.log("player",player.position.x, player.position.y, player.position.z);
+	
+	// reset alpha speed
+	alpha.setSpeedZ(-0.01);	// We should probably have a static variable for this
+	alpha.setSpeedY(0);
+	animating = true;	
+	// 
+}
+
+
+
+/*//////////////////////////////////////////////////////////////////////////
+Save Position: Saves players legal position every N frames. avi_respawn
+///////////////////////////////////////////////////////////////////////////*/
+// function SavePosition(){
+// 	if (everyNframes == SAVE_EVERY_N_FRAMES){
+// 		// Do stuff:
+// 		console.log("N counter: ", everyNframes);
+// 		// - Store position of player
+// 		last_position = player.position.clone(); // may need to be player.position.clone()
+// 		console.log("last position",last_position);
+// 		// Reset to everyNframes counter to 0
+// 		everyNframes = 0;
+// 		console.log("N counter: ", everyNframes);
+
+// 	}else{ 
+// 		return; // necessary ??
+// 	}
+// }
 
 
 
@@ -365,7 +596,11 @@ function Crash() {
 		//do other stuff
 	}else{
 	// TODO : Crash animation, respawn
+		// Respawn(); //avi_respawn
+		console.log("alpha crashed...");
 		animating = false;
+		window.alert("C R A S H E D!\n Lives left: " + alpha.lives);
+		respawnAlpha();
 	// respawning:
 	// player.position = legal position
 	// 
@@ -373,75 +608,199 @@ function Crash() {
 
 }
 
+
+
 /*//////////////////////////////////////////////////////////////////////////
 Collisions!
 ///////////////////////////////////////////////////////////////////////////*/
 
+//check for collision between two bounding boxes
+//note bounding boxes have min: x,y,z, and max: x,y,z values
+function twoBoxCollision(box1, box2){
+	if(
+		(box1.max.x < box2.min.x || box1.min.x > box2.max.x) ||
+		(box1.max.y < box2.min.y || box1.min.y > box2.max.y) ||
+		(box1.max.z < box2.min.z || box1.min.z > box2.max.z) 
+	){
+		return false;
+	}
+	return true;
+}
+
+
+//this function checks for collision of bounding boxes of alpha nd the map buildings
+function alphaBoxCollision(){
+	var suspectObjects = [];
+	var alphaBox = new THREE.Box3();
+    alphaBox.setFromObject( alpha );
+
+	for(var i = 0; i < worldMap.buildingBoxes.length; i++){
+		if(twoBoxCollision(worldMap.buildingBoxes[i], alphaBox)){
+			suspectObjects.push(worldMap.buildings[i]);
+		}
+	}
+	return suspectObjects;
+}
+
+
 //This must be called in updateFrame
 // credit to Lee Stemkoski for his tutorial
 // insert link to page
-
-
 function  collissions() {
 	var originPoint = player.position.clone();	// players position
+	var suspectObjects = alphaBoxCollision();
 
-	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++)
-		{		
-			var localVertex = alpha.geometry.vertices[vertexIndex].clone();
-			var globalVertex = localVertex.applyMatrix4( alpha.matrix );
-			var directionVector = globalVertex.sub( alpha.position );
-			
-			var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-			
-			// Check building collisions
-			var BuildingCollisionResults = ray.intersectObjects( worldMap.buildings );
-			
-			// Check Powerups[] collisions
-				// TODO
-			var PowerupsCollisionResults = ray.intersectObjects(powerups);
-			
-			var CollectibleCollisionResults = ray.intersectObjects(collectibles);
-
-			if ( BuildingCollisionResults.length > 0 && BuildingCollisionResults[0].distance < directionVector.length() - 1){ // TODO: adjust this offset (-1 currently)
-				console.log("hit");
-				Crash();
-			}
-			//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
-			if (PowerupsCollisionResults.length > 0 && PowerupsCollisionResults[0].distance < directionVector.length()){
-				//Check what type of powerup it was
-				if(PowerupsCollisionResults[0].object.type == powerupTypes["gun"]){
-					console.log("Gun"); //TODO: update alpha stats
-				}else if(PowerupsCollisionResults[0].object.type == powerupTypes["invisible"]){
-					console.log("Invisible"); //TODO: update alpha stats
-				}else if(PowerupsCollisionResults[0].object.type == powerupTypes["gravity"]){
-					console.log("Gravity"); //TODO: update alpha stats
-				}
-				
-				PowerupsCollisionResults[0].object.activatePower();
-				activePowerup = PowerupsCollisionResults[0].object;
-				powerups.splice(powerups.indexOf (PowerupsCollisionResults[0].object), 1 );
-				scene.remove(PowerupsCollisionResults[0].object);
+	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++){		
+		var localVertex = alpha.geometry.vertices[vertexIndex].clone();
+		var globalVertex = localVertex.applyMatrix4( alpha.matrix );
+		var directionVector = globalVertex.sub( alpha.position );
+		
+		var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+		
+		// Check building collisions
+		var BuildingCollisionResults = ray.intersectObjects( suspectObjects , true );
+		
+		// Check Powerups[] collisions
+			// TODO
+		var PowerupsCollisionResults = ray.intersectObjects(powerups);
+		
+		var CollectibleCollisionResults = ray.intersectObjects(collectibles);
+		if ( 
+			BuildingCollisionResults.length > 0 &&
+			BuildingCollisionResults[0].distance < directionVector.length() - 1 &&
+			!BuildingCollisionResults[0].point.equals(new THREE.Vector3(0,0,0))
+		){ // TODO: adjust this offset (-1 currently)
+			console.log("hit");
+			Crash();
+			break;
+		}
+		//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
+		if (PowerupsCollisionResults.length > 0 && PowerupsCollisionResults[0].distance < directionVector.length()){
+			//Check what type of powerup it was
+			if(PowerupsCollisionResults[0].object.type == powerupTypes["gun"]){
+				console.log("Gun"); //TODO: update alpha stats
+			}else if(PowerupsCollisionResults[0].object.type == powerupTypes["invisible"]){
+				console.log("Invisible"); //TODO: update alpha stats
+			}else if(PowerupsCollisionResults[0].object.type == powerupTypes["gravity"]){
+				console.log("Gravity"); //TODO: update alpha stats
 			}
 			
-			if ( CollectibleCollisionResults.length > 0 && CollectibleCollisionResults[0].distance < directionVector.length() ){ 
-				console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
-				collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
-				scene.remove(CollectibleCollisionResults[0].object);
-				
-				if(collectibles.length == 0) {
-					window.alert( "You won the level!");
-					//TODO: win the level if all collectibles collected
-				}
+			PowerupsCollisionResults[0].object.activatePower();
+			activePowerup = PowerupsCollisionResults[0].object;
+			powerups.splice(powerups.indexOf (PowerupsCollisionResults[0].object), 1 );
+			scene.remove(PowerupsCollisionResults[0].object);
+		}
+		
+		if ( CollectibleCollisionResults.length > 0 && CollectibleCollisionResults[0].distance < directionVector.length() ){ 
+			console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
+			collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
+			scene.remove(CollectibleCollisionResults[0].object);
+			
+			if(collectibles.length == 0) {
+				window.alert( "You won the level!");
+				//TODO: win the level if all collectibles collected
 			}
+		}
 
-		}// end for loop	
+	}// end for loop	
 
 } // end collision function
 
 
 
+/*//////////////////////////////////////////////////////////////////////////
+Fucking Text!
+///////////////////////////////////////////////////////////////////////////*/
 
 
+materials = [
+	new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } ), // front
+	new THREE.MeshPhongMaterial( { color: 0xffffff } ) // side
+];
+// get the font then run create text fn
+function loadFont() {
+
+	var loader = new THREE.FontLoader();
+	loader.load( 'fonts/Etienne/helvetiker_regular.typeface.js', function ( response ) {
+
+		font = response;
+		createText();
+		console.log("loadFont()");
+
+	} );
+
+}
+
+// create text fn
+function createText() {
+	console.log("createText()");
+	textGeo = new THREE.TextGeometry( text, {
+		font: font,
+		size: size,
+		height: height,
+		curveSegments: curveSegments
+	});
+
+	textGeo.computeBoundingBox();
+	textGeo.computeVertexNormals();
+
+	// "fix" side normals by removing z-component of normals for side faces
+	// (this doesn't work well for beveled geometry as then we lose nice curvature around z-axis)
+	var triangleAreaHeuristics = 0.1 * ( height * size );
+
+	for ( var i = 0; i < textGeo.faces.length; i ++ ) {
+
+		var face = textGeo.faces[ i ];
+
+		if ( face.materialIndex == 1 ) {
+
+			for ( var j = 0; j < face.vertexNormals.length; j ++ ) {
+
+				face.vertexNormals[ j ].z = 0;
+				face.vertexNormals[ j ].normalize();
+
+			}
+
+			var va = textGeo.vertices[ face.a ];
+			var vb = textGeo.vertices[ face.b ];
+			var vc = textGeo.vertices[ face.c ];
+
+			var s = THREE.GeometryUtils.triangleArea( va, vb, vc );
+
+			if ( s > triangleAreaHeuristics ) {
+
+				for ( var j = 0; j < face.vertexNormals.length; j ++ ) {
+
+					face.vertexNormals[ j ].copy( face.normal );
+
+				}
+			
+			}
+
+		}
+
+	}
+
+	var centerOffset = -0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
+
+	textMesh1 = new THREE.Mesh( textGeo, materials );
+
+	// bend the text - this took hours to figure out because all the docs and examples are deprecated - FUCK
+	// Had to modify a lib file (BendModifier.js)
+	var direction = new THREE.Vector3( 0, 0, -1 );
+	var axis =  new THREE.Vector3( 0, 1, 0 );
+	var angle = Math.PI / 2.5;
+	var modifier = new THREE.BendModifier();
+	modifier.set( direction, axis, angle ).modify( textMesh1.geometry );
+
+
+	group.add( textMesh1 );
+
+	// create a glowMesh to make the text glow like neon
+	var glowMesh	= new THREEx.GeometricGlowMesh(textMesh1);
+	group.add(glowMesh.object3d);
+
+}
 
 
 ///////////////////////////////////\				  //////////////////////////////
@@ -453,6 +812,8 @@ function  collissions() {
  *  animated properties.  The value of the global variable frameNumber
  *  is incrementd 1 before this function is called.
  */
+var everyNframes = 0; // Global counter to do stuff every Nth frame. 
+
 function updateForFrame() {
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
@@ -500,19 +861,35 @@ function updateForFrame() {
 	}
 
 	// camera can't got below floor
-	if(camera.position.y < worldMap.floorHeight + 1.1){
+	if(new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld).y < worldMap.floorHeight + 1.1){
 		camera.position.y = worldMap.floorHeight + 1.1;
 	}
 	
-
 	// Summon keyboard control lookups in one line.
 	key_check(); 		
 
+	// Increment Nth frame counter
+	everyNframes ++;
+	console.log("N counter: ",everyNframes);
+
+	//Every N frames, save position.
+	//SavePosition();	//avi_respawn
 
 	//Collision
-	collissions();
+	collissions();	
 
+	//animate josh sucks
+	joshSucks.rotateY(Math.sin(Math.PI/6));
+
+	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
+	//cubeCamera.update(renderer, scene);
 	
+	// Score update: TODO: ut in function and tidy up
+	Score++;
+ 	document.getElementById("s1").innerHTML = "Score: " + Score;
+ 	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
+
+
 }
 
 
@@ -579,9 +956,13 @@ function doFrame() {
 function init() {
     try {
 		container = document.getElementById( 'container' );
+		document.getElementById("s0").innerHTML = "Level: " + LEVEL;
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
+		renderer.shadowMap.enabled = true;
+		//renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
 		container.appendChild( renderer.domElement );
 
 		stats = new Stats();
@@ -601,20 +982,81 @@ function init() {
 	// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
 	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
-
     render();
 }
 
 </script>
+
+<!-- CSS -->
+<style>
+.container {
+    position: relative;
+    text-align: center;
+    color: black;
+}
+
+.bottom-left {
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+}
+
+.top-left {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+}
+
+.top-right {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+}
+
+.bottom-right {
+    position: absolute;
+    bottom: 8px;
+    right: 16px;
+}
+
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.text-block {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color:rgba(192,192,192,0.5);
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+</style>
+
+
 </head>
 <body onload="init()">
+
+
 	<noscript>
    		<p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
 	</noscript>
 
 	<p style="color:#AA0000; font-weight: bold" id="message"> </p>
-
-	<div id="container"></div>
+ 	<div class="container">
+		<div id="container"></div>
+	  	<div class="text-block">
+	    	<h4>Stats</h4>
+	    	<p id="s0"></p>
+	    	<p id="s1">Score: NaN </p>
+	    	<p id="s2">Lives: - / - </p>
+	    </div>
+	</div>
 
 </body>
 </html>

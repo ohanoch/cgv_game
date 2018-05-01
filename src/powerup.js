@@ -17,7 +17,7 @@ class Powerup extends THREE.Mesh{
 			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0xaa00bb, transparent: true} )
 		);
 
-		this.expiration = 300;
+		this.expiration = 600;
 		this.type = powerupTypes[type];
 
 		if(this.type == 0){	//gun type
