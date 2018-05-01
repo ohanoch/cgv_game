@@ -274,7 +274,8 @@ function createWorld() {
 
 	var geometry = new THREE.SphereGeometry(5, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
-    color   : 'chrome'
+    color   : 'chrome',
+	envMap 	: scene.background
 	});
 	mesh = new THREE.Mesh(geometry, material);
 	//mesh.scale.set(5,10,10);
@@ -282,10 +283,10 @@ function createWorld() {
 	scene.add(mesh);
 
 	// using cubecamera.js library. Don't know if this is legal
- 	cubeCamera  = new THREEx.CubeCamera(mesh);
-	scene.add(cubeCamera.object3d);
+ 	//cubeCamera  = new THREEx.CubeCamera(mesh);
+	//scene.add(cubeCamera.object3d);
 
-	material.envMap = cubeCamera.textureCube;
+	//material.envMap = cubeCamera.textureCube;
 	joshSucks.add(mesh);
 
 	// GLOW THING
@@ -862,7 +863,7 @@ function updateForFrame() {
 	joshSucks.rotateY(Math.sin(Math.PI/6));
 
 	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
-	cubeCamera.update(renderer, scene);
+	//cubeCamera.update(renderer, scene);
 	
 	// Score update: TODO: ut in function and tidy up
 	Score++;
