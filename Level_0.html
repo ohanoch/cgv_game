@@ -31,10 +31,11 @@ var WORLD_WIDTH = 2000;
 var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
-var LEVEL = 0; //level variable mostly for display purposes at the moment
 // var SAVE_EVERY_N_FRAMES = 200; // ACHTUNG: This may need adjusting depending on layout of buildings in level ad other stuff
 var STARTING_LIVES = 3;
 var NUM_LIGHTS = 2;
+
+var currLevel = 0; //level variable mostly for display purposes at the moment
 
 var canvas, renderer, scene, camera; // Standard three.js requirements.
 
@@ -805,6 +806,9 @@ function  collissions() {
 			
 			if(collectibles.length == 0) {
 				window.alert( "You won the level!");
+				currLevel++;
+				restartGame();
+				return;
 				//TODO: win the level if all collectibles collected
 			}
 		}
@@ -990,7 +994,13 @@ function updateForFrame() {
 	//SavePosition();	//avi_respawn
 
 	//Collision
-	collissions();	
+	var tempCurrLevel = currLevel;
+	collissions();
+	console.log(currLevel + " asdasdas " + tempCurrLevel);
+	if(currLevel != tempCurrLevel){
+		console.log("12312123");
+		return;
+	}
 
 	//animate josh sucks
 	joshSucks.rotateY(Math.sin(Math.PI/6));
@@ -1069,7 +1079,7 @@ function doFrame() {
 function init() {
     try {
 		container = document.getElementById( 'container' );
-		document.getElementById("s0").innerHTML = "Level: " + LEVEL;
+		document.getElementById("s0").innerHTML = "Level: " + currLevel;
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
