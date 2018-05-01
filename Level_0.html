@@ -919,7 +919,6 @@ function updateForFrame() {
 
 	// camera can't got below floor
 	if(new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld).y < worldMap.floorHeight + 0.1){
-		console.log("asdasdasd " + new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld).y + "qweqwew " + (worldMap.floorHeight+1.1));
 		camera.position.y = worldMap.floorHeight + 1.1;
 	}
 	
