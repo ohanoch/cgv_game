@@ -14,7 +14,9 @@ class Menu {
 			//------------------------------------------ BUTTONS ---------------------------------------
 		if(buttonDirectoryURL != "")
 			this.buttons = [];
-			this.addButton(buttonDirectoryURL, "resume_button.png");
+			this.addButton(buttonDirectoryURL, "resume_button");
+			this.addButton(buttonDirectoryURL, "exit_button");
+			this.addButton(buttonDirectoryURL, "restart_button");
 
 		console.log("menu created")
 	}
@@ -50,16 +52,18 @@ class Menu {
 		var materialArray = [];
 		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + "generel_button_side.png") }));
 		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + "generel_button_side.png") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + buttonName) }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + buttonName) }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + buttonName) }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + buttonName) }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + buttonName + ".png") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + buttonName + ".png") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + buttonName + ".png") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(buttonDirectoryURL + buttonName + ".png") }));
 
-		var resumeButton = new THREE.Mesh(
+		var button = new THREE.Mesh(
 			new THREE.BoxGeometry(4,2,2),
 			materialArray
 		);
-		this.buttons.push(resumeButton);
+		button.name = buttonName;
+		this.buttons.push(button);
+
 
 		console.log("added menu button " + buttonName);
 	}
