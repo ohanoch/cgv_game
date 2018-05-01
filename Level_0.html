@@ -383,6 +383,42 @@ function resetCameraPosition(){
 	}
 }
 
+function exitMenu(){
+	scene.remove(menu.skybox);
+	for(var i = 0; i< menu.buttons.length; i++){
+		scene.remove(menu.buttons[i]);
+	}
+	document.removeEventListener("mousedown", menuInteraction);
+}
+/*//////////////////////////////////////////////////////////////////////////////////////////
+Waiting for user input while in menu mode
+///////////////////////////////////////////////////////////////////////////////////////////*/
+function menuInteraction(e){
+	var raycaster = new THREE.Raycaster();
+	
+	//var r = window.getBoundingClientRect();
+	var x = e.clientX// - r.left; // convert mouse location to canvas pixel coords
+	var y = e.clientY// - r.top;
+
+	var a = 2 * x / window.innerWidth - 1; // convert canvas pixel coords to clip coords
+	var b = 1 - 2 * y / window.innerHeight;
+
+	console.log("aaaaaaaaaaa " + a + " bbbbbbbbbbbb " + b);
+	raycaster.setFromCamera( new THREE.Vector2(a,b), camera );
+
+	var intersections = raycaster.intersectObjects( menu.buttons, true );
+	if(intersections.length >= 1){
+		if(intersections[0].object.name == "restart_button"){
+			console.log("restarting game");
+		} else if (intersections[0].object.name == "resume_button"){
+			console.log("resuming game");
+			exitMenu();
+		} else if(intersections[0].object.name == "exit_button"){
+			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
+		}
+	}
+}
+
 /*////////////////////////////////////////////////////////////////////////////////
 Display pause menu
 /////////////////////////////////////////////////////////////////////////////////*/
@@ -399,7 +435,10 @@ function displayMenu(){
 
 		scene.add(menu.buttons[i]);
 	}
+
 	console.log("displaying menu...");
+
+	document.addEventListener("mousedown", menuInteraction, false);
 }
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -457,11 +496,7 @@ function keysPressed(e) {
 	// "p" for pause and play           
 	if(e.keyCode == 80){
 		if(!animating){
-			scene.remove(menu.skybox);
-			for(var i = 0; i< menu.buttons.length; i++){
-				scene.remove(menu.buttons[i]);
-			}
-
+			exitMenu();
 			animating = true;
 			requestAnimationFrame(doFrame);
 		} else {
