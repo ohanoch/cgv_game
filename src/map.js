@@ -8,6 +8,7 @@ class Map {
 		this.atmosphereHeight = atmosphereHeight; // y axis
 		this.depth = depth; // z axis
 		this.buildings = []; // array of buildings
+		this.buildingBoxes = [];
 
 		//------------------------------------- Atmosphere --------------------------------------------
 		this.atmosphere = new THREE.Mesh(
@@ -32,11 +33,12 @@ class Map {
 			floorTexture.repeat.set( 20, 20 );                                              //how many times the image repeats
 			this.floor = new THREE.Mesh(
 				new THREE.PlaneGeometry(this.width, this.depth,1,1),
-				new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide })
+				new THREE.MeshStandardMaterial({ map: floorTexture, side: THREE.DoubleSide })
 			);
 			this.floorHeight = -4;
 			this.floor.position.set(0,this.floorHeight,0);
 			this.floor.rotation.x = -Math.PI / 2;
+			this.floor.receiveShadow = true;			
 
 			console.log("Floor texture added to map");
 		}
@@ -45,7 +47,7 @@ class Map {
 		//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
     	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
 		if(skyboxDirectoryURL != ""){
-			var materialArray = [];
+		/**	var materialArray = [];
 			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xpos.png") }));
 			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xneg.png") }));
 			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "ypos.png") }));
@@ -61,7 +63,18 @@ class Map {
 			this.skybox = new THREE.Mesh(
 				new THREE.CubeGeometry( cubeSize, cubeSize, cubeSize, 1, 1, 1 ),
 				materialArray
-			);
+			);*/
+			
+			this.skybox = new THREE.CubeTextureLoader()
+				.setPath(skyboxDirectoryURL)
+				.load([
+					'xpos.png',
+					'xneg.png',
+					'ypos.png',
+					'yneg.png',
+					'zpos.png',
+					'zneg.png'
+				]);
 
 			console.log("Skybox added to map");
 		}
@@ -112,6 +125,7 @@ class Map {
 					objLoader.load(
 						modelURL + '.obj',
 						function ( object ) {
+							
 							// get model geometry.
 							// Note modules from .obj files are of type GeometryBuffer
 							var objectGeo;
@@ -120,13 +134,14 @@ class Map {
 									objectGeo = child.geometry;
 								}
 							} );
-
 							objectGeo.computeBoundingSphere();
-		
-							
+							objectGeo.computeBoundingBox();
+
 							for(var j = 1; j < numModels; j++){
 
 								var currObject = object.clone();
+								var currObjectBox = objectGeo.boundingBox;
+
 								//resize loaded object with relation to its size (should apply to any object)
 								var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random();
 								currObject.scale.set(
@@ -142,6 +157,11 @@ class Map {
 								
 								worldMap.buildings.push( currObject );
 								scene.add( currObject );
+
+								//get geometry of object after it moved to get correct bounding box coordinats
+								var box = new THREE.Box3();
+								box.setFromObject( currObject );
+								worldMap.buildingBoxes.push(box);
 							}
 							loadingDone();
 						}
