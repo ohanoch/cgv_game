@@ -16,6 +16,7 @@
 <script src="src/js/BendModifier.js"></script>
 
 
+<script src ="src\level.js"></script>
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
 <script src="src\menu.js"></script>
@@ -28,15 +29,12 @@
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+var currLevel = 0;
 
-var WORLD_WIDTH = 2000;
-var WORLD_DEPTH = 2000;
-var ATMOSPHERE_HEIGHT = 100;
-var ALPHA_CAMERA_DISTANCE = 20;
-var STARTING_LIVES = 3;
-var NUM_RANDOM_LIGHTS = 2;
-
-var currLevel = 0; //level variable mostly for display purposes at the moment
+var level = new Level(currLevel, 2000, 2000, 100, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
+				2, ['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, buildingModelURLs, alphaModelURL, floorTextureURL,
+				"textures/skyboxes/dawnmountain/", 3, 3, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerups, 
+				1, -10, -2, -0.01);																														// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
 
 var canvas, renderer, scene, mainCamera; // Standard three.js requirements.
 
@@ -57,7 +55,7 @@ var keys = []; //records current keys being pressed
 
 var resetCameraFlag = false //flag to reset the camera position to original position
 
-var jumping = false;	//whether player is jumping or not
+//var jumping = false;	//whether player is jumping or not
 
 var alpha;	// player stats tracking + model  object
 
@@ -77,8 +75,6 @@ var mixer = null;  // The object that animates the model, of type THREE.Animatio
 
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
 
-var worldMap;
-
 var mesh;
 
 var joshSucks; // he does
@@ -93,7 +89,7 @@ var text = "JOSH  SUCKS",
 	font = undefined;
 var group, textMesh1, textGeo, materials;
 
-var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
+var menu = new Menu(level.alphaCameraDistance * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -125,7 +121,7 @@ function putAboveObject(objectArray, item){
 		var currItem = item.clone();
 		currItem.translateX(objectArray[i].position.x - currItem.position.x);
 		currItem.translateZ(objectArray[i].position.z - currItem.position.z);
-		currItem.translateY(ATMOSPHERE_HEIGHT * 2);
+		currItem.translateY(level.atmosphereHeight * 2);
 		scene.add(currItem);
 
 		newItemArray.push(currItem);
@@ -224,34 +220,34 @@ function createWorld() {
 		30, 
 		window.innerWidth/window.innerHeight, 
 		0.1, 
-		ALPHA_CAMERA_DISTANCE * 20
+		level.alphaCameraDistance * 20
 	);
-    mainCamera.position.z = ALPHA_CAMERA_DISTANCE;
+    mainCamera.position.z = level.alphaCameraDistance;
 
 	//-------------------------------------------- LIGHTING ------------------------------------------------
-	for(var i = 0; i < NUM_RANDOM_LIGHTS; i++){
+	for(var i = 0; i < level.numRandomLights; i++){
 		var light = new THREE.PointLight(0xffffff, 1, 1000000);
 		light.position.set(
-			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10),
-			ATMOSPHERE_HEIGHT * (1 + Math.random()), 
-			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10)
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10),
+			level.atmosphereHeight * (1 + Math.random()), 
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10)
 		);
 
 		//shadows for light 1
 		light.castShadow = true;
 		light.shadowDarkness = 0.5;
 		//Set up shadow properties for the light
-		light.shadow.mapSize.width = WORLD_WIDTH;  
-		light.shadow.mapSize.height = WORLD_DEPTH; 
+		light.shadow.mapSize.width = level.worldWidth;  
+		light.shadow.mapSize.height = level.worldDepth; 
 		light.shadow.camera.near = 0.5;    // default
-		light.shadow.camera.far = Math.sqrt(Math.pow(ATMOSPHERE_HEIGHT,2) + Math.pow(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
+		light.shadow.camera.far = Math.sqrt(Math.pow(level.atmosphereHeight,2) + Math.pow(Math.pow(level.worldWidth,2) + Math.pow(level.worldDepth,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
 
 		scene.add(light);
 	}
 	
 	var viewLight = new THREE.PointLight(0xff00ff, 1);
 	player.add(viewLight);
-	viewLight.position.z = ALPHA_CAMERA_DISTANCE;
+	viewLight.position.z = level.alphaCameraDistance;
 	
     player.add(mainCamera);
     scene.add(player);
@@ -262,7 +258,7 @@ function createWorld() {
 		window.innerHeight / 5,							// Right
     	window.innerHeight / 5,							// Top
     	window.innerHeight / -5,						// Bottom
-    	-3 * ATMOSPHERE_HEIGHT,					// Near 
+    	-3 * level.atmosphereHeight,					// Near 
     	10000 );           								// Far 
 	minimapCamera.up = new THREE.Vector3(0,0,-1);
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
@@ -273,7 +269,7 @@ function createWorld() {
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
-	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	worldMap = new Map(level.worldWidth, level.worldDepth, level.atmosphereHeight, level.floorTextureURL, level.backgroundURL, level.buildingModelURLs) //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.background = worldMap.background;
 	scene.add(worldMap.atmosphere);	
@@ -332,7 +328,7 @@ function createWorld() {
 // alpha is created by modelLoader function and added to player
 	
 	var loader = new THREE.JSONLoader();					// create loader for .js models
-	loader.load("models/stork.js", modelLoader);		// load model and call model_loader
+	loader.load(level.alphaModelURL, modelLoader);		// load model and call model_loader
 	
 	
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
@@ -475,12 +471,12 @@ function resetCameraPosition(){
 	var cameraRotationSpeed = 0.1;
 	mainCamera.translateX((alpha.position.x - mainCamera.position.x) * cameraRotationSpeed);
 	mainCamera.translateY((alpha.position.y - mainCamera.position.y) * cameraRotationSpeed);
-	mainCamera.translateZ((alpha.position.z + ALPHA_CAMERA_DISTANCE - mainCamera.position.z) * cameraRotationSpeed);
+	mainCamera.translateZ((alpha.position.z + level.alphaCameraDistance - mainCamera.position.z) * cameraRotationSpeed);
 	mainCamera.lookAt(alpha.position);
 
 	if(Math.abs(alpha.position.x - mainCamera.position.x) <= 0.01 &&
 		Math.abs(alpha.position.y - mainCamera.position.y <= 0.01) &&
-		Math.abs(alpha.position.z + ALPHA_CAMERA_DISTANCE - mainCamera.position.z <= 0.01)){
+		Math.abs(alpha.position.z + level.alphaCameraDistance - mainCamera.position.z <= 0.01)){
 		
 		resetCameraFlag = false;
 	}
@@ -552,9 +548,9 @@ function displayMenu(){
 	scene.add(menu.skybox);
 
 	for(var i = 0; i < menu.buttons.length; i++){
-		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-		menu.buttons[i].position.y = player.position.y + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-		menu.buttons[i].position.z = player.position.z + Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+		menu.buttons[i].position.y = player.position.y + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+		menu.buttons[i].position.z = player.position.z + Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
 
 		scene.add(menu.buttons[i]);
 	}
@@ -568,38 +564,6 @@ function displayMenu(){
 
 
 /*///////////////////////////////////////////////////////////////////////////////////
-	Reinitialize global variables
-	Called by restartGame
-	INPUT: none
-	OUTPUT: none
-////////////////////////////////////////////////////////////////////////////////////*/
-function reinitializeGlobals(){
-	scene = null;
-	mainCamera = null;
-	frameNumber = 0;
-	animating = false;
-	player = new THREE.Object3D();
-	keys = []; //records current keys being pressed
-	resetCameraFlag = false //flag to reset the camera position to original position
-	jumping = false;	//whether player is jumping or not
-	alpha = null;	// player stats tracking + model  object
-	worldMap = null; // make global so it can be accessed by collision function
-	powerups = [];	
-	collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
-	powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
-	activePowerup = null;
-	collectibles = [];			// the items that the player needs to collect in order to progress to the next level
-	//var collectiblesLeft = 0;			// the number of collectibles left to collect. when this reaches zero, go to next level
-	mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
-	minimapCamera = null; 
-	worldMap = null;
-	mesh = null;
-	joshSucks = null; // he does
-	Score = 0;
-	everyNframes = 0; // Global counter to do stuff every Nth frame. 
-}
-
-/*///////////////////////////////////////////////////////////////////////////////////
 	Restart game - reset all alpha variables, reload all models, respawn alpha at origin
 	Called by Crash when the player crashes and has no more lives, menuInteraction when the restart game option is chosen and collisions when all collectibles are found
 	INPUT: none
@@ -607,7 +571,7 @@ function reinitializeGlobals(){
 ////////////////////////////////////////////////////////////////////////////////////*/
 function restartGame(){
 	console.log("restarting game");
-	reinitializeGlobals();
+	level.reinitializeGlobals();
 	createWorld();
 	installOrbitControls();
 	console.log("game restarted");	
@@ -898,7 +862,7 @@ function updateForFrame() {
 	}
 
 	//check for death by atmosphere (lasers) (height) + some leeway
-	if(player.position.y > ATMOSPHERE_HEIGHT + 1){
+	if(player.position.y > level.atmosphereHeight + 1){
 		Crash();
 		return;
 	}
@@ -947,9 +911,9 @@ function updateForFrame() {
 	console.log("N counter: ",everyNframes);
 
 	//Collision
-	var tempCurrLevel = currLevel;
+	var tempCurrLevel = level.levelNum;
 	collisions();
-	if(currLevel != tempCurrLevel){
+	if(level.levelNum != tempCurrLevel){
 		return;
 	}
 
@@ -1019,10 +983,10 @@ function keyCheck(){
 
    // z key: fight gravity
    if (keys[90]) {     
-		if (!jumping) {			// Set limit on jumping
+		if (!alpha.jumping) {			// Set limit on jumping
 			alpha.incSpeedY(1);
 		}
-		jumping = true;
+		alpha.jumping = true;
     }
 }
 
@@ -1080,7 +1044,7 @@ function keysReleased(e) {
     // mark keys that were released
     keys[e.keyCode] = false;
     if (e.keyCode == 90) {
-		jumping = false;
+		alpha.jumping = false;
 	}
 }
 
@@ -1145,7 +1109,7 @@ function doFrame() {
 function init() {
     try {
 		container = document.getElementById( 'container' );
-		document.getElementById("s0").innerHTML = "Level: " + currLevel;
+		document.getElementById("s0").innerHTML = "Level: " + level.levelNum;
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
