@@ -39,7 +39,7 @@ var MAP_FLOOR_URL = "textures/floor.jpg"
 var MAP_BACKGROUND_URL = "textures/skyboxes/dawnmountain/"
 var ALPHA_MODEL_URL = "models/stork.js"
 var NUM_POWERUPS = 100;
-var NUM_COLLECTIBLES = 5;
+var NUM_COLLECTIBLES = 100;
 
 var currLevel = 0; //level variable mostly for display purposes at the moment
 
@@ -344,18 +344,6 @@ function createWorld() {
 			powerups.push(new Powerup(i));
 		}
 	}
-/**	var gun = new Powerup("gun");	// add a gun powerup
-	gun.position.set(3,4,3);
-	powerups.push(gun);
-
-	var inv = new Powerup("invisible");	// add invisibility powerup
-	inv.position.set(10,6,10);
-	powerups.push(inv);
-
-	var grav = new Powerup("gravity");	// add a gravity powerup
-	grav.position.set(0,3,-16);
-	powerups.push(grav);
-*/
 	// move powerups to random place on map
 	randomMoveArray(powerups);
 
@@ -365,6 +353,21 @@ function createWorld() {
 	
 //--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
 	
+	for(var i = 0; i < NUM_COLLECTIBLES; i++){
+		collectibles.push(new Collectible(
+				new THREE.CylinderGeometry(1,0.5,1,32),
+				new THREE.MeshPhongMaterial({color: 0xff00ff})
+			)
+		);
+	}
+	// move powerups to random place on map
+	randomMoveArray(collectibles);
+
+	for(var i = 0; i < collectibles.length; i++){
+		scene.add(collectibles[i]);
+	}
+
+/** 
 	var collectible0 = new Collectible(
 		new THREE.CylinderGeometry(1,0.5,1,32),
 		new THREE.MeshPhongMaterial({color: 0xff00ff})
@@ -386,7 +389,7 @@ function createWorld() {
 		scene.add(collectibles[i]);
 		console.log(collectibles[i].position);
 	}
-
+*/
 } // end function createWorld()
 
 
