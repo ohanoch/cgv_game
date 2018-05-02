@@ -49,8 +49,6 @@ class Alpha extends THREE.Mesh{
 			var randomZ = Math.random();
 			player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
 			minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
-			console.log(alpha.position)
-			console.log(player.position)
 			if(buildingBoxCollision(player).length == 0){
 				console.log("alpha respawned to empty location");
 				break;
