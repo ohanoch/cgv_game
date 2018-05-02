@@ -18,12 +18,15 @@ class Alpha extends THREE.Mesh{
 		
 		this.speedY = 0;
 		this.speedZ = -0.01;
-		this.maxSpeedY = 0.7;
-		this.minSpeedY = -1000;
-		this.maxSpeedZ = -1;
-		this.minSpeedZ = -0.01;
 		
-		this.lives = STARTING_LIVES; //TODO: make a cat that gives you 9 lives
+		this.maxSpeedY = level.alphaMaxSpeedY;
+		this.minSpeedY = level.alphaMinSpeedY;
+		this.maxSpeedZ = level.alphaMaxSpeedZ;
+		this.minSpeedZ = level.alphaMinSpeedZ;
+		
+		this.jumping = false;
+		
+		this.lives = level.startingLives; //TODO: make a cat that gives you 9 lives
 		this.radius = radius;
 		
 		this.geometry = geometry;	// save geometry of model so that it can be accessed later by collision fn.
@@ -34,9 +37,11 @@ class Alpha extends THREE.Mesh{
 	resetMovement(){
 		this.speedY = 0;
 		this.speedZ = -0.01;
-		this.maxSpeedY = 0.7;
-		this.maxSpeedZ = -1;
-		this.minSpeedZ = -0.01;
+		this.maxSpeedY = level.alphaMaxSpeedY;
+		this.minSpeedY = level.alphaMinSpeedY;
+		this.maxSpeedZ = level.alphaMaxSpeedZ;
+		this.minSpeedZ = level.alphaMinSpeedZ;
+		this.jumping = false;
 		
 		console.log("alpha reset");
 	}
