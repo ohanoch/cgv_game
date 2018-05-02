@@ -38,6 +38,8 @@ var NUM_RANDOM_LIGHTS = 2;
 var MAP_FLOOR_URL = "textures/floor.jpg"
 var MAP_BACKGROUND_URL = "textures/skyboxes/dawnmountain/"
 var ALPHA_MODEL_URL = "models/stork.js"
+var NUM_POWERUPS = 100;
+var NUM_COLLECTIBLES = 5;
 
 var currLevel = 0; //level variable mostly for display purposes at the moment
 
@@ -219,7 +221,6 @@ function splitNumToParts(num, numParts){
 		currNum -= currAmount;
 	}
 	numPerSplit.push(currNum);
-	console.log("split per types " + numPerSplit);
 
 	return numPerSplit;
 }
@@ -334,8 +335,16 @@ function createWorld() {
 	
 	
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
+	var powerupsSplit = splitNumToParts(NUM_POWERUPS, powerupTypes.length);
+	console.log("Powerups Split: " + powerupsSplit);
 
-	var gun = new Powerup("gun");	// add a gun powerup
+	
+	for(var i = 0; i < powerupTypes.length; i++){
+		for(var j = 0; j < powerupsSplit[i]; j++){
+			powerups.push(new Powerup(i));
+		}
+	}
+/**	var gun = new Powerup("gun");	// add a gun powerup
 	gun.position.set(3,4,3);
 	powerups.push(gun);
 
@@ -346,7 +355,7 @@ function createWorld() {
 	var grav = new Powerup("gravity");	// add a gravity powerup
 	grav.position.set(0,3,-16);
 	powerups.push(grav);
-
+*/
 	// move powerups to random place on map
 	randomMoveArray(powerups);
 
