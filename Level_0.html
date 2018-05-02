@@ -27,7 +27,7 @@
 "use strict";
 
 //Globals
-var WORLD_WIDTH = 2000;
+var WORLD_WIDTH = 2000;	// dimensions of world (plane)
 var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
@@ -48,7 +48,7 @@ var controls;  // An OrbitControls object that is used to implement
 var fullscreen = false;
 var animating = false;  // Set to true when an animation is in progress.
 var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
-var everyNframes = 0; // Global counter to do stuff every Nth frame. 
+//var everyNframes = 0; // Global counter to do stuff every Nth frame. 
 
 var player = new THREE.Object3D();
 
@@ -96,6 +96,7 @@ var text = "JOSH  SUCKS",
 	font = undefined;
 var group, textMesh1, textGeo, materials;
 
+// for menu class
 var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
 
@@ -103,7 +104,7 @@ var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/"
 /**
  *  The render function draws the scene.
  */
-function render() {
+function render() { //gets called in draw world
 	var w = window.innerWidth, h = window.innerHeight;
 	renderer.setSize(w,h);
 
@@ -115,7 +116,7 @@ function render() {
 	camera.updateProjectionMatrix();
     renderer.render(scene, camera);
 	
-	//add objects to minimap so it will be easier to see
+	//add objects to minimap so it will be easier to see:
 
 	//add sphere for player
 	var arrow = new THREE.Mesh(
@@ -171,12 +172,12 @@ function render() {
 		scene.remove(minimapPowerups[i])
 	}
 	
-	for (var i = 0; i < collectibles.length; i++){
+	for (var i = 0; i < collectibles.length; i++){	//remove mini map indicators
 		scene.remove(minimapCollectibles[i])
 	}
 }
 
-function respawnAlpha(){
+function respawnAlpha(){	
 	var currLives = alpha.lives;
 	while(true){
 		console.log("respawning alpha");
@@ -186,11 +187,11 @@ function respawnAlpha(){
 		minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
 		collissions();
 		if(alpha.lives != currLives){
-			alpha.lives = currLives;
+			alpha.lives = currLives;	// Keep trying till you spawn somewhere without collisions.
 		} else {
 			break;
 		} 
-	}
+	} 
 	alpha.resetAttributes();
 }
 
@@ -201,7 +202,7 @@ var mapDone = false;
 function alphaStartup(){
 	if(alphaDone && mapDone){
 		console.log("checking if alpha initialized on building");
-		collissions();
+		collissions(); //TODO this should be respawn alpha
 		alpha.lives = STARTING_LIVES;
 	}
 }
@@ -219,7 +220,7 @@ function createWorld() {
 		30, 
 		window.innerWidth/window.innerHeight, 
 		0.1, 
-		ALPHA_CAMERA_DISTANCE * 20//Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
+		ALPHA_CAMERA_DISTANCE * 20// Determines how far the camera sees
 	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
 
@@ -252,12 +253,12 @@ function createWorld() {
     scene.add(player);
     
 	//---------------------- Minimap ----------------------------------------------
-	minimapCamera = new THREE.OrthographicCamera(
+	minimapCamera = new THREE.OrthographicCamera(		// Orthographic camera does not change according to distance, which is what we want
 	    window.innerHeight / -5,						// Left
 		window.innerHeight / 5,							// Right
     	window.innerHeight / 5,							// Top
     	window.innerHeight / -5,						// Bottom
-    	-1 * ATMOSPHERE_HEIGHT + 0.001,					// Near 
+    	-1 * ATMOSPHERE_HEIGHT + 0.001,					// Near Why negative??
     	10000 );           								// Far 
 	minimapCamera.up = new THREE.Vector3(0,0,-1);
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
@@ -296,7 +297,7 @@ function createWorld() {
     color   : 'chrome',
 	envMap 	: scene.background
 	});
-	mesh = new THREE.Mesh(geometry, material);
+	mesh = new THREE.Mesh(geometry, material); //TODO:
 	//mesh.scale.set(5,10,10);
 	mesh.position.set(0,0,0);	// centre obj coords of sphere
 	scene.add(mesh);
