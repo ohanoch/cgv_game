@@ -64,8 +64,6 @@ var alpha;	// player stats tracking + model  object
 var alphaDone = false;
 var mapDone = false;
 
-var gameOver = false; //updates to true when lives == 0
-
 var worldMap; // make global so it can be accessed by collision function
 
 var collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
@@ -251,10 +249,10 @@ function createWorld() {
 		scene.add(light);
 	}
 	
-	//var spotlight = new THREE.SpotLight(0x0000ff, 5);
-	//spotlight.position.z = ALPHA_CAMERA_DISTANCE;
-	//camera.add(spotlight);
-
+	var viewLight = new THREE.PointLight(0xff00ff, 1);
+	player.add(viewLight);
+	viewLight.position.z = ALPHA_CAMERA_DISTANCE;
+	
     player.add(mainCamera);
     scene.add(player);
     
@@ -585,7 +583,6 @@ function reinitializeGlobals(){
 	resetCameraFlag = false //flag to reset the camera position to original position
 	jumping = false;	//whether player is jumping or not
 	alpha = null;	// player stats tracking + model  object
-	gameOver = false; //updates to true when lives == 0
 	worldMap = null; // make global so it can be accessed by collision function
 	powerups = [];	
 	collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
@@ -645,7 +642,6 @@ function Crash() {
 	
 	// if no more lives, game over
 	if (alpha.lives == 0){
-		gameOver = true;
 		animating = false;
 		window.alert("G A M E    O V E R\nYour final score: " + Score + "\nClick OK to start a new game");
 		restartGame();
@@ -1021,7 +1017,7 @@ function keyCheck(){
 		minimapCamera.rotateZ(Math.PI/180) ;
     }
 
-   // space key: fight gravity
+   // z key: fight gravity
    if (keys[90]) {     
 		if (!jumping) {			// Set limit on jumping
 			alpha.incSpeedY(1);
@@ -1071,8 +1067,8 @@ function keysPressed(e) {
 	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
-        // NB: prevent default browser behavior - disable during testing
-        //e.preventDefault();
+    // NB: prevent default browser behavior - disable during testing
+    //e.preventDefault();
 }
 
 /*///////////////////////////////////////////////////////////////////////////////// 
