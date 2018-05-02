@@ -80,14 +80,7 @@ class Map {
 		var materialLoader = new THREE.MTLLoader();		
 		
 		//split numBuildings between different models
-		var numPerModel = [];
-		var currNumBuildings = numBuildings;
-		for(var i = 0; i < modelList.length -1; i++){
-			var currAmount = Math.floor(Math.random() * currNumBuildings);
-			numPerModel.push(currAmount);
-			currNumBuildings -= currAmount;
-		}
-		numPerModel.push(currNumBuildings);
+		var numPerModel = splitNumToParts(numBuildings, modelList.length);
 		console.log("split of building types " + numPerModel);
 
 		var numLoaded = 0;

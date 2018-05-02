@@ -7,7 +7,7 @@
 // animation
 // type
 
-var powerupTypes = {gun: 0, invisible: 1, gravity: 2};  //dictionary to make powerup types readable
+var powerupTypes = ["gun", "invisible", "gravity"];  //dictionary to make powerup types readable
 
 class Powerup extends THREE.Mesh{
 
@@ -18,7 +18,7 @@ class Powerup extends THREE.Mesh{
 		);
 
 		this.expiration = 600;
-		this.type = powerupTypes[type];
+		this.type = type;
 
 		if(this.type == 0){	//gun type
 		//load model here	

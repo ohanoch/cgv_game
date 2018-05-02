@@ -12,8 +12,8 @@
 <script src="src\js\threex.atmospherematerialdatgui.js"></script>
 <script src="src\js\threex.dilategeometry.js"></script>
 <script src="src\js\threex.geometricglowmesh.js"></script>
-<script src="src/js/GeometryUtils.js"></script>
-<script src="src/js/BendModifier.js"></script>
+<script src="src\js\GeometryUtils.js"></script>
+<script src="src\js\BendModifier.js"></script>
 
 
 <script src ="src\level.js"></script>
@@ -29,12 +29,14 @@
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-var currLevel = 0;
+
+var currLevel = 0; //level variable mostly for display purposes at the moment
 
 var level = new Level(currLevel, 2000, 2000, 100, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
 				2, ['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, buildingModelURLs, alphaModelURL, floorTextureURL,
 				"textures/skyboxes/dawnmountain/", 3, 3, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerups, 
 				1, -10, -2, -0.01);																														// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
+
 
 var canvas, renderer, scene, mainCamera; // Standard three.js requirements.
 
@@ -89,11 +91,35 @@ var text = "JOSH  SUCKS",
 	font = undefined;
 var group, textMesh1, textGeo, materials;
 
-var menu = new Menu(level.alphaCameraDistance * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
+
+var menusArr = {};
 
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+function createMenus(){
+	var startMenu = new Menu(
+			level.alphaCameraDistance * 2 * 2, 
+			"textures/skyboxes/ulam/", 
+			"sprites/buttons/", 
+			["exit_button", "start_button"]
+		);
+	menusArr.startMenu = startMenu;
+//	player.add(menusArr.startMenu.skybox);
+/**	menusArr.push(startMenu);
+	player.add(menusArr[0].skybox);
+	for(var i = 0; i < menusArr[0].buttons.length; i++){
+		player.add(menusArr[0].buttons[i]);
+	}
+*/
+	var pauseMenu = new Menu(
+			level.alphaCameraDistance * 2 * 2, 
+			"textures/skyboxes/tantolunden5/", 
+			"sprites/buttons/", 
+			["exit_button", "restart_button", "resume_button"]
+		);
+		menusArr.pauseMenu = pauseMenu;
+//	menusArr.push(pauseMenu);
+}
 
 /* /////////////////////////////////////////////////////////////
 	Renders the camera given as input
@@ -203,6 +229,75 @@ function render() {
 	}
 }
 
+function createRandomLights(){
+	for(var i = 0; i < NUM_RANDOM_LIGHTS; i++){
+		var light = new THREE.PointLight(0xffffff, 1, 1000000);
+		light.position.set(
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10),
+			ATMOSPHERE_HEIGHT * (1 + Math.random()), 
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10)
+		);
+
+		//shadows for light 1
+		light.castShadow = true;
+		light.shadowDarkness = 0.5;
+		//Set up shadow properties for the light
+		light.shadow.mapSize.width = WORLD_WIDTH;  
+		light.shadow.mapSize.height = WORLD_DEPTH; 
+		light.shadow.camera.near = 0.5;    // default
+		light.shadow.camera.far = Math.sqrt(Math.pow(ATMOSPHERE_HEIGHT,2) + Math.pow(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
+
+		scene.add(light);
+	}
+}
+
+function splitNumToParts(num, numParts){
+	//split numBuildings between different models
+	var numPerSplit = []; 
+	var currNum = num;
+	for(var i = 0; i < numParts -1; i++){
+		var currAmount = Math.floor(Math.random() * currNum);
+		numPerSplit.push(currAmount);
+		currNum -= currAmount;
+	}
+	numPerSplit.push(currNum);
+
+	return numPerSplit;
+}
+
+function createPowerups(){
+	var powerupsSplit = splitNumToParts(NUM_POWERUPS, powerupTypes.length);
+	console.log("Powerups Split: " + powerupsSplit);
+
+	
+	for(var i = 0; i < powerupTypes.length; i++){
+		for(var j = 0; j < powerupsSplit[i]; j++){
+			powerups.push(new Powerup(i));
+		}
+	}
+	// move powerups to random place on map
+	randomMoveArray(powerups);
+
+	for(var i = 0; i < powerups.length; i++){
+		scene.add(powerups[i]);
+	} 
+}
+
+function createCollectibles(){
+	for(var i = 0; i < NUM_COLLECTIBLES; i++){
+		collectibles.push(new Collectible(
+				new THREE.CylinderGeometry(1,0.5,1,32),
+				new THREE.MeshPhongMaterial({color: 0xff00ff})
+			)
+		);
+	}
+	// move powerups to random place on map
+	randomMoveArray(collectibles);
+
+	for(var i = 0; i < collectibles.length; i++){
+		scene.add(collectibles[i]);
+	}
+}
 
 /* /////////////////////////////////////////////////////////////
 	Creates the world map, lights, cameras, player and collectibles and powerups.
@@ -213,7 +308,9 @@ function render() {
 function createWorld() {
     renderer.setClearColor("black"); // Background color for scene.
     scene = new THREE.Scene();
+    scene.add(player);
     
+	createMenus();
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     
     mainCamera = new THREE.PerspectiveCamera(
@@ -222,35 +319,14 @@ function createWorld() {
 		0.1, 
 		level.alphaCameraDistance * 20
 	);
-    mainCamera.position.z = level.alphaCameraDistance;
+  mainCamera.position.z = level.alphaCameraDistance;
+  player.add(mainCamera);
 
 	//-------------------------------------------- LIGHTING ------------------------------------------------
-	for(var i = 0; i < level.numRandomLights; i++){
-		var light = new THREE.PointLight(0xffffff, 1, 1000000);
-		light.position.set(
-			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10),
-			level.atmosphereHeight * (1 + Math.random()), 
-			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10)
-		);
-
-		//shadows for light 1
-		light.castShadow = true;
-		light.shadowDarkness = 0.5;
-		//Set up shadow properties for the light
-		light.shadow.mapSize.width = level.worldWidth;  
-		light.shadow.mapSize.height = level.worldDepth; 
-		light.shadow.camera.near = 0.5;    // default
-		light.shadow.camera.far = Math.sqrt(Math.pow(level.atmosphereHeight,2) + Math.pow(Math.pow(level.worldWidth,2) + Math.pow(level.worldDepth,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
-
-		scene.add(light);
-	}
-	
+	createRandomLights();
 	var viewLight = new THREE.PointLight(0xff00ff, 1);
 	player.add(viewLight);
 	viewLight.position.z = level.alphaCameraDistance;
-	
-    player.add(mainCamera);
-    scene.add(player);
     
 	//------------------------------------------ MINIMAP ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(
@@ -269,7 +345,9 @@ function createWorld() {
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
+
 	worldMap = new Map(level.worldWidth, level.worldDepth, level.atmosphereHeight, level.floorTextureURL, level.backgroundURL, level.buildingModelURLs) //width, height, atmosphereHight, textureURL, skyboxDirectory
+
 	scene.add(worldMap.floor);
 	scene.background = worldMap.background;
 	scene.add(worldMap.atmosphere);	
@@ -328,54 +406,14 @@ function createWorld() {
 // alpha is created by modelLoader function and added to player
 	
 	var loader = new THREE.JSONLoader();					// create loader for .js models
+
 	loader.load(level.alphaModelURL, modelLoader);		// load model and call model_loader
 	
 	
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
-
-	var gun = new Powerup("gun");	// add a gun powerup
-	gun.position.set(3,4,3);
-	powerups.push(gun);
-
-	var inv = new Powerup("invisible");	// add invisibility powerup
-	inv.position.set(10,6,10);
-	powerups.push(inv);
-
-	var grav = new Powerup("gravity");	// add a gravity powerup
-	grav.position.set(0,3,-16);
-	powerups.push(grav);
-
-	// move powerups to random place on map
-	randomMoveArray(powerups);
-
-	for(var i = 0; i < powerups.length; i++){
-		scene.add(powerups[i]);
-	} 
-	
+	createPowerups();
 //--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
-	
-	var collectible0 = new Collectible(
-		new THREE.CylinderGeometry(1,0.5,1,32),
-		new THREE.MeshPhongMaterial({color: 0xff00ff})
-	);
-	collectible0.position.set(-7,5,3);
-	collectibles.push(collectible0);
-	
-	var collectible1 = new Collectible(
-		new THREE.CylinderGeometry(1,0.5,1,32),
-		new THREE.MeshPhongMaterial({color: 0x00ffff})
-	);
-	collectible1.position.set(7,3,-4);
-	collectibles.push(collectible1);
-	
-	// move collectibles to random place on map
-	randomMoveArray(collectibles);
-
-	for (var i = 0; i < collectibles.length; i++) {
-		scene.add(collectibles[i]);
-		console.log(collectibles[i].position);
-	}
-
+	createCollectibles();
 } // end function createWorld()
 
 
@@ -436,7 +474,7 @@ function modelLoader(geometry, materials) {
 function randomPlace(){
 	var move = [];
 	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.width / 2));
-	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight);
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight + 5);
 	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.depth / 2));
 	return new THREE.Vector3(move[0],move[1],move[2]);
 
@@ -484,22 +522,39 @@ function resetCameraPosition(){
 
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< M E N U   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
 /*///////////////////////////////////////////////////////////////////////////////// 
-	Exits the menu.
+	Returns the current open menu
 	Called by menuInteraction and keysPressed
 	INPUT: none
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
+function openMenu(){
+	var menu;
+	if(menusArr.startMenu.isOpen){
+		menu = menusArr.startMenu;
+	} else {
+		menu = menuArr.pauseMenu;
+	}
+	return menu;
+}
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Exits the menu.
+	Called by exitMenu and menuInteraction
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
 function exitMenu(){
+	var menu = openMenu();
+	
+	console.log("exiting menu");
 	scene.remove(menu.skybox);
 	for(var i = 0; i< menu.buttons.length; i++){
 		scene.remove(menu.buttons[i]);
 	}
+	
+	menu.isOpen = false;
 	document.removeEventListener("mousedown", menuInteraction);
-	animating = true;
-	requestAnimationFrame(doFrame);
 }
 
 
@@ -511,7 +566,8 @@ function exitMenu(){
 //////////////////////////////////////////////////////////////////////////////////*/
 function menuInteraction(e){
 	var raycaster = new THREE.Raycaster();
-	
+	var menu = openMenu();
+
 	//var r = window.getBoundingClientRect();
 	var x = e.clientX	// take in click coordinates
 	var y = e.clientY	// 
@@ -525,10 +581,18 @@ function menuInteraction(e){
 	if(intersections.length >= 1){
 		if(intersections[0].object.name == "restart_button"){
 			console.log("restarting game");
+			exitMenu();
 			restartGame();
+		} else if(intersections[0].object.name == "start_button"){
+			console.log("starting game");
+			exitMenu();
+			animating = true;
+			requestAnimationFrame(doFrame);
 		} else if (intersections[0].object.name == "resume_button"){
 			console.log("resuming game");
 			exitMenu();
+			animating = true;
+			requestAnimationFrame(doFrame);
 		} else if(intersections[0].object.name == "exit_button"){
 			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
 		}
@@ -541,16 +605,19 @@ function menuInteraction(e){
 	INPUT: none
 	OUTPUT: none
 /////////////////////////////////////////////////////////////////////////////////*/
-function displayMenu(){
+function displayMenu(menu){
+	menu.isOpen = true;
 	menu.skybox.position.x = player.position.x;
 	menu.skybox.position.y = player.position.y;
 	menu.skybox.position.z = player.position.z;
 	scene.add(menu.skybox);
 
 	for(var i = 0; i < menu.buttons.length; i++){
-		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-		menu.buttons[i].position.y = player.position.y + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-		menu.buttons[i].position.z = player.position.z + Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+
+  menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+  menu.buttons[i].position.y = player.position.y +  Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+  menu.buttons[i].position.z = player.position.z + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+
 
 		scene.add(menu.buttons[i]);
 	}
@@ -844,7 +911,6 @@ function createText() {
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function updateForFrame() {
-	console.log(player.position)
 
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
@@ -908,7 +974,6 @@ function updateForFrame() {
 
 	// Increment Nth frame counter
 	everyNframes ++;
-	console.log("N counter: ",everyNframes);
 
 	//Collision
 	var tempCurrLevel = level.levelNum;
@@ -1006,7 +1071,7 @@ function keysPressed(e) {
 			requestAnimationFrame(doFrame);
 		} else {
 			animating = false;
-			displayMenu();
+			displayMenu(menusArr.pauseMenu);
 		}
 		return;
 	}
@@ -1122,7 +1187,6 @@ function init() {
 
 		stats = new Stats();
 		container.appendChild( stats.dom );
-
     }
     catch (e) {
         document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
