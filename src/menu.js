@@ -4,6 +4,7 @@ class Menu {
 	
 	constructor(cubeSize, skyboxDirectoryURL, buttonDirectoryURL, buttonNames) {
 
+		this.isOpen = false;
 		//-------------------------------------- SKYBOX -------------------------------------------------
         //stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
         //other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
@@ -25,6 +26,7 @@ class Menu {
 		var textureLoader = new THREE.TextureLoader();
 		var materialArray = [];
 		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xpos.jpg") }));
+console.log("")
 		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xneg.jpg") }));
 		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "ypos.jpg") }));
 		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "yneg.jpg") }));
