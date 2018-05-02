@@ -11,7 +11,6 @@ class Menu {
         if(skyboxDirectoryURL != ""){
 			this.addSkybox(skyboxDirectoryURL, cubeSize);
 		}
-		console.log(this.skybox)
 			//------------------------------------------ BUTTONS ---------------------------------------
 		if(buttonDirectoryURL != []){
 			this.buttons = [];
