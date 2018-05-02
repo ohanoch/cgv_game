@@ -1185,7 +1185,6 @@ function init() {
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.shadowMap.enabled = true;
 		renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
-		renderer.setSize(window.innerWidth, window.innerHeight);
 		//renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
 		container.appendChild( renderer.domElement );
