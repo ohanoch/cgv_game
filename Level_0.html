@@ -995,7 +995,14 @@ function updateForFrame() {
 	//cubeCamera.update(renderer, scene);
 	
 	// Score update: TODO: ut in function and tidy up
-	Score++;
+	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
+		console.log("player.position.x " + player.position.x + " player.position.z " + player.position.z)  
+		console.log("level.worldWidth " + level.worldWidth + " level.worldDepth " + level.worldDepth)
+		Score++;
+	} else {
+		Score = Score - 5;
+	}
+
  	document.getElementById("s1").innerHTML = "Score: " + Score;
  	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
 
