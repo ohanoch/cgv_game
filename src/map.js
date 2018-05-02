@@ -78,6 +78,8 @@ class Map {
 		var modelList = ['models/tree/tree', 'models/mill/mill'];
 		
 		//split numBuildings between different models
+		var numPerModel = splitNumToParts(numBuildings, modelList.length);
+/**
 		var numPerModel = [];
 		var currNumBuildings = numBuildings;
 		for(var i = 0; i < modelList.length -1; i++){
@@ -87,7 +89,7 @@ class Map {
 		}
 		numPerModel.push(currNumBuildings);
 		console.log("split of building types " + numPerModel);
-
+*/
 		var numLoaded = 0;
 		function loadingDone(){
 			numLoaded++;
