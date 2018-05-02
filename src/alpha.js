@@ -49,12 +49,14 @@ class Alpha extends THREE.Mesh{
 			var randomZ = Math.random();
 			player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
 			minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
-			collisions();
-			if(this.lives != currLives){
-				this.lives = currLives;
-			} else {
+			console.log(alpha.position)
+			console.log(player.position)
+			if(buildingBoxCollision(player).length == 0){
+				console.log("alpha respawned to empty location");
 				break;
-			} 
+			} else {
+				console.log("alpha spawned to occupied location - respawning");
+			}
 		}
 		this.resetMovement();
 	}
