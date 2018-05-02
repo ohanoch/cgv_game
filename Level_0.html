@@ -49,7 +49,6 @@ var controls;  // An OrbitControls object that is used to implement
 var fullscreen = false;
 var animating = false;  // Set to true when an animation is in progress.
 var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
-var everyNframes = 0; // Global counter to do stuff every Nth frame. 
 
 var player = new THREE.Object3D();
 
@@ -230,22 +229,22 @@ function render() {
 }
 
 function createRandomLights(){
-	for(var i = 0; i < NUM_RANDOM_LIGHTS; i++){
+	for(var i = 0; i < level.numRandomLights; i++){
 		var light = new THREE.PointLight(0xffffff, 1, 1000000);
 		light.position.set(
-			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10),
-			ATMOSPHERE_HEIGHT * (1 + Math.random()), 
-			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10)
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10),
+			level.atmosphereHeight * (1 + Math.random()), 
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10)
 		);
 
 		//shadows for light 1
 		light.castShadow = true;
 		light.shadowDarkness = 0.5;
 		//Set up shadow properties for the light
-		light.shadow.mapSize.width = WORLD_WIDTH;  
-		light.shadow.mapSize.height = WORLD_DEPTH; 
+		light.shadow.mapSize.width = level.worldWidth;  
+		light.shadow.mapSize.height = level.worldDepth; 
 		light.shadow.camera.near = 0.5;    // default
-		light.shadow.camera.far = Math.sqrt(Math.pow(ATMOSPHERE_HEIGHT,2) + Math.pow(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
+		light.shadow.camera.far = Math.sqrt(Math.pow(level.atmosphereHeight,2) + Math.pow(Math.pow(level.worldWidth,2) + Math.pow(level.worldDepth,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
 
 		scene.add(light);
 	}
@@ -266,7 +265,7 @@ function splitNumToParts(num, numParts){
 }
 
 function createPowerups(){
-	var powerupsSplit = splitNumToParts(NUM_POWERUPS, powerupTypes.length);
+	var powerupsSplit = splitNumToParts(level.numPowerups, powerupTypes.length);
 	console.log("Powerups Split: " + powerupsSplit);
 
 	
@@ -284,7 +283,7 @@ function createPowerups(){
 }
 
 function createCollectibles(){
-	for(var i = 0; i < NUM_COLLECTIBLES; i++){
+	for(var i = 0; i < level.numCollectibles; i++){
 		collectibles.push(new Collectible(
 				new THREE.CylinderGeometry(1,0.5,1,32),
 				new THREE.MeshPhongMaterial({color: 0xff00ff})
@@ -533,7 +532,7 @@ function openMenu(){
 	if(menusArr.startMenu.isOpen){
 		menu = menusArr.startMenu;
 	} else {
-		menu = menuArr.pauseMenu;
+		menu = menusArr.pauseMenu;
 	}
 	return menu;
 }
@@ -684,7 +683,6 @@ function Crash() {
 		window.alert("C R A S H E D!\n Lives left: " + alpha.lives);
 		alpha.respawn();
 	}
-
 }
 
 
@@ -972,13 +970,9 @@ function updateForFrame() {
 	// Summon keyboard control lookups in one line.
 	keyCheck(); 		
 
-	// Increment Nth frame counter
-	everyNframes ++;
-
 	//Collision
-	var tempCurrLevel = level.levelNum;
 	collisions();
-	if(level.levelNum != tempCurrLevel){
+	if(alpha == null){
 		return;
 	}
 
@@ -1047,7 +1041,7 @@ function keyCheck(){
     }
 
    // z key: fight gravity
-   if (keys[90]) {     
+   if (keys[90]) {
 		if (!alpha.jumping) {			// Set limit on jumping
 			alpha.incSpeedY(1);
 		}

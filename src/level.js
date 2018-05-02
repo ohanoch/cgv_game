@@ -55,9 +55,5 @@ class Level {
 		worldMap = null;
 		joshSucks = null; // he does
 		Score = 0;
-		everyNframes = 0; // Global counter to do stuff every Nth frame. 
 	}
-
-
-
 }
