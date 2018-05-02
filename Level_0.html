@@ -33,7 +33,7 @@
 var currLevel = 0; //level variable mostly for display purposes at the moment
 
 var level = new Level(currLevel, 2000, 2000, 100, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
-				2, ['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, buildingModelURLs, alphaModelURL, floorTextureURL,
+				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
 				"textures/skyboxes/dawnmountain/", 3, 3, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerups, 
 				1, -10, -2, -0.01);																														// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
 
@@ -367,7 +367,7 @@ function createWorld() {
 	scene.add(worldMap.atmosphere);	
 
 	//add buildings to scene
-	worldMap.createBuildings(0.5); //map-buildings ratio is 1/2
+	worldMap.createBuildings(level.mapBuildingRatio); //map-buildings ratio is 1/2
 
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);

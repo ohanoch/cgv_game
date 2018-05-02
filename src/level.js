@@ -13,8 +13,7 @@
 
 class Level {
 
-	constructor(levelNum, worldWidth, worldDepth, atmosphereHeight, alphaCameraDistance, startingLives, numRandomLights, buildingModelURLs, alphaModelURL, floorTextureURL,
-															backgroundURL, numPowerups, numCollectibles, powerups, alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ) {
+	constructor(levelNum, worldWidth, worldDepth, atmosphereHeight, alphaCameraDistance, startingLives, numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL, backgroundURL, numPowerups, numCollectibles, powerups, alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ) {
 		
 		this.levelNum = levelNum;
 		this.worldWidth = worldWidth;
@@ -34,7 +33,7 @@ class Level {
 		this.alphaMinSpeedY = alphaMinSpeedY;
 		this.alphaMaxSpeedZ = alphaMaxSpeedZ;
 		this.alphaMinSpeedZ  = alphaMinSpeedZ;
-		
+		this.mapBuildingRatio = mapBuildingRatio;
 	}
 
 	reinitializeGlobals(){
