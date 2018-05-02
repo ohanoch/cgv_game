@@ -209,6 +209,21 @@ function createRandomLights(){
 	}
 }
 
+function splitNumToParts(num, numParts){
+	//split numBuildings between different models
+	var numPerSplit = []; 
+	var currNum = num;
+	for(var i = 0; i < numParts -1; i++){
+		var currAmount = Math.floor(Math.random() * currNum);
+		numPerSplit.push(currAmount);
+		currNum -= currAmount;
+	}
+	numPerSplit.push(currNum);
+	console.log("split per types " + numPerSplit);
+
+	return numPerSplit;
+}
+
 
 /* /////////////////////////////////////////////////////////////
 	Creates the world map, lights, cameras, player and collectibles and powerups.
