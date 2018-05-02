@@ -225,6 +225,39 @@ function splitNumToParts(num, numParts){
 	return numPerSplit;
 }
 
+function createPowerups(){
+	var powerupsSplit = splitNumToParts(NUM_POWERUPS, powerupTypes.length);
+	console.log("Powerups Split: " + powerupsSplit);
+
+	
+	for(var i = 0; i < powerupTypes.length; i++){
+		for(var j = 0; j < powerupsSplit[i]; j++){
+			powerups.push(new Powerup(i));
+		}
+	}
+	// move powerups to random place on map
+	randomMoveArray(powerups);
+
+	for(var i = 0; i < powerups.length; i++){
+		scene.add(powerups[i]);
+	} 
+}
+
+function createCollectibles(){
+	for(var i = 0; i < NUM_COLLECTIBLES; i++){
+		collectibles.push(new Collectible(
+				new THREE.CylinderGeometry(1,0.5,1,32),
+				new THREE.MeshPhongMaterial({color: 0xff00ff})
+			)
+		);
+	}
+	// move powerups to random place on map
+	randomMoveArray(collectibles);
+
+	for(var i = 0; i < collectibles.length; i++){
+		scene.add(collectibles[i]);
+	}
+}
 
 /* /////////////////////////////////////////////////////////////
 	Creates the world map, lights, cameras, player and collectibles and powerups.
@@ -335,61 +368,10 @@ function createWorld() {
 	
 	
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
-	var powerupsSplit = splitNumToParts(NUM_POWERUPS, powerupTypes.length);
-	console.log("Powerups Split: " + powerupsSplit);
-
-	
-	for(var i = 0; i < powerupTypes.length; i++){
-		for(var j = 0; j < powerupsSplit[i]; j++){
-			powerups.push(new Powerup(i));
-		}
-	}
-	// move powerups to random place on map
-	randomMoveArray(powerups);
-
-	for(var i = 0; i < powerups.length; i++){
-		scene.add(powerups[i]);
-	} 
-	
+	createPowerups();
 //--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
-	
-	for(var i = 0; i < NUM_COLLECTIBLES; i++){
-		collectibles.push(new Collectible(
-				new THREE.CylinderGeometry(1,0.5,1,32),
-				new THREE.MeshPhongMaterial({color: 0xff00ff})
-			)
-		);
-	}
-	// move powerups to random place on map
-	randomMoveArray(collectibles);
+	createCollectibles();
 
-	for(var i = 0; i < collectibles.length; i++){
-		scene.add(collectibles[i]);
-	}
-
-/** 
-	var collectible0 = new Collectible(
-		new THREE.CylinderGeometry(1,0.5,1,32),
-		new THREE.MeshPhongMaterial({color: 0xff00ff})
-	);
-	collectible0.position.set(-7,5,3);
-	collectibles.push(collectible0);
-	
-	var collectible1 = new Collectible(
-		new THREE.CylinderGeometry(1,0.5,1,32),
-		new THREE.MeshPhongMaterial({color: 0x00ffff})
-	);
-	collectible1.position.set(7,3,-4);
-	collectibles.push(collectible1);
-	
-	// move collectibles to random place on map
-	randomMoveArray(collectibles);
-
-	for (var i = 0; i < collectibles.length; i++) {
-		scene.add(collectibles[i]);
-		console.log(collectibles[i].position);
-	}
-*/
 } // end function createWorld()
 
 
