@@ -24,12 +24,12 @@ class Menu {
 	addSkybox(skyboxDirectoryURL, cubeSize){
 		var textureLoader = new THREE.TextureLoader();
 		var materialArray = [];
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "posx.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "negx.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "posy.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "negy.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "posz.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "negz.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xpos.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xneg.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "ypos.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "yneg.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "zpos.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "zneg.jpg") }));
 
 		for (var i = 0; i < 6; i++) {
 			materialArray[i].side = THREE.BackSide;
