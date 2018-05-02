@@ -102,13 +102,6 @@ function createMenus(){
 			["exit_button", "start_button"]
 		);
 	menusArr.startMenu = startMenu;
-//	player.add(menusArr.startMenu.skybox);
-/**	menusArr.push(startMenu);
-	player.add(menusArr[0].skybox);
-	for(var i = 0; i < menusArr[0].buttons.length; i++){
-		player.add(menusArr[0].buttons[i]);
-	}
-*/
 	var pauseMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
 			"textures/skyboxes/tantolunden5/", 
@@ -116,7 +109,6 @@ function createMenus(){
 			["exit_button", "restart_button", "resume_button"]
 		);
 		menusArr.pauseMenu = pauseMenu;
-//	menusArr.push(pauseMenu);
 }
 
 /* /////////////////////////////////////////////////////////////
@@ -227,6 +219,12 @@ function render() {
 	}
 }
 
+/* /////////////////////////////////////////////////////////////
+	Creates random lights, Amount is specified when creating level. Lights are Point lights with shadows enabled
+	Called from createWorld
+	INPUT: none
+	OUTPUT: none - this function adds lights directly to the scene
+ *//////////////////////////////////////////////////////////////
 function createRandomLights(){
 	for(var i = 0; i < level.numRandomLights; i++){
 		var light = new THREE.PointLight(0xffffff, 1, 1000000);
@@ -249,8 +247,13 @@ function createRandomLights(){
 	}
 }
 
+/* /////////////////////////////////////////////////////////////
+	This function takes a number and splits it randomly into numParts parts.
+	Called from createPowerups
+	INPUT: num - number to be split, numParts - amount of sections to dplit the number to
+	OUTPUT: none - this function adds lights directly to the scene
+ *//////////////////////////////////////////////////////////////
 function splitNumToParts(num, numParts){
-	//split numBuildings between different models
 	var numPerSplit = []; 
 	var currNum = num;
 	for(var i = 0; i < numParts -1; i++){
@@ -263,6 +266,13 @@ function splitNumToParts(num, numParts){
 	return numPerSplit;
 }
 
+/* /////////////////////////////////////////////////////////////
+	This function adds powerups to the scene. Amount of powerups specified when creating level.
+	The different powerups are chosen with random probability
+	Called when adding powerups  in createWorld
+	INPUT: none
+	OUTPUT: none - this function adds powerups directly to the scene
+ *//////////////////////////////////////////////////////////////
 function createPowerups(){
 	var powerupsSplit = splitNumToParts(level.numPowerups, powerupTypes.length);
 	console.log("Powerups Split: " + powerupsSplit);
@@ -281,6 +291,12 @@ function createPowerups(){
 	} 
 }
 
+/* /////////////////////////////////////////////////////////////
+	This function adds collectibles to the scene. Amount of collectibles specified when creating level.
+	Called when adding collectibles in createWorld
+	INPUT: none
+	OUTPUT: none - this function adds collectibles directly to the scene
+ *//////////////////////////////////////////////////////////////
 function createCollectibles(){
 	for(var i = 0; i < level.numCollectibles; i++){
 		collectibles.push(new Collectible(
@@ -289,7 +305,7 @@ function createCollectibles(){
 			)
 		);
 	}
-	// move powerups to random place on map
+	// move collectibles to random place on map
 	randomMoveArray(collectibles);
 
 	for(var i = 0; i < collectibles.length; i++){
