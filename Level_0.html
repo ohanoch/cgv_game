@@ -100,11 +100,33 @@ var text = "JOSH  SUCKS",
 	font = undefined;
 var group, textMesh1, textGeo, materials;
 
-var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
-
+var menusArr = {};
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+function createMenus(){
+	var startMenu = new Menu(
+			ALPHA_CAMERA_DISTANCE * 2, 
+			"textures/skyboxes/ulam/", 
+			"sprites/buttons/", 
+			["exit_button", "start_button"]
+		);
+	menusArr.startMenu = startMenu;
+//	player.add(menusArr.startMenu.skybox);
+/**	menusArr.push(startMenu);
+	player.add(menusArr[0].skybox);
+	for(var i = 0; i < menusArr[0].buttons.length; i++){
+		player.add(menusArr[0].buttons[i]);
+	}
+*/
+	var pauseMenu = new Menu(
+			ALPHA_CAMERA_DISTANCE * 2, 
+			"textures/skyboxes/tantolunden5/", 
+			"sprites/buttons/", 
+			["exit_button", "restart_button", "resume_button"]
+		);
+		menusArr.pauseMenu = pauseMenu;
+//	menusArr.push(pauseMenu);
+}
 
 function cameraRender( camera, left, top, width, height ){
 	
@@ -270,6 +292,7 @@ function createWorld() {
     scene = new THREE.Scene();
     scene.add(player);
     
+	createMenus();
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     
     mainCamera = new THREE.PerspectiveCamera(
@@ -371,7 +394,6 @@ function createWorld() {
 	createPowerups();
 //--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
 	createCollectibles();
-
 } // end function createWorld()
 
 
@@ -432,7 +454,7 @@ function modelLoader(geometry, materials) {
 function randomPlace(){
 	var move = [];
 	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.width / 2));
-	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight);
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight + 5);
 	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.depth / 2));
 	return new THREE.Vector3(move[0],move[1],move[2]);
 
@@ -480,22 +502,39 @@ function resetCameraPosition(){
 
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< M E N U   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
 /*///////////////////////////////////////////////////////////////////////////////// 
-	Exits the menu.
+	Returns the current open menu
 	Called by menuInteraction and keysPressed
 	INPUT: none
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
+function openMenu(){
+	var menu;
+	if(menusArr.startMenu.isOpen){
+		menu = menusArr.startMenu;
+	} else {
+		menu = menuArr.pauseMenu;
+	}
+	return menu;
+}
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Exits the menu.
+	Called by exitMenu and menuInteraction
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
 function exitMenu(){
+	var menu = openMenu();
+	
+	console.log("exiting menu");
 	scene.remove(menu.skybox);
 	for(var i = 0; i< menu.buttons.length; i++){
 		scene.remove(menu.buttons[i]);
 	}
+	
+	menu.isOpen = false;
 	document.removeEventListener("mousedown", menuInteraction);
-	animating = true;
-	requestAnimationFrame(doFrame);
 }
 
 
@@ -507,7 +546,8 @@ function exitMenu(){
 //////////////////////////////////////////////////////////////////////////////////*/
 function menuInteraction(e){
 	var raycaster = new THREE.Raycaster();
-	
+	var menu = openMenu();
+
 	//var r = window.getBoundingClientRect();
 	var x = e.clientX	// take in click coordinates
 	var y = e.clientY	// 
@@ -521,10 +561,18 @@ function menuInteraction(e){
 	if(intersections.length >= 1){
 		if(intersections[0].object.name == "restart_button"){
 			console.log("restarting game");
+			exitMenu();
 			restartGame();
+		} else if(intersections[0].object.name == "start_button"){
+			console.log("starting game");
+			exitMenu();
+			animating = true;
+			requestAnimationFrame(doFrame);
 		} else if (intersections[0].object.name == "resume_button"){
 			console.log("resuming game");
 			exitMenu();
+			animating = true;
+			requestAnimationFrame(doFrame);
 		} else if(intersections[0].object.name == "exit_button"){
 			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
 		}
@@ -537,7 +585,8 @@ function menuInteraction(e){
 	INPUT: none
 	OUTPUT: none
 /////////////////////////////////////////////////////////////////////////////////*/
-function displayMenu(){
+function displayMenu(menu){
+	menu.isOpen = true;
 	menu.skybox.position.x = player.position.x;
 	menu.skybox.position.y = player.position.y;
 	menu.skybox.position.z = player.position.z;
@@ -545,8 +594,8 @@ function displayMenu(){
 
 	for(var i = 0; i < menu.buttons.length; i++){
 		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-		menu.buttons[i].position.y = player.position.y + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-		menu.buttons[i].position.z = player.position.z + Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+		menu.buttons[i].position.y = player.position.y +  Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+		menu.buttons[i].position.z = player.position.z + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
 
 		scene.add(menu.buttons[i]);
 	}
@@ -874,7 +923,6 @@ function createText() {
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function updateForFrame() {
-	console.log(player.position)
 
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
@@ -938,7 +986,6 @@ function updateForFrame() {
 
 	// Increment Nth frame counter
 	everyNframes ++;
-	console.log("N counter: ",everyNframes);
 
 	//Collision
 	var tempCurrLevel = currLevel;
@@ -1036,7 +1083,7 @@ function keysPressed(e) {
 			requestAnimationFrame(doFrame);
 		} else {
 			animating = false;
-			displayMenu();
+			displayMenu(menusArr.pauseMenu);
 		}
 		return;
 	}
@@ -1152,7 +1199,6 @@ function init() {
 
 		stats = new Stats();
 		container.appendChild( stats.dom );
-
     }
     catch (e) {
         document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
