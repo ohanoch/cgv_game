@@ -38,7 +38,7 @@ var NUM_RANDOM_LIGHTS = 2;
 
 var currLevel = 0; //level variable mostly for display purposes at the moment
 
-var canvas, renderer, scene, camera; // Standard three.js requirements.
+var canvas, renderer, scene, mainCamera; // Standard three.js requirements.
 
 var container, stats;
 
@@ -101,6 +101,64 @@ var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/"
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+function cameraRender( camera, left, top, width, height ){
+	
+	renderer.setViewport( left, top, width, height );
+	renderer.setScissor( left, top, width, height );
+	camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+}
+
+function putAboveObject(objectArray, item){
+	var newItemArray = new Array();
+	for (var i = 0; i < objectArray.length; i++){
+		var currItem = item.clone();
+		currItem.translateX(objectArray[i].position.x - currItem.position.x);
+		currItem.translateZ(objectArray[i].position.z - currItem.position.z);
+		currItem.translateY(ATMOSPHERE_HEIGHT * 2);
+		scene.add(currItem);
+
+		newItemArray.push(currItem);
+	}
+	return newItemArray;
+}
+
+function addMinimapObjects(){
+	var removeObjects = new Array();
+
+	//add yellow sphere for player
+	var alphaMarker = new THREE.Mesh(
+		new THREE.SphereGeometry( 20 ),
+		new THREE.MeshBasicMaterial( {color: 0xffff00} )	
+	);
+	removeObjects = removeObjects.concat(putAboveObject(new Array(player), alphaMarker));
+
+	// add red cube for powerups
+	var minimapPowerups = [];
+	var powerupCube = new THREE.Mesh(
+		new THREE.BoxGeometry( 20, 20, 20 ),
+		new THREE.MeshBasicMaterial( {color: 0xff0000} )
+	);
+	removeObjects = removeObjects.concat(putAboveObject(powerups, powerupCube));
+
+	//add blue dodecahedron for collectibles
+	var minimapCollectibles = [];
+	var collectibleDodec = new THREE.Mesh(
+		new THREE.DodecahedronGeometry( 20 ),
+		new THREE.MeshBasicMaterial( {color: 0x0000ff} )
+	);
+	removeObjects = removeObjects.concat(putAboveObject(collectibles, collectibleDodec));
+
+	return removeObjects;
+}
+
+function removeMinimapObjects( removeObjects ){
+		for(var i = 0; i < removeObjects.length; i++){
+			scene.remove(removeObjects[i]);
+		}
+}
+
+
 /* /////////////////////////////////////////////////////////////
 	The render function draws the scene.
 	Called every frame.
@@ -108,75 +166,21 @@ var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/"
 	OUTPUT: none
  *//////////////////////////////////////////////////////////////
 function render() {
-	var w = window.innerWidth, h = window.innerHeight;
-	renderer.setSize(w,h);
 
 	// Render main camera on entire screen
-	renderer.setViewport( 0, 0, w, h );
-	renderer.setScissor( 0, 0, w, h );
-	renderer.setScissorTest( true );
-	camera.aspect = w / h;
-	camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
+	cameraRender (mainCamera, 0, 0, window.innerWidth, window.innerHeight)	
+
+	//if paused don't show minimap
+	if(animating){
+		scene.remove(worldMap.atmosphere);
+		//add objects to minimap so it will be easier to see
+		var removeObjects = addMinimapObjects();
+		// Render minimap camera in top right corner
+		cameraRender(minimapCamera, window.innerWidth - minimapWidth - 50, 20, minimapWidth, minimapHeight);
 	
-	//add objects to minimap so it will be easier to see
-
-	//add sphere for player
-	var arrow = new THREE.Mesh(
-		new THREE.SphereGeometry( 20 ),
-		new THREE.MeshBasicMaterial( {color: 0xffff00} )	
-	);
-	arrow.translateX(player.position.x - arrow.position.x);
-	arrow.translateZ(player.position.z - arrow.position.z);
-	arrow.translateY(ATMOSPHERE_HEIGHT - 88);
-	scene.add(arrow);
-
-	var minimapPowerups = [];
-	for (var i = 0; i < powerups.length; i++){
-		var powerupCube = new THREE.Mesh(
-			new THREE.BoxGeometry( 30, 30, 30 ),
-			new THREE.MeshBasicMaterial( {color: 0xff0000} )
-		);
-		
-		powerupCube.translateX(powerups[i].position.x - powerupCube.position.x);
-		powerupCube.translateZ(powerups[i].position.z - powerupCube.position.z);
-		powerupCube.translateY(ATMOSPHERE_HEIGHT - 90);
-		minimapPowerups.push(powerupCube);
-
-		scene.add(powerupCube);
-	} 
-
-	var minimapCollectibles = [];
-	for (var i = 0; i < collectibles.length; i++){
-		var collectibleDodec = new THREE.Mesh(
-			new THREE.DodecahedronGeometry( 15 ),
-			new THREE.MeshBasicMaterial( {color: 0x0000ff} )
-		);
-		
-		collectibleDodec.translateX(collectibles[i].position.x - collectibleDodec.position.x);
-		collectibleDodec.translateZ(collectibles[i].position.z - collectibleDodec.position.z);
-		collectibleDodec.translateY(ATMOSPHERE_HEIGHT - 90);
-		minimapCollectibles.push(collectibleDodec);
-
-		scene.add(collectibleDodec);
-	} 
-	// Render minimap camera in top right corner
-	renderer.setViewport( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
-	renderer.setScissor( w - minimapWidth - 50, 20, minimapWidth, minimapHeight );
-	renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
-	minimapCamera.aspect = w / h;
-	minimapCamera.updateProjectionMatrix();
-	renderer.render( scene, minimapCamera );
-
-	//romve arrow from scene
-	scene.remove(arrow);
-
-	for (var i = 0; i < powerups.length; i++){
-		scene.remove(minimapPowerups[i])
-	}
-	
-	for (var i = 0; i < collectibles.length; i++){
-		scene.remove(minimapCollectibles[i])
+		// remove objects from minimap
+		removeMinimapObjects(removeObjects);
+		scene.add(worldMap.atmosphere)
 	}
 }
 
@@ -193,13 +197,13 @@ function createWorld() {
     
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     
-    camera = new THREE.PerspectiveCamera(
+    mainCamera = new THREE.PerspectiveCamera(
 		30, 
 		window.innerWidth/window.innerHeight, 
 		0.1, 
 		ALPHA_CAMERA_DISTANCE * 20
 	);
-    camera.position.z = ALPHA_CAMERA_DISTANCE;
+    mainCamera.position.z = ALPHA_CAMERA_DISTANCE;
 
 	//-------------------------------------------- LIGHTING ------------------------------------------------
 	for(var i = 0; i < NUM_RANDOM_LIGHTS; i++){
@@ -226,7 +230,7 @@ function createWorld() {
 	//spotlight.position.z = ALPHA_CAMERA_DISTANCE;
 	//camera.add(spotlight);
 
-    player.add(camera);
+    player.add(mainCamera);
     scene.add(player);
     
 	//------------------------------------------ MINIMAP ----------------------------------------------
@@ -235,7 +239,7 @@ function createWorld() {
 		window.innerHeight / 5,							// Right
     	window.innerHeight / 5,							// Top
     	window.innerHeight / -5,						// Bottom
-    	-1 * ATMOSPHERE_HEIGHT + 0.001,					// Near 
+    	-3 * ATMOSPHERE_HEIGHT,					// Near 
     	10000 );           								// Far 
 	minimapCamera.up = new THREE.Vector3(0,0,-1);
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
@@ -446,14 +450,14 @@ function randomMoveArray( arr ){
 //////////////////////////////////////////////////////////////////////////////////*/
 function resetCameraPosition(){
 	var cameraRotationSpeed = 0.1;
-	camera.translateX((alpha.position.x - camera.position.x) * cameraRotationSpeed);
-	camera.translateY((alpha.position.y - camera.position.y) * cameraRotationSpeed);
-	camera.translateZ((alpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z) * cameraRotationSpeed);
-	camera.lookAt(alpha.position);
+	mainCamera.translateX((alpha.position.x - mainCamera.position.x) * cameraRotationSpeed);
+	mainCamera.translateY((alpha.position.y - mainCamera.position.y) * cameraRotationSpeed);
+	mainCamera.translateZ((alpha.position.z + ALPHA_CAMERA_DISTANCE - mainCamera.position.z) * cameraRotationSpeed);
+	mainCamera.lookAt(alpha.position);
 
-	if(Math.abs(alpha.position.x - camera.position.x) <= 0.01 &&
-		Math.abs(alpha.position.y - camera.position.y <= 0.01) &&
-		Math.abs(alpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z <= 0.01)){
+	if(Math.abs(alpha.position.x - mainCamera.position.x) <= 0.01 &&
+		Math.abs(alpha.position.y - mainCamera.position.y <= 0.01) &&
+		Math.abs(alpha.position.z + ALPHA_CAMERA_DISTANCE - mainCamera.position.z <= 0.01)){
 		
 		resetCameraFlag = false;
 	}
@@ -496,7 +500,7 @@ function menuInteraction(e){
 	var a = 2 * x / window.innerWidth - 1; // convert canvas pixel coords to clip coords
 	var b = 1 - 2 * y / window.innerHeight;
 
-	raycaster.setFromCamera( new THREE.Vector2(a,b), camera );
+	raycaster.setFromCamera( new THREE.Vector2(a,b), mainCamera );
 
 	var intersections = raycaster.intersectObjects( menu.buttons, true );
 	if(intersections.length >= 1){
@@ -548,7 +552,7 @@ function displayMenu(){
 ////////////////////////////////////////////////////////////////////////////////////*/
 function reinitializeGlobals(){
 	scene = null;
-	camera = null;
+	mainCamera = null;
 	frameNumber = 0;
 	animating = false;
 	player = new THREE.Object3D();
@@ -910,8 +914,8 @@ function updateForFrame() {
 	}
 
 	// camera can't got below floor
-	if(new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld).y < worldMap.floorHeight + 0.1){
-		camera.position.y = worldMap.floorHeight + 1.1;
+	if(new THREE.Vector3().setFromMatrixPosition(mainCamera.matrixWorld).y < worldMap.floorHeight + 0.1){
+		mainCamera.position.y = worldMap.floorHeight + 1.1;
 	}
 	
 	// Summon keyboard control lookups in one line.
@@ -1066,7 +1070,7 @@ function keysReleased(e) {
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function installOrbitControls() {
-    controls = new THREE.OrbitControls(camera,canvas);
+    controls = new THREE.OrbitControls(mainCamera,canvas);
     controls.noPan = true; 
     controls.noZoom = true;
     controls.staticMoving = true;
@@ -1125,6 +1129,8 @@ function init() {
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.shadowMap.enabled = true;
+		renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
+		renderer.setSize(window.innerWidth, window.innerHeight);
 		//renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
 		container.appendChild( renderer.domElement );
