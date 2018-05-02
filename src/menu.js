@@ -2,8 +2,7 @@
 
 class Menu {
 	
-	constructor(cubeSize, skyboxDirectoryURL, buttonDirectoryURL) {
-
+	constructor(cubeSize, skyboxDirectoryURL, buttonDirectoryURL, buttonNames) {
 
 		//-------------------------------------- SKYBOX -------------------------------------------------
         //stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
@@ -11,13 +10,14 @@ class Menu {
         if(skyboxDirectoryURL != ""){
 			this.addSkybox(skyboxDirectoryURL, cubeSize);
 		}
+		console.log(this.skybox)
 			//------------------------------------------ BUTTONS ---------------------------------------
-		if(buttonDirectoryURL != "")
+		if(buttonDirectoryURL != []){
 			this.buttons = [];
-			this.addButton(buttonDirectoryURL, "resume_button");
-			this.addButton(buttonDirectoryURL, "exit_button");
-			this.addButton(buttonDirectoryURL, "restart_button");
-
+			for(var i = 0; i < buttonNames.length; i++){
+				this.addButton(buttonDirectoryURL, buttonNames[i]);
+			}
+		}
 		console.log("menu created")
 	}
 
