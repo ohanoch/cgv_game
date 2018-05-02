@@ -21,6 +21,12 @@ class Menu {
 		console.log("menu created")
 	}
 
+	/* /////////////////////////////////////////////////////////////
+    Adds skybox to menu
+	called from menu constructor
+    INPUT: URL for skybox images folder, size of skybox cube
+    OUTPUT: none - adds skybox directly to this.skybox
+ *//////////////////////////////////////////////////////////////
 	addSkybox(skyboxDirectoryURL, cubeSize){
 		var textureLoader = new THREE.TextureLoader();
 		var materialArray = [];
@@ -48,6 +54,13 @@ console.log("")
 		console.log("added menu skybox");
 	}
 
+	/* /////////////////////////////////////////////////////////////
+    Adds a button to the menu
+    Called by menu constructor
+    INPUT: directory with button image URLS, name of button
+    OUTPUT: none - adds button directly to this.buttons array
+ *//////////////////////////////////////////////////////////////
+
 	addButton(buttonDirectoryURL, buttonName){
 		var textureLoader = new THREE.TextureLoader();
 		var materialArray = [];
@@ -64,7 +77,6 @@ console.log("")
 		);
 		button.name = buttonName;
 		this.buttons.push(button);
-
 
 		console.log("added menu button " + buttonName);
 	}

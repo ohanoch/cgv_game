@@ -146,7 +146,9 @@ class Map {
 				}
 			);
 		
-		}	
+		}
+
+		// Calls loader for each object
 		for (var i = 0; i < modelList.length; i++){
 			modelLoader(modelList[i], numPerModel[i]);
 		}

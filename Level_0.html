@@ -627,11 +627,9 @@ function displayMenu(menu){
 	scene.add(menu.skybox);
 
 	for(var i = 0; i < menu.buttons.length; i++){
-
-  menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-  menu.buttons[i].position.y = player.position.y +  Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-  menu.buttons[i].position.z = player.position.z + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-
+		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+		menu.buttons[i].position.y = player.position.y +  Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+		menu.buttons[i].position.z = player.position.z + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
 
 		scene.add(menu.buttons[i]);
 	}
@@ -690,7 +688,6 @@ function Crash() {
 		animating = false;
 		window.alert("G A M E    O V E R\nYour final score: " + Score + "\nClick OK to start a new game");
 		restartGame();
-		//do other stuff
 	}else{
 	// TODO : Crash animation, respawn
 		console.log("alpha crashed...");
