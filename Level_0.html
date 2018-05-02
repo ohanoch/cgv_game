@@ -12,8 +12,8 @@
 <script src="src\js\threex.atmospherematerialdatgui.js"></script>
 <script src="src\js\threex.dilategeometry.js"></script>
 <script src="src\js\threex.geometricglowmesh.js"></script>
-<script src="src/js/GeometryUtils.js"></script>
-<script src="src/js/BendModifier.js"></script>
+<script src="src\js\GeometryUtils.js"></script>
+<script src="src\js\BendModifier.js"></script>
 
 
 <script src="src\alpha.js"></script>
@@ -35,6 +35,9 @@ var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
 var STARTING_LIVES = 3;
 var NUM_RANDOM_LIGHTS = 2;
+var MAP_FLOOR_URL = "textures/floor.jpg"
+var MAP_BACKGROUND_URL = "textures/skyboxes/dawnmountain/"
+var ALPHA_MODEL_URL = "models/stork.js"
 
 var currLevel = 0; //level variable mostly for display purposes at the moment
 
@@ -184,28 +187,7 @@ function render() {
 	}
 }
 
-
-/* /////////////////////////////////////////////////////////////
-	Creates the world map, lights, cameras, player and collectibles and powerups.
-	Called by restartGame and init.
-	INPUT: none
-	OUTPUT: none
- *//////////////////////////////////////////////////////////////
-function createWorld() {
-    renderer.setClearColor("black"); // Background color for scene.
-    scene = new THREE.Scene();
-    
-    // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
-    
-    mainCamera = new THREE.PerspectiveCamera(
-		30, 
-		window.innerWidth/window.innerHeight, 
-		0.1, 
-		ALPHA_CAMERA_DISTANCE * 20
-	);
-    mainCamera.position.z = ALPHA_CAMERA_DISTANCE;
-
-	//-------------------------------------------- LIGHTING ------------------------------------------------
+function createRandomLights(){
 	for(var i = 0; i < NUM_RANDOM_LIGHTS; i++){
 		var light = new THREE.PointLight(0xffffff, 1, 1000000);
 		light.position.set(
@@ -225,13 +207,37 @@ function createWorld() {
 
 		scene.add(light);
 	}
-	
+}
+
+
+/* /////////////////////////////////////////////////////////////
+	Creates the world map, lights, cameras, player and collectibles and powerups.
+	Called by restartGame and init.
+	INPUT: none
+	OUTPUT: none
+ *//////////////////////////////////////////////////////////////
+function createWorld() {
+    renderer.setClearColor("black"); // Background color for scene.
+    scene = new THREE.Scene();
+    scene.add(player);
+    
+    // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
+    
+    mainCamera = new THREE.PerspectiveCamera(
+		30, 
+		window.innerWidth/window.innerHeight, 
+		0.1, 
+		ALPHA_CAMERA_DISTANCE * 20
+	);
+    mainCamera.position.z = ALPHA_CAMERA_DISTANCE;
+    player.add(mainCamera);
+
+	//-------------------------------------------- LIGHTING ------------------------------------------------
+	createRandomLights();
 	//var spotlight = new THREE.SpotLight(0x0000ff, 5);
 	//spotlight.position.z = ALPHA_CAMERA_DISTANCE;
 	//camera.add(spotlight);
 
-    player.add(mainCamera);
-    scene.add(player);
     
 	//------------------------------------------ MINIMAP ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(
@@ -250,7 +256,7 @@ function createWorld() {
     //---------------------------------- CREATE THE WORLD -------------------------------------------
     
 
-	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/") //width, height, atmosphereHight, textureURL, skyboxDirectory
+	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, MAP_FLOOR_URL, MAP_BACKGROUND_URL) //width, height, atmosphereHight, textureURL, skyboxDirectory
 	scene.add(worldMap.floor);
 	scene.background = worldMap.background;
 	scene.add(worldMap.atmosphere);	
@@ -309,7 +315,7 @@ function createWorld() {
 // alpha is created by modelLoader function and added to player
 	
 	var loader = new THREE.JSONLoader();					// create loader for .js models
-	loader.load("models/stork.js", modelLoader);		// load model and call model_loader
+	loader.load(ALPHA_MODEL_URL, modelLoader);		// load model and call model_loader
 	
 	
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
