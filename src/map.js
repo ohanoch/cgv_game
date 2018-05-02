@@ -79,17 +79,8 @@ class Map {
 		
 		//split numBuildings between different models
 		var numPerModel = splitNumToParts(numBuildings, modelList.length);
-/**
-		var numPerModel = [];
-		var currNumBuildings = numBuildings;
-		for(var i = 0; i < modelList.length -1; i++){
-			var currAmount = Math.floor(Math.random() * currNumBuildings);
-			numPerModel.push(currAmount);
-			currNumBuildings -= currAmount;
-		}
-		numPerModel.push(currNumBuildings);
 		console.log("split of building types " + numPerModel);
-*/
+
 		var numLoaded = 0;
 		function loadingDone(){
 			numLoaded++;
