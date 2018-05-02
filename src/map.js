@@ -111,7 +111,7 @@ class Map {
 			numLoaded++;
 			if (numLoaded == modelList.length){
 				mapDone = true;
-				alphaStartup();
+				alpha.startup();
 			}
 		}
 		//load models

@@ -31,9 +31,8 @@ var WORLD_WIDTH = 2000;
 var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
-// var SAVE_EVERY_N_FRAMES = 200; // ACHTUNG: This may need adjusting depending on layout of buildings in level ad other stuff
 var STARTING_LIVES = 3;
-var NUM_LIGHTS = 2;
+var NUM_RANDOM_LIGHTS = 2;
 
 var currLevel = 0; //level variable mostly for display purposes at the moment
 
@@ -60,29 +59,27 @@ var jumping = false;	//whether player is jumping or not
 
 var alpha;	// player stats tracking + model  object
 
+var alphaDone = false;
+var mapDone = false;
+
 var gameOver = false; //updates to true when lives == 0
 
 var worldMap; // make global so it can be accessed by collision function
-
-var powerups = [];	
 
 var collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
 
 var powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
 var activePowerup = null;
+
 var collectibles = [];			// the items that the player needs to collect in order to progress to the next level
-//var collectiblesLeft = 0;			// the number of collectibles left to collect. when this reaches zero, go to next level
+
 var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
 
 var worldMap;
 
-var last_position; // Save last legal position of player. Used in respawning process Gets updated every +- 10 (?) legal positions
-
 var mesh;
-
-var cubeCamera;
 
 var joshSucks; // he does
 
@@ -97,8 +94,6 @@ var text = "JOSH  SUCKS",
 var group, textMesh1, textGeo, materials;
 
 var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
-
-
 
 /**
  *  The render function draws the scene.
@@ -176,35 +171,6 @@ function render() {
 	}
 }
 
-function respawnAlpha(){
-	var currLives = alpha.lives;
-	while(true){
-		console.log("respawning alpha");
-		var randomX = Math.random();
-		var randomZ = Math.random();
-		player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
-		minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
-		collissions();
-		if(alpha.lives != currLives){
-			alpha.lives = currLives;
-		} else {
-			break;
-		} 
-	}
-	alpha.resetAttributes();
-}
-
-//make sure alpha doesn't spawn on an object
-// this function gets called as a callback for when alpha finishes loading and for when map buildings get loaded
-var alphaDone = false;
-var mapDone = false;
-function alphaStartup(){
-	if(alphaDone && mapDone){
-		console.log("checking if alpha initialized on building");
-		collissions();
-		alpha.lives = STARTING_LIVES;
-	}
-}
 
 /**
  * This function is called by the init() method to create the world. 
@@ -224,7 +190,7 @@ function createWorld() {
     camera.position.z = ALPHA_CAMERA_DISTANCE;
 
 	//------------------------------------- LIGHTING ------------------------------------------------
-	for(var i = 0; i < NUM_LIGHTS; i++){
+	for(var i = 0; i < NUM_RANDOM_LIGHTS; i++){
 		var light = new THREE.PointLight(0xffffff, 1, 1000000);
 		light.position.set(
 			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10),
@@ -301,11 +267,6 @@ function createWorld() {
 	mesh.position.set(0,0,0);	// centre obj coords of sphere
 	scene.add(mesh);
 
-	// using cubecamera.js library. Don't know if this is legal
- 	//cubeCamera  = new THREEx.CubeCamera(mesh);
-	//scene.add(cubeCamera.object3d);
-
-	//material.envMap = cubeCamera.textureCube;
 	joshSucks.add(mesh);
 
 	// GLOW THING
@@ -335,7 +296,8 @@ function createWorld() {
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 	loader.load("models/stork.js", model_loader);		// load model and call model_loader
 	
-
+	
+//------------------------------------- CREATE POWERUPS -----------------------------------------------
 
 	var gun = new Powerup("gun");	// add a gun powerup
 	gun.position.set(3,4,3);
@@ -355,6 +317,8 @@ function createWorld() {
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
 	} 
+	
+//--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
 	
 	var collectible0 = new Collectible(
 		new THREE.CylinderGeometry(1,0.5,1,32),
@@ -577,7 +541,7 @@ function keysPressed(e) {
     // store an entry for every key pressed
     keys[e.keyCode] = true;
         // NB: prevent default browser behavior - disable during testing
-        e.preventDefault();
+        //e.preventDefault();
 }
 
 function keysReleased(e) {
@@ -613,9 +577,7 @@ function reinitializeGlobals(){
 	mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 	minimapCamera = null; 
 	worldMap = null;
-	last_position = null; // Save last legal position of player. Used in respawning process Gets updated every +- 10 (?) legal positions
 	mesh = null;
-	cubeCamera = null;
 	joshSucks = null; // he does
 	Score = 0;
 	everyNframes = 0; // Global counter to do stuff every Nth frame. 
@@ -637,11 +599,9 @@ Put player on the floor
 ///////////////////////////////////////////////////////////////////////////*/
 function put_on_floor() {
 	if(player.position.y > worldMap.floorHeight + alpha.getRadius() - 2) {	//check if player has reached the "floor" + some leeway
-		alpha.incSpeedY(-0.01);				//if they have not, reduce speed (gravity)
+		alpha.incSpeedY(-0.01);																		//if they have not, reduce speed (gravity)
 		return true;
-	} else {						//if they have, stop reducing speed and set position to the ground, set Y speed to zero
-		//alpha.setSpeedY(0);
-		//player.position.y = -2 + alpha.getRadius();
+	} else {						//if they have, the player crashes
 		Crash();
 		return false;
 	}	
@@ -659,19 +619,10 @@ function model_loader(geometry, materials) {
         vertexColors: THREE.FaceColors,  	// use colors from the geometry
         morphTargets: true							// for animation
     });
-
-// Testing geometry
-       // var geom2= new THREE.BoxGeometry(10,10,10);
-       //  var mar2 = new THREE.MeshPhongMaterial({
-       //      color: 0xFF0000,
-       //      specular: 0x222222,
-       //      shininess: 16
-       //      //shading: THREE.FlatShading
-       //  });
     
 	alpha = new Alpha(geometry,material, 1);	// create alpha object
+	
 // TRANSFORMS
-
 	alpha.scale.set(0.05,0.05,0.05);
 	alpha.position.set(0,0,0);
 	alpha.rotateY(Math.PI);
@@ -681,10 +632,10 @@ function model_loader(geometry, materials) {
 
 	alpha.geometry.computeBoundingBox();
 	alphaDone = true;
-	alphaStartup();	
+	alpha.startup();
 
-// ANIMATION STUFF
 	
+// ANIMATION STUFF
 	mixer = new THREE.AnimationMixer( alpha );
 	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
     var animationAction = mixer.clipAction(clip);
@@ -694,53 +645,13 @@ function model_loader(geometry, materials) {
 }
 
 
-
-/*//////////////////////////////////////////////////////////////////////////
-Respawn: Reset player position, reset alpha speed 
-///////////////////////////////////////////////////////////////////////////*/
-function Respawn(){
-	animating = false;
-	// reset player position to legal position, N frames ago (checkpoint kinda):
-	player.position.set(last_position.x,last_position.y,last_position.z);
-	console.log("player",player.position.x, player.position.y, player.position.z);
-	
-	// reset alpha speed
-	alpha.setSpeedZ(-0.01);	// We should probably have a static variable for this
-	alpha.setSpeedY(0);
-	animating = true;	
-	// 
-}
-
-
-
-/*//////////////////////////////////////////////////////////////////////////
-Save Position: Saves players legal position every N frames. avi_respawn
-///////////////////////////////////////////////////////////////////////////*/
-// function SavePosition(){
-// 	if (everyNframes == SAVE_EVERY_N_FRAMES){
-// 		// Do stuff:
-// 		console.log("N counter: ", everyNframes);
-// 		// - Store position of player
-// 		last_position = player.position.clone(); // may need to be player.position.clone()
-// 		console.log("last position",last_position);
-// 		// Reset to everyNframes counter to 0
-// 		everyNframes = 0;
-// 		console.log("N counter: ", everyNframes);
-
-// 	}else{ 
-// 		return; // necessary ??
-// 	}
-// }
-
-
-
-
 /*//////////////////////////////////////////////////////////////////////////
 Crash: Explosion, respawn from crash site, decrement lives, game over
 ///////////////////////////////////////////////////////////////////////////*/
 function Crash() {
 	// Update Alpha stats
 	alpha.lives -= 1;
+	
 	// if no more lives, game over
 	if (alpha.lives == 0){
 		gameOver = true;
@@ -750,14 +661,10 @@ function Crash() {
 		//do other stuff
 	}else{
 	// TODO : Crash animation, respawn
-		// Respawn(); //avi_respawn
 		console.log("alpha crashed...");
 		animating = false;
 		window.alert("C R A S H E D!\n Lives left: " + alpha.lives);
-		respawnAlpha();
-	// respawning:
-	// player.position = legal position
-	// 
+		alpha.respawn();
 	}
 
 }
@@ -1037,9 +944,6 @@ function updateForFrame() {
 	// Increment Nth frame counter
 	everyNframes ++;
 	console.log("N counter: ",everyNframes);
-
-	//Every N frames, save position.
-	//SavePosition();	//avi_respawn
 
 	//Collision
 	var tempCurrLevel = currLevel;

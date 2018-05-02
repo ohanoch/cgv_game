@@ -2,12 +2,9 @@
 
 
 // lives
-// rewards
 // score
-// boosts
 // speedY
 // speedZ
-// speedRotation ???
 // position -  x,y,z
 // geometry - threejs geometry, may be a model
 // material - threejs material, includes shading, may include a texture
@@ -34,7 +31,7 @@ class Alpha extends THREE.Mesh{
 		
 	}
 	
-	resetAttributes(){
+	resetMovement(){
 		this.speedY = 0;
 		this.speedZ = -0.01;
 		this.maxSpeedY = 0.7;
@@ -42,6 +39,34 @@ class Alpha extends THREE.Mesh{
 		this.minSpeedZ = -0.01;
 		
 		console.log("alpha reset");
+	}
+	
+	respawn() {
+		var currLives = this.lives;
+		while(true){
+			console.log("respawning alpha");
+			var randomX = Math.random();
+			var randomZ = Math.random();
+			player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
+			minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
+			collissions();
+			if(this.lives != currLives){
+				this.lives = currLives;
+			} else {
+				break;
+			} 
+		}
+		this.resetMovement();
+	}
+	
+	
+//make sure alpha doesn't spawn on an object
+// this function gets called as a callback for when alpha finishes loading and for when map buildings get loaded
+	startup() {
+		if(alphaDone && mapDone){
+			console.log("checking if alpha initialized on building");
+			this.respawn();
+		}
 	}
 
 	getRadius() {
