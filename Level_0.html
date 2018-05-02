@@ -26,7 +26,9 @@
 
 "use strict";
 
-//Globals
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
 var WORLD_WIDTH = 2000;
 var WORLD_DEPTH = 2000;
 var ATMOSPHERE_HEIGHT = 100;
@@ -95,9 +97,16 @@ var group, textMesh1, textGeo, materials;
 
 var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
-/**
- *  The render function draws the scene.
- */
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+/* /////////////////////////////////////////////////////////////
+	The render function draws the scene.
+	Called every frame.
+	INPUT: none
+	OUTPUT: none
+ *//////////////////////////////////////////////////////////////
 function render() {
 	var w = window.innerWidth, h = window.innerHeight;
 	renderer.setSize(w,h);
@@ -172,24 +181,27 @@ function render() {
 }
 
 
-/**
- * This function is called by the init() method to create the world. 
- */
+/* /////////////////////////////////////////////////////////////
+	Creates the world map, lights, cameras, player and collectibles and powerups.
+	Called by restartGame and init.
+	INPUT: none
+	OUTPUT: none
+ *//////////////////////////////////////////////////////////////
 function createWorld() {
     renderer.setClearColor("black"); // Background color for scene.
     scene = new THREE.Scene();
     
-    // ------------------- Make a camera with viewpoint light ----------------------
+    // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     
     camera = new THREE.PerspectiveCamera(
 		30, 
 		window.innerWidth/window.innerHeight, 
 		0.1, 
-		ALPHA_CAMERA_DISTANCE * 20//Math.sqrt(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH, 2))
+		ALPHA_CAMERA_DISTANCE * 20
 	);
     camera.position.z = ALPHA_CAMERA_DISTANCE;
 
-	//------------------------------------- LIGHTING ------------------------------------------------
+	//-------------------------------------------- LIGHTING ------------------------------------------------
 	for(var i = 0; i < NUM_RANDOM_LIGHTS; i++){
 		var light = new THREE.PointLight(0xffffff, 1, 1000000);
 		light.position.set(
@@ -209,15 +221,15 @@ function createWorld() {
 
 		scene.add(light);
 	}
-
-	//Create a helper for the shadow camera (optional)
-	//var lightHelper = new THREE.CameraHelper( light1.shadow.camera );
-	//scene.add( lightHelper );
+	
+	//var spotlight = new THREE.SpotLight(0x0000ff, 5);
+	//spotlight.position.z = ALPHA_CAMERA_DISTANCE;
+	//camera.add(spotlight);
 
     player.add(camera);
     scene.add(player);
     
-	//---------------------- Minimap ----------------------------------------------
+	//------------------------------------------ MINIMAP ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(
 	    window.innerHeight / -5,						// Left
 		window.innerHeight / 5,							// Right
@@ -288,13 +300,12 @@ function createWorld() {
 
 
 
-
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 
-// alpha is created by model_loader function and added to player
+// alpha is created by modelLoader function and added to player
 	
 	var loader = new THREE.JSONLoader();					// create loader for .js models
-	loader.load("models/stork.js", model_loader);		// load model and call model_loader
+	loader.load("models/stork.js", modelLoader);		// load model and call model_loader
 	
 	
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
@@ -345,275 +356,13 @@ function createWorld() {
 } // end function createWorld()
 
 
-
-
-/*<<<<<<<<<<<<<<<<<<<<<< C U S T O M 	S U B   R O U T I N E S >>>>>>>>>>>>>>>>>>>>>>>>>>>
-			                                 |_
-			                           _____|~ |____
-			                          (  --         ~~~~--_,
-			                           ~~~~~~~~~~~~~~~~~~~'`  
-
-*/
-
-/*///////////////////////////////////////////////////////////////////////////////// 
-Reset the camera's to be behind the player (chase cam), after viewing the world.
-//////////////////////////////////////////////////////////////////////////////////*/
-
-function randomPlace(){
-	var move = [];
-	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.width / 2));
-	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight);
-	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.depth / 2));
-	return new THREE.Vector3(move[0],move[1],move[2]);
-
-}
-
-function randomMoveArray( arr ){
-	for(var i = 0; i < arr.length; i++){
-		var move = randomPlace();
-		arr[i].position.set(move.x, move.y, move.z);
-		arr[i].geometry.computeBoundingBox();
-		while(buildingBoxCollision(arr[i]).length != 0){
-			move = randomMove();
-			arr[i].position.set(move.x, move.y, move.z);
-		}
-	}
-}
-
-function resetCameraPosition(){
-	var cameraRotationSpeed = 0.1;
-	camera.translateX((alpha.position.x - camera.position.x) * cameraRotationSpeed);
-	camera.translateY((alpha.position.y - camera.position.y) * cameraRotationSpeed);
-	camera.translateZ((alpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z) * cameraRotationSpeed);
-	camera.lookAt(alpha.position);
-
-	if(Math.abs(alpha.position.x - camera.position.x) <= 0.01 &&
-		Math.abs(alpha.position.y - camera.position.y <= 0.01) &&
-		Math.abs(alpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z <= 0.01)){
-		
-		resetCameraFlag = false;
-	}
-}
-
-function exitMenu(){
-	scene.remove(menu.skybox);
-	for(var i = 0; i< menu.buttons.length; i++){
-		scene.remove(menu.buttons[i]);
-	}
-	document.removeEventListener("mousedown", menuInteraction);
-	animating = true;
-	requestAnimationFrame(doFrame);
-}
-/*//////////////////////////////////////////////////////////////////////////////////////////
-Waiting for user input while in menu mode
-///////////////////////////////////////////////////////////////////////////////////////////*/
-function menuInteraction(e){
-	var raycaster = new THREE.Raycaster();
-	
-	//var r = window.getBoundingClientRect();
-	var x = e.clientX	// take in click coordinates
-	var y = e.clientY	// 
-
-	var a = 2 * x / window.innerWidth - 1; // convert canvas pixel coords to clip coords
-	var b = 1 - 2 * y / window.innerHeight;
-
-	raycaster.setFromCamera( new THREE.Vector2(a,b), camera );
-
-	var intersections = raycaster.intersectObjects( menu.buttons, true );
-	if(intersections.length >= 1){
-		if(intersections[0].object.name == "restart_button"){
-			console.log("restarting game");
-			restartGame();
-		} else if (intersections[0].object.name == "resume_button"){
-			console.log("resuming game");
-			exitMenu();
-		} else if(intersections[0].object.name == "exit_button"){
-			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
-		}
-	}
-}
-
-/*////////////////////////////////////////////////////////////////////////////////
-Display pause menu
-/////////////////////////////////////////////////////////////////////////////////*/
-function displayMenu(){
-	menu.skybox.position.x = player.position.x;
-	menu.skybox.position.y = player.position.y;
-	menu.skybox.position.z = player.position.z;
-	scene.add(menu.skybox);
-
-	for(var i = 0; i < menu.buttons.length; i++){
-		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-		menu.buttons[i].position.y = player.position.y + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-		menu.buttons[i].position.z = player.position.z + Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-
-		scene.add(menu.buttons[i]);
-	}
-
-	console.log("displaying menu...");
-
-	document.addEventListener("mousedown", menuInteraction, false);
-}
-
 /*//////////////////////////////////////////////////////////////////////////
- Keyboard key lookups:  Check arrow, a,w,s,d and space keys
+	Model Loader function for alpha object. Creates alpha, places it in the scene and sets up animation
+	Callback function for JSON loader in createWorld
+	INPUT: THREE geometry and material objects
+	OUTPUT: none
 ///////////////////////////////////////////////////////////////////////////*/
-
-window.addEventListener("keydown", keysPressed, false);
-window.addEventListener("keyup", keysReleased, false);
-
-function key_check(){
-	//keycodes taken from: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes	
-
-	// Up Arrow or "w" - camera moves forwad = speed up
-	if(keys[38] || keys[87]){ 
-		alpha.incSpeedZ(-0.05);
-	}
-    // Down Arrow or "s" - camera moves back = speed down
-    if(keys[40] || keys[83]){  
-		alpha.incSpeedZ(0.05);
-	}
-
-    // a key: strafe left
-    if (keys[65]) {     
-        player.translateX(-0.2);
-    }
-
-    // d key: strafe right
-    if (keys[68]) {     
-        player.translateX(0.2);
-    }
-
-    // right arrow: turn right
-    if (keys[39]) {     
-        player.rotateY(-1 * Math.PI/180);
-		minimapCamera.rotateZ(-1 * Math.PI/180);
-    }
-
-    // left arrow: turn left
-    if (keys[37]) {     
-        player.rotateY(Math.PI/180);
-		minimapCamera.rotateZ(Math.PI/180) ;
-    }
-
-   // space key: fight gravity
-   if (keys[90]) {     
-		if (!jumping) {			// Set limit on jumping
-			alpha.incSpeedY(1);
-		}
-		jumping = true;
-    }
-}
-
-// This function gets called when a key is pressed
-function keysPressed(e) {
-	// "p" for pause and play           
-	if(e.keyCode == 80){
-		if(!animating){
-			exitMenu();
-			animating = true;
-			requestAnimationFrame(doFrame);
-		} else {
-			animating = false;
-			displayMenu();
-		}
-		return;
-	}
-
-	// F11 to enter and exit fullscreen
-	if(e.keyCode == 122){
-		if(!fullscreen){
-			fullscreen = true;
-			document.requestFullscreen();
-		} else {
-			fullscreen = false
-			document.exitFullscreen();
-		}
-		return;
-	}
-
-	// F5 to refresh page
-	if(e.keyCode == 116){
-		window.location.reload(false); 
-		return
-	}
-	
-    // store an entry for every key pressed
-    keys[e.keyCode] = true;
-        // NB: prevent default browser behavior - disable during testing
-        //e.preventDefault();
-}
-
-function keysReleased(e) {
-    // mark keys that were released
-    keys[e.keyCode] = false;
-    if (e.keyCode == 90) {
-		jumping = false;
-	}
-}
-
-
-/*///////////////////////////////////////////////////////////////////////////////////
-reinitialize globals
-////////////////////////////////////////////////////////////////////////////////////*/
-function reinitializeGlobals(){
-	scene = null;
-	camera = null;
-	frameNumber = 0;
-	animating = false;
-	player = new THREE.Object3D();
-	keys = []; //records current keys being pressed
-	resetCameraFlag = false //flag to reset the camera position to original position
-	jumping = false;	//whether player is jumping or not
-	alpha = null;	// player stats tracking + model  object
-	gameOver = false; //updates to true when lives == 0
-	worldMap = null; // make global so it can be accessed by collision function
-	powerups = [];	
-	collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
-	powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
-	activePowerup = null;
-	collectibles = [];			// the items that the player needs to collect in order to progress to the next level
-	//var collectiblesLeft = 0;			// the number of collectibles left to collect. when this reaches zero, go to next level
-	mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
-	minimapCamera = null; 
-	worldMap = null;
-	mesh = null;
-	joshSucks = null; // he does
-	Score = 0;
-	everyNframes = 0; // Global counter to do stuff every Nth frame. 
-}
-
-/*///////////////////////////////////////////////////////////////////////////////////
-restart game - reset all alpha variables, reload all models, respawn alpha at origin
-////////////////////////////////////////////////////////////////////////////////////*/
-function restartGame(){
-	console.log("restarting game");
-	reinitializeGlobals();
-	createWorld();
-	installOrbitControls();
-	console.log("game restarted");	
-}
-
-/*//////////////////////////////////////////////////////////////////////////
-Put player on the floor
-///////////////////////////////////////////////////////////////////////////*/
-function put_on_floor() {
-	if(player.position.y > worldMap.floorHeight + alpha.getRadius() - 2) {	//check if player has reached the "floor" + some leeway
-		alpha.incSpeedY(-0.01);																		//if they have not, reduce speed (gravity)
-		return true;
-	} else {						//if they have, the player crashes
-		Crash();
-		return false;
-	}	
-}
-
-
-
-/*//////////////////////////////////////////////////////////////////////////
-Model Loader
-///////////////////////////////////////////////////////////////////////////*/
-
-function model_loader(geometry, materials) {
+function modelLoader(geometry, materials) {
 
 	var material = new THREE.MeshLambertMaterial( {
         vertexColors: THREE.FaceColors,  	// use colors from the geometry
@@ -644,9 +393,222 @@ function model_loader(geometry, materials) {
 	render();
 }
 
+// END OF INITIALISATION
+
+
+/*<<<<<<<<<<<<<<<<<<<<<< C U S T O M 	S U B   R O U T I N E S >>>>>>>>>>>>>>>>>>>>>>>>>>>
+			                                 |_
+			                           _____|~ |____
+			                          (  --         ~~~~--_,
+			                           ~~~~~~~~~~~~~~~~~~~'`  
+
+*/
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Gets a random vector for a new position.
+	Called by randomMoveArray
+	INPUT: none
+	OUTPUT: THREE.Vector3 with the new randomised position
+//////////////////////////////////////////////////////////////////////////////////*/
+function randomPlace(){
+	var move = [];
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.width / 2));
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight);
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.depth / 2));
+	return new THREE.Vector3(move[0],move[1],move[2]);
+
+}
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	For every object in the input array, calls randomPlace to get a new random position, places the object in that position, then finds a new position until it is no longer colliding with another object
+	Called in createWorld for the collectibles and powerups
+	INPUT: array of objects to place in random positions
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function randomMoveArray( arr ){
+	for(var i = 0; i < arr.length; i++){
+		var move = randomPlace();
+		arr[i].position.set(move.x, move.y, move.z);
+		arr[i].geometry.computeBoundingBox();
+		while(buildingBoxCollision(arr[i]).length != 0){
+			move = randomPlace();
+			arr[i].position.set(move.x, move.y, move.z);
+		}
+	}
+}
+
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Reset the camera's to be behind the player (chase cam), after viewing the world.
+	Called by 
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function resetCameraPosition(){
+	var cameraRotationSpeed = 0.1;
+	camera.translateX((alpha.position.x - camera.position.x) * cameraRotationSpeed);
+	camera.translateY((alpha.position.y - camera.position.y) * cameraRotationSpeed);
+	camera.translateZ((alpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z) * cameraRotationSpeed);
+	camera.lookAt(alpha.position);
+
+	if(Math.abs(alpha.position.x - camera.position.x) <= 0.01 &&
+		Math.abs(alpha.position.y - camera.position.y <= 0.01) &&
+		Math.abs(alpha.position.z + ALPHA_CAMERA_DISTANCE - camera.position.z <= 0.01)){
+		
+		resetCameraFlag = false;
+	}
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< M E N U   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Exits the menu.
+	Called by menuInteraction and keysPressed
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function exitMenu(){
+	scene.remove(menu.skybox);
+	for(var i = 0; i< menu.buttons.length; i++){
+		scene.remove(menu.buttons[i]);
+	}
+	document.removeEventListener("mousedown", menuInteraction);
+	animating = true;
+	requestAnimationFrame(doFrame);
+}
+
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Uses raycasting to check which menu box the user clicks
+	Callback function for mouseclick event listener in displayMenu
+	INPUT: click event
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function menuInteraction(e){
+	var raycaster = new THREE.Raycaster();
+	
+	//var r = window.getBoundingClientRect();
+	var x = e.clientX	// take in click coordinates
+	var y = e.clientY	// 
+
+	var a = 2 * x / window.innerWidth - 1; // convert canvas pixel coords to clip coords
+	var b = 1 - 2 * y / window.innerHeight;
+
+	raycaster.setFromCamera( new THREE.Vector2(a,b), camera );
+
+	var intersections = raycaster.intersectObjects( menu.buttons, true );
+	if(intersections.length >= 1){
+		if(intersections[0].object.name == "restart_button"){
+			console.log("restarting game");
+			restartGame();
+		} else if (intersections[0].object.name == "resume_button"){
+			console.log("resuming game");
+			exitMenu();
+		} else if(intersections[0].object.name == "exit_button"){
+			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
+		}
+	}
+}
+
+/*////////////////////////////////////////////////////////////////////////////////
+	Display pause menu, sets position of menu skybox and buttons and places them in the scene, makes an event listener for mouseclicks
+	Called by keysPressed when the 'p' key is pressed
+	INPUT: none
+	OUTPUT: none
+/////////////////////////////////////////////////////////////////////////////////*/
+function displayMenu(){
+	menu.skybox.position.x = player.position.x;
+	menu.skybox.position.y = player.position.y;
+	menu.skybox.position.z = player.position.z;
+	scene.add(menu.skybox);
+
+	for(var i = 0; i < menu.buttons.length; i++){
+		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+		menu.buttons[i].position.y = player.position.y + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+		menu.buttons[i].position.z = player.position.z + Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+
+		scene.add(menu.buttons[i]);
+	}
+
+	console.log("displaying menu...");
+
+	document.addEventListener("mousedown", menuInteraction, false);
+}
+
+//END OF MENU FUNCTIONS
+
+
+/*///////////////////////////////////////////////////////////////////////////////////
+	Reinitialize global variables
+	Called by restartGame
+	INPUT: none
+	OUTPUT: none
+////////////////////////////////////////////////////////////////////////////////////*/
+function reinitializeGlobals(){
+	scene = null;
+	camera = null;
+	frameNumber = 0;
+	animating = false;
+	player = new THREE.Object3D();
+	keys = []; //records current keys being pressed
+	resetCameraFlag = false //flag to reset the camera position to original position
+	jumping = false;	//whether player is jumping or not
+	alpha = null;	// player stats tracking + model  object
+	gameOver = false; //updates to true when lives == 0
+	worldMap = null; // make global so it can be accessed by collision function
+	powerups = [];	
+	collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
+	powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
+	activePowerup = null;
+	collectibles = [];			// the items that the player needs to collect in order to progress to the next level
+	//var collectiblesLeft = 0;			// the number of collectibles left to collect. when this reaches zero, go to next level
+	mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
+	minimapCamera = null; 
+	worldMap = null;
+	mesh = null;
+	joshSucks = null; // he does
+	Score = 0;
+	everyNframes = 0; // Global counter to do stuff every Nth frame. 
+}
+
+/*///////////////////////////////////////////////////////////////////////////////////
+	Restart game - reset all alpha variables, reload all models, respawn alpha at origin
+	Called by Crash when the player crashes and has no more lives, menuInteraction when the restart game option is chosen and collisions when all collectibles are found
+	INPUT: none
+	OUTPUT: none
+////////////////////////////////////////////////////////////////////////////////////*/
+function restartGame(){
+	console.log("restarting game");
+	reinitializeGlobals();
+	createWorld();
+	installOrbitControls();
+	console.log("game restarted");	
+}
 
 /*//////////////////////////////////////////////////////////////////////////
-Crash: Explosion, respawn from crash site, decrement lives, game over
+	Reduce player Y speed for for gravity and make them crash if they touch the floor
+	Called by updateForFrame every frame
+	INPUT: none
+	OUTPUT: returns false if the player crashes and true if they dont
+///////////////////////////////////////////////////////////////////////////*/
+function putOnFloor() {
+	if(player.position.y > worldMap.floorHeight + alpha.getRadius() - 2) {	//check if player has reached the "floor" + some leeway
+		alpha.incSpeedY(-0.01);																		//if they have not, reduce speed (gravity)
+		return true;
+	} else {						//if they have, the player crashes
+		Crash();
+		return false;
+	}	
+}
+
+
+/*//////////////////////////////////////////////////////////////////////////
+	Crash: Explosion, respawn from crash site, decrement lives, game over
+	Called by colllisions, updateForFrame and putOnFloor
+	INPUT: none
+	OUTPUT: none
 ///////////////////////////////////////////////////////////////////////////*/
 function Crash() {
 	// Update Alpha stats
@@ -671,12 +633,15 @@ function Crash() {
 
 
 
-/*//////////////////////////////////////////////////////////////////////////
-Collisions!
-///////////////////////////////////////////////////////////////////////////*/
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< C O L L I S I O N S ! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-//check for collision between two bounding boxes
-//note bounding boxes have min: x,y,z, and max: x,y,z values
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Check for collision between two bounding boxes. Note bounding boxes have min: x,y,z, and max: x,y,z values
+	Called by buildingBoxCollision
+	INPUT: two objects
+	OUTPUT: returns true if their is a collision, false otherwise
+//////////////////////////////////////////////////////////////////////////////////*/
 function twoBoxCollision(box1, box2){
 	if(
 		(box1.max.x < box2.min.x || box1.min.x > box2.max.x) ||
@@ -689,7 +654,12 @@ function twoBoxCollision(box1, box2){
 }
 
 
-//this function checks for collision of bounding boxes of alpha nd the map buildings
+/*///////////////////////////////////////////////////////////////////////////////// 
+	This function checks for collision of bounding boxes of alpha and the map buildings
+	Called by collisions and randomMoveArray
+	INPUT: object to check collision for
+	OUTPUT: object array of suspected collisions with input objects
+//////////////////////////////////////////////////////////////////////////////////*/
 function buildingBoxCollision( object ){
 	var suspectObjects = [];
 	var objectBox = new THREE.Box3();
@@ -704,10 +674,15 @@ function buildingBoxCollision( object ){
 }
 
 
-//This must be called in updateFrame
 // credit to Lee Stemkoski for his tutorial
 // insert link to page
-function  collissions() {
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Function to check for collisions between player and buildings, collectibles and powerups
+	Called by updateForFrame and alpha.respawn
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function  collisions() {
 	var originPoint = player.position.clone();	// players position
 	var suspectObjects = buildingBoxCollision(alpha);
 
@@ -770,6 +745,7 @@ function  collissions() {
 
 } // end collision function
 
+//END OF COLLISION FUNCTIONS
 
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -870,13 +846,14 @@ function createText() {
 ///////////////////////////////////\				  //////////////////////////////
 //================================== end sub routines =============================
 ///////////////////////////////////////////////////////////////////////////////////
-/**
- *  This function is called once for each frame of the animation, before
- *  the render() function is called for that frame.  It updates any
- *  animated properties.  The value of the global variable frameNumber
- *  is incrementd 1 before this function is called.
- */
 
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Updates frame by moving player, moving minimap camera, crashing player if they move above atmosphere or below floor, update animations, increment score and check for collisions
+	Called by doFrame
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
 function updateForFrame() {
 	console.log(player.position)
 
@@ -891,8 +868,7 @@ function updateForFrame() {
 	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);	
 
 	// Put player on floor if they aren't already on it.
-	// TODO:Might need to update this for dying
-	if(!put_on_floor()){
+	if(!putOnFloor()){
 		return;
 	}
 
@@ -939,7 +915,7 @@ function updateForFrame() {
 	}
 	
 	// Summon keyboard control lookups in one line.
-	key_check(); 		
+	keyCheck(); 		
 
 	// Increment Nth frame counter
 	everyNframes ++;
@@ -947,7 +923,7 @@ function updateForFrame() {
 
 	//Collision
 	var tempCurrLevel = currLevel;
-	collissions();
+	collisions();
 	if(currLevel != tempCurrLevel){
 		return;
 	}
@@ -966,18 +942,129 @@ function updateForFrame() {
 }
 
 
-/* ---------------------------- MOUSE AND ANIMATION SUPPORT ------------------
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<< MOUSE AND KEYBOARD SUPPORT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-/**
- *  This page uses THREE.OrbitControls to let the user use the mouse to rotate
- *  the view.  OrbitControls are designed to be used during an animation, where
- *  the rotation is updated as part of preparing for the next frame.  The scene
- *  is not automatically updated just because the user drags the mouse.  To get
- *  the rotation to work without animation, I add another mouse listener to the
- *  canvas, just to call the render() function when the user drags the mouse.
- *  The same thing holds for touch events -- I call render for any mouse move
- *  event with one touch.
- */
+
+// Event listeners for keydown and keyup events
+window.addEventListener("keydown", keysPressed, false);
+window.addEventListener("keyup", keysReleased, false);
+
+// keyboard control taken from: http://www.johannes-raida.de/tutorials/three.js/tutorial07/tutorial07.htm
+// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Keyboard key lookups:  Check if arrow, a,w,s,d and space keys are down using keys array
+	Called by updateForFrame
+	keycodes taken from: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes	
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function keyCheck(){
+
+	// Up Arrow or "w" - camera moves forwad = speed up
+	if(keys[38] || keys[87]){ 
+		alpha.incSpeedZ(-0.05);
+	}
+    // Down Arrow or "s" - camera moves back = speed down
+    if(keys[40] || keys[83]){  
+		alpha.incSpeedZ(0.05);
+	}
+
+    // a key: strafe left
+    if (keys[65]) {     
+        player.translateX(-0.2);
+    }
+
+    // d key: strafe right
+    if (keys[68]) {     
+        player.translateX(0.2);
+    }
+
+    // right arrow: turn right
+    if (keys[39]) {     
+        player.rotateY(-1 * Math.PI/180);
+		minimapCamera.rotateZ(-1 * Math.PI/180);
+    }
+
+    // left arrow: turn left
+    if (keys[37]) {     
+        player.rotateY(Math.PI/180);
+		minimapCamera.rotateZ(Math.PI/180) ;
+    }
+
+   // space key: fight gravity
+   if (keys[90]) {     
+		if (!jumping) {			// Set limit on jumping
+			alpha.incSpeedY(1);
+		}
+		jumping = true;
+    }
+}
+
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	This function gets called when a key is pressed
+	Callback function for keydown event listener
+	INPUT: keydown event e
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function keysPressed(e) {
+	// "p" for pause and play           
+	if(e.keyCode == 80){
+		if(!animating){
+			exitMenu();
+			animating = true;
+			requestAnimationFrame(doFrame);
+		} else {
+			animating = false;
+			displayMenu();
+		}
+		return;
+	}
+
+	// F11 to enter and exit fullscreen
+	if(e.keyCode == 122){
+		if(!fullscreen){
+			fullscreen = true;
+			document.requestFullscreen();
+		} else {
+			fullscreen = false
+			document.exitFullscreen();
+		}
+		return;
+	}
+
+	// F5 to refresh page
+	if(e.keyCode == 116){
+		window.location.reload(false); 
+		return
+	}
+	
+    // store an entry for every key pressed
+    keys[e.keyCode] = true;
+        // NB: prevent default browser behavior - disable during testing
+        //e.preventDefault();
+}
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Callback function for keyup event listener
+	INPUT: keyup event e
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function keysReleased(e) {
+    // mark keys that were released
+    keys[e.keyCode] = false;
+    if (e.keyCode == 90) {
+		jumping = false;
+	}
+}
+
+ /*///////////////////////////////////////////////////////////////////////////////// 
+	Uses THREE.OrbitControls from the graphics course to allow the user to rotate the view with the mouse
+	Called by init and restartGame
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
 function installOrbitControls() {
     controls = new THREE.OrbitControls(camera,canvas);
     controls.noPan = true; 
@@ -1004,9 +1091,15 @@ function installOrbitControls() {
     document.addEventListener("touchmove", touch, false);
 }
 
+// END OF MOUSE AND KEYBOARD FUNCTIONS
 
-// It determines _alpha_'s movements ("Space" with arrow keys or WASD). 
-/*  Drives the animation, called by system through requestAnimationFrame() */
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Drives the animation, called by system through requestAnimationFrame()
+	Called by itself, exitMenu and keysPressed
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
 function doFrame() {
     if (animating) {
         frameNumber++;
@@ -1018,14 +1111,12 @@ function doFrame() {
 }
 
 
-/*----------------------------- INITIALIZATION ----------------------------------------
-
-/**
- *  This function is called by the onload event so it will run after the
- *  page has loaded.  It creates the renderer, canvas, and scene objects,
- *  calls createWorld() to add objects to the scene, and renders the
- *  initial view of the scene.  If an error occurs, it is reported.
- */
+ /*/////////////////////////////////////////////////////////////////////////////////////
+	Creates the renderer, container for stats, scene object, calls createWorld and installOrbitControls. Renders initial view of the scene
+	Called by onload event
+	INPUT: none
+	OUTPUT: none
+ //////////////////////////////////////////////////////////////////////////////////////*/
 function init() {
     try {
 		container = document.getElementById( 'container' );
@@ -1050,9 +1141,6 @@ function init() {
     createWorld();
     installOrbitControls();
 
-	// keyboard controls
-	// taken from: http://www.johannes-raida.de/tutorials/three.js/tutorial07/tutorial07.htm
-	// multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
 	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
     render();
