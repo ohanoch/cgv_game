@@ -31,14 +31,10 @@
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-var WORLD_WIDTH = 10;						// dimensions of world (plane)
-var WORLD_DEPTH = 10;
-var ATMOSPHERE_HEIGHT = 100;
-var ALPHA_CAMERA_DISTANCE = 20;
-var STARTING_LIVES = 3;
-var NUM_RANDOM_LIGHTS = 2;
 var canvas, renderer, scene, mainCamera; 	// Standard three.js requirements.
+
 var currLevel = 0; 							//level variable mostly for display purposes at the moment
+
 var level = new Level(currLevel, 2000, 2000, 100, 20, 3, 																							// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
 				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
 				"textures/skyboxes/dawnmountain/", 3, 3, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerups, 
@@ -79,8 +75,6 @@ var activePowerup = null;
 
 var menusArr = {};
 
-var gameOver = false; 						// updates to true when lives == 0
-
 var worldMap; 								// make global so it can be accessed by collision function
 
 var collideMeshArray = []; 					// array to store  all collidable mesh's (buildings + items)
@@ -104,8 +98,6 @@ var text_height ;
 var text_size;
 var curveSegments;	
 //
-
-var Score = 0;
 
 var text_object_container;			
 
@@ -714,7 +706,8 @@ function key_check(){
         player.rotateY(Math.PI/180);
         // Rotate the model (in it's Euler angles)
         while(i < 0.3){
-        	alpha.rotateZ(-i);
+        	//alpha.rotateZ(-i);
+        	alpha.rotation.z = Math.PI/2;
         	i += 0.1;
         }
 		minimapCamera.rotateZ(Math.PI/180) ;
@@ -780,6 +773,7 @@ function keysReleased(e) {
 			i -= 0.1;
 		}
 		i=0;	// reset i so it can be used again
+		alpha.rotation.z = Math.PI;
 	}
 }
 
