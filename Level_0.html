@@ -848,7 +848,7 @@ materials = [
 function loadFont() {
 
 	var loader = new THREE.FontLoader();
-	loader.load( 'fonts/Etienne/helvetiker_regular.typeface.json', function ( response ) {
+	loader.load( 'fonts/Etienne/helvetiker_regular.typeface.js', function ( response ) {
 
 		font = response;
 		createText();
@@ -967,6 +967,13 @@ function updateForFrame() {
 	// Slowly moving the camera back behind _alpha_
 	if (resetCameraFlag){
 		resetCameraPosition();
+	}
+	
+	if(keys[37]) {
+		//if(alpha.rotation.z > Math.PI) {
+		console.log(alpha.rotation.z);
+			alpha.rotation.z -= 0.1;
+		//}
 	}
 
 	// Animate power-ups
@@ -1126,6 +1133,12 @@ function keysPressed(e) {
 		return
 	}
 	
+	if (e.keyCode == 37) {
+		//if(alpha.rotation.z > Math.PI/2) {
+			//alpha.rotation.z = Math.PI - 0.1;
+		//}
+	}
+	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
     // NB: prevent default browser behavior - disable during testing
@@ -1142,6 +1155,10 @@ function keysReleased(e) {
     keys[e.keyCode] = false;
     if (e.keyCode == 90) {
 		alpha.jumping = false;
+	}
+	
+	if(e.keyCode == 37) {
+		alpha.rotation.z = Math.PI;
 	}
 }
 
