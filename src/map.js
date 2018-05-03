@@ -1,14 +1,17 @@
 "use strict";
 
+var modelList;
+
 class Map {
 	
-	constructor(width, depth, atmosphereHeight, floorTextureURL, skyboxDirectoryURL) {		//create and initialize map
+	constructor(width, depth, atmosphereHeight, floorTextureURL, backgroundDirectoryURL, inputModelList) {		//create and initialize map
 		
 		this.width = width; // x axis
 		this.atmosphereHeight = atmosphereHeight; // y axis
 		this.depth = depth; // z axis
 		this.buildings = []; // array of buildings
 		this.buildingBoxes = [];
+		modelList = inputModelList;
 
 		//------------------------------------- Atmosphere --------------------------------------------
 		this.atmosphere = new THREE.Mesh(
@@ -26,6 +29,8 @@ class Map {
 		this.atmosphere.rotation.x = -Math.PI / 2;
 
 		var textureLoader = new THREE.TextureLoader();
+		
+		
 		//-------------------------------------- FLOOR -------------------------------------------------
 		if(floorTextureURL != ""){
 			var floorTexture = textureLoader.load( floorTextureURL );    //load floor texture
@@ -43,30 +48,10 @@ class Map {
 			console.log("Floor texture added to map");
 		}
 	
-		//-------------------------------------- SKYBOX -------------------------------------------------
-		//stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
-    	//other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
-		if(skyboxDirectoryURL != ""){
-		/**	var materialArray = [];
-			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xpos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xneg.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "ypos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "yneg.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "zpos.png") }));
-			materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "zneg.png") }));
-
-			for (var i = 0; i < 6; i++) {
-				materialArray[i].side = THREE.BackSide;
-			}
-
-			var cubeSize = Math.max(this.width, this.atmosphereHeight, this.depth);
-			this.skybox = new THREE.Mesh(
-				new THREE.CubeGeometry( cubeSize, cubeSize, cubeSize, 1, 1, 1 ),
-				materialArray
-			);*/
+		if(backgroundDirectoryURL != ""){
 			
-			this.skybox = new THREE.CubeTextureLoader()
-				.setPath(skyboxDirectoryURL)
+			this.background = new THREE.CubeTextureLoader()
+				.setPath(backgroundDirectoryURL)
 				.load([
 					'xpos.png',
 					'xneg.png',
@@ -76,7 +61,7 @@ class Map {
 					'zneg.png'
 				]);
 
-			console.log("Skybox added to map");
+			console.log("background added to map");
 		}
 
 		console.log("Map Created");
@@ -93,17 +78,9 @@ class Map {
 		console.log("adding " + numBuildings + " buildings to map")
 
 		var materialLoader = new THREE.MTLLoader();		
-		var modelList = ['models/tree/tree', 'models/mill/mill'];
 		
 		//split numBuildings between different models
-		var numPerModel = [];
-		var currNumBuildings = numBuildings;
-		for(var i = 0; i < modelList.length -1; i++){
-			var currAmount = Math.floor(Math.random() * currNumBuildings);
-			numPerModel.push(currAmount);
-			currNumBuildings -= currAmount;
-		}
-		numPerModel.push(currNumBuildings);
+		var numPerModel = splitNumToParts(numBuildings, modelList.length);
 		console.log("split of building types " + numPerModel);
 
 		var numLoaded = 0;
@@ -111,7 +88,7 @@ class Map {
 			numLoaded++;
 			if (numLoaded == modelList.length){
 				mapDone = true;
-				alphaStartup();
+				alpha.startup();
 			}
 		}
 		//load models
@@ -158,7 +135,7 @@ class Map {
 								worldMap.buildings.push( currObject );
 								scene.add( currObject );
 
-								//get geometry of object after it moved to get correct bounding box coordinats
+								//get geometry of object after it moved to get correct bounding box coordinates
 								var box = new THREE.Box3();
 								box.setFromObject( currObject );
 								worldMap.buildingBoxes.push(box);
@@ -169,10 +146,14 @@ class Map {
 				}
 			);
 		
-		}	
+		}
+
+		// Calls loader for each object
 		for (var i = 0; i < modelList.length; i++){
 			modelLoader(modelList[i], numPerModel[i]);
 		}
 
 	}
+
+
 }
