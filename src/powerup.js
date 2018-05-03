@@ -13,7 +13,7 @@ class Powerup extends THREE.Mesh{
 
 	constructor(type) {
 		super(
-			new THREE.SphereGeometry( 4, 32, 32 ),
+			new THREE.SphereGeometry( 8, 32, 32 ),
 			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0xaa00bb, transparent: true} )
 		);
 
