@@ -40,7 +40,6 @@ class Level {
 	reinitializeGlobals(){
 		scene = null;
 		mainCamera = null;
-		frameNumber = 0;
 		animating = false;
 		player = new THREE.Object3D();
 		keys = []; //records current keys being pressed
