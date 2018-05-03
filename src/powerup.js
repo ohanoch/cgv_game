@@ -13,7 +13,7 @@ class Powerup extends THREE.Mesh{
 
 	constructor(type) {
 		super(
-			new THREE.SphereGeometry( 4, 32, 32 ),
+			new THREE.SphereGeometry( 8, 32, 32 ),
 			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0xaa00bb, transparent: true} )
 		);
 
@@ -58,13 +58,13 @@ class Powerup extends THREE.Mesh{
 	activatePower( ) {
 	// test powerup. make your own!
 	
-		if (this.type == powerupTypes["gravity"] ) {
+		if (this.type == 2 ) {
 			alpha.setMinSpeedY(0);
 		}
 	}
 	
 	deactivatePower() {
-		if(this.type == powerupTypes["gravity"]) {
+		if(this.type == 2) {
 			alpha.setMinSpeedY(-1000);
 		}
 	}

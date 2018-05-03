@@ -28,21 +28,22 @@
 
 "use strict";
 
+var currLevel = 0; //level variable mostly for display purposes at the moment
+var lore;
+if (currLevel == 0){
+	lore = "The Centaurians are an advanced microbiological race that inhabits the Alpha Centauri star system.\n In order to survive the harsh conditions they have evolved the ability to shapeshift.\n They posses advanced technologies beyond human comprehension, except for emacs, they love emacs! Proxima Centauri, aka PC, is a red dwarf star that serves as the prison for the Alpha Centauri system.\n Once a being arrives in PC its identity is lost, and is given the name __alpha__\n\n We play as _alpha_, a falsely imprisoned centorian.\n alpha was accused of killing Bambi’s mother. Previous to _alpha_’s imprisonment _alpha_ and Walt Disney were lovers.\n When Walt discovered _alpha_ killed Bambi’s mother it was too much for him, he swore to never talk to alpha again. (Walt Disney was reincarnated as a centaurian after he was cryogenically frozen, which can be a side-effect of cryogenics).\n _alpha_ is on a mission to escape PC and tell Walt the truth and win his love back."
+}
+
+var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
+				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
+				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerupsTypes, 
+				1, -10, -2, -0.01,	// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
+				lore); //lore for level story
+
+/* General mechanics variables */
+var canvas, renderer, scene, mainCamera; // Standard three.js requirements.
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-var WORLD_WIDTH = 10;						// dimensions of world (plane)
-var WORLD_DEPTH = 10;
-var ATMOSPHERE_HEIGHT = 100;
-var ALPHA_CAMERA_DISTANCE = 20;
-var STARTING_LIVES = 3;
-var NUM_RANDOM_LIGHTS = 2;
-var canvas, renderer, scene, mainCamera; 	// Standard three.js requirements.
-var currLevel = 0; 							//level variable mostly for display purposes at the moment
-var level = new Level(currLevel, 2000, 2000, 100, 20, 3, 																							// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
-				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
-				"textures/skyboxes/dawnmountain/", 3, 3, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerups, 
-				1, -10, -2, -0.01);																														// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
 
 var container, stats;
 
@@ -75,11 +76,9 @@ var mapDone = false;
 
 var Score = 0;
 
-var activePowerup = null;
+var collectibleCount = 0;
 
 var menusArr = {};
-
-var gameOver = false; 						// updates to true when lives == 0
 
 var worldMap; 								// make global so it can be accessed by collision function
 
@@ -105,7 +104,6 @@ var text_size;
 var curveSegments;	
 //
 
-var Score = 0;
 
 var text_object_container;			
 
@@ -120,14 +118,14 @@ var i =0;									// iterator for doing object roation animation
 function createMenus(){
 	var startMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
-			"textures/skyboxes/ulam/", 
+			"textures/skyboxes/ulam_words/", 
 			"sprites/buttons/", 
-			["exit_button", "start_button"]
+			["exit_button", "start_button","controls_button","credits_button"]
 		);
 	menusArr.startMenu = startMenu;
 	var pauseMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
-			"textures/skyboxes/tantolunden5/", 
+			"textures/skyboxes/tantolunden5_words/", 
 			"sprites/buttons/", 
 			["exit_button", "restart_button", "resume_button"]
 		);
@@ -308,9 +306,9 @@ function createPowerups(){
 	console.log("Powerups Split: " + powerupsSplit);
 
 	
-	for(var i = 0; i < powerupTypes.length; i++){
+	for(var i = 0; i < level.powerupTypes.length; i++){
 		for(var j = 0; j < powerupsSplit[i]; j++){
-			powerups.push(new Powerup(i));
+			powerups.push(new Powerup(level.powerupTypes[i]));
 		}
 	}
 	// move powerups to random place on map
@@ -598,13 +596,21 @@ function exitMenu(){
 	for(var i = 0; i< menu.buttons.length; i++){
 		scene.remove(menu.buttons[i]);
 	}
+	if(menu == menusArr.pauseMenu){
+		scene.add(worldMap.floor);
+	}
 	
 	menu.isOpen = false;
 	document.removeEventListener("mousedown", menuInteraction);
+
+	if(menu == menusArr.startMenu){
+		window.alert(level.lore);
+	}
 }
 
 
-/*///////////////////////////////////////////////////////////////////////////////// 
+
+/*y///////////////////////////////////////////////////////////////////////////////// 
 	Uses raycasting to check which menu box the user clicks
 	Callback function for mouseclick event listener in displayMenu
 	INPUT: click event
@@ -613,7 +619,6 @@ function exitMenu(){
 function menuInteraction(e){
 	var raycaster = new THREE.Raycaster();
 	var menu = openMenu();
-
 	//var r = window.getBoundingClientRect();
 	var x = e.clientX							// take in click coordinates
 	var y = e.clientY	// 
@@ -641,6 +646,10 @@ function menuInteraction(e){
 			requestAnimationFrame(doFrame);
 		} else if(intersections[0].object.name == "exit_button"){
 			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
+		} else if(intersections[0].object.name == "controls_button"){
+			window.alert("P - Play/Pause\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe");
+		} else if(intersections[0].object.name == "credits_button"){
+			window.alert("This game was technically made by Avi Bank, Niambh Blundell, Or Hanoch but..\nIt was actually brought to life by the awesome Dr. Richard Klein, Phd, who taught us everything we know and inspired us to be better people. Everything we Do we owe to him.\nWE LOVE YOU RICHARD!");
 		}
 	}
 }
@@ -660,10 +669,13 @@ function displayMenu(menu){
 
 	for(var i = 0; i < menu.buttons.length; i++){
 		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-		menu.buttons[i].position.y = player.position.y +  Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+		menu.buttons[i].position.y = player.position.y +  Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
 		menu.buttons[i].position.z = player.position.z + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
 
 		scene.add(menu.buttons[i]);
+	}
+	if(menu == menusArr.pauseMenu){
+		scene.remove(worldMap.floor);
 	}
 
 	console.log("displaying menu...");
@@ -972,8 +984,10 @@ function  collisions() {
 			console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
 			collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
 			scene.remove(CollectibleCollisionResults[0].object);
+			Score = Score + 1000000
+			collectibleCount++;
 			
-			if(collectibles.length == 0) {
+			if(collectibleCount == 3/*collectibles.length == 0*/) {
 				window.alert( "You won the level!");
 				currLevel++;
 				restartGame();
@@ -1136,6 +1150,14 @@ function updateForFrame() {
 	if (resetCameraFlag){
 		resetCameraPosition();
 	}
+	
+	if(keys[37]) {
+		if(alpha.rotation.z > 2.8) {
+			console.log(alpha.rotation.z);
+			alpha.rotation.z -= 0.1;
+			//alpha.rotateZ(0.1);
+		}
+	}
 
 	// Animate power-ups
 	for(var i = 0; i < powerups.length; i++){
@@ -1185,8 +1207,6 @@ function updateForFrame() {
 	
 	// Score update: TODO: ut in function and tidy up
 	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
-		console.log("player.position.x " + player.position.x + " player.position.z " + player.position.z)  
-		console.log("level.worldWidth " + level.worldWidth + " level.worldDepth " + level.worldDepth)
 		Score++;
 	} else {
 		Score = Score - 5;
@@ -1296,6 +1316,12 @@ function keysPressed(e) {
 		return
 	}
 	
+	if (e.keyCode == 37) {
+		//if(alpha.rotation.z > Math.PI/2) {
+			//alpha.rotation.z = Math.PI - 0.1;
+		//}
+	}
+	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
     // NB: prevent default browser behavior - disable during testing
@@ -1312,6 +1338,10 @@ function keysReleased(e) {
     keys[e.keyCode] = false;
     if (e.keyCode == 90) {
 		alpha.jumping = false;
+	}
+	
+	if(e.keyCode == 37) {
+		alpha.rotation.z = Math.PI;
 	}
 }
 
