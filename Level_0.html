@@ -38,7 +38,7 @@ if (currLevel == 0){
 
 var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
 				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
-				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerups, 
+				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerupsTypes, 
 				1, -10, -2, -0.01,	// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
 				lore); //lore for level story
 
@@ -283,9 +283,9 @@ function createPowerups(){
 	console.log("Powerups Split: " + powerupsSplit);
 
 	
-	for(var i = 0; i < powerupTypes.length; i++){
+	for(var i = 0; i < level.powerupTypes.length; i++){
 		for(var j = 0; j < powerupsSplit[i]; j++){
-			powerups.push(new Powerup(i));
+			powerups.push(new Powerup(level.powerupTypes[i]));
 		}
 	}
 	// move powerups to random place on map
