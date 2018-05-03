@@ -570,6 +570,9 @@ function exitMenu(){
 	for(var i = 0; i< menu.buttons.length; i++){
 		scene.remove(menu.buttons[i]);
 	}
+	if(menu == menusArr.pauseMenu){
+		scene.add(worldMap.floor);
+	}
 	
 	menu.isOpen = false;
 	document.removeEventListener("mousedown", menuInteraction);
@@ -636,10 +639,13 @@ function displayMenu(menu){
 
 	for(var i = 0; i < menu.buttons.length; i++){
 		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-		menu.buttons[i].position.y = player.position.y +  Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+		menu.buttons[i].position.y = player.position.y +  Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
 		menu.buttons[i].position.z = player.position.z + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
 
 		scene.add(menu.buttons[i]);
+	}
+	if(menu == menusArr.pauseMenu){
+		scene.remove(worldMap.floor);
 	}
 
 	console.log("displaying menu...");
