@@ -34,6 +34,10 @@ if (currLevel == 0){
 	lore = "The Centaurians are an advanced microbiological race that inhabits the Alpha Centauri star system.\n In order to survive the harsh conditions they have evolved the ability to shapeshift.\n They posses advanced technologies beyond human comprehension, except for emacs, they love emacs! Proxima Centauri, aka PC, is a red dwarf star that serves as the prison for the Alpha Centauri system.\n Once a being arrives in PC its identity is lost, and is given the name __alpha__\n\n We play as _alpha_, a falsely imprisoned centorian.\n alpha was accused of killing Bambi’s mother. Previous to _alpha_’s imprisonment _alpha_ and Walt Disney were lovers.\n When Walt discovered _alpha_ killed Bambi’s mother it was too much for him, he swore to never talk to alpha again. (Walt Disney was reincarnated as a centaurian after he was cryogenically frozen, which can be a side-effect of cryogenics).\n _alpha_ is on a mission to escape PC and tell Walt the truth and win his love back."
 }
 
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+var canvas, renderer, scene, mainCamera; 	// Standard three.js requirements.
+var currLevel = 0; 							//level variable mostly for display purposes at the moment
 var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
 				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
 				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerupsTypes, 
@@ -107,8 +111,9 @@ var curveSegments;
 
 var text_object_container;			
 
-var i =0;									// iterator for doing object roation animation
+var crot = Math.PI;									// iterator for doing object rotation animation
 
+var alpha_centered =true;							// used to recenter alpha avater after doing a rotation animation
 // for menu class
 //var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
@@ -686,114 +691,6 @@ function displayMenu(menu){
 //END OF MENU FUNCTIONS
 
 
-/*//////////////////////////////////////////////////////////////////////////
- Keyboard key lookups:  Check arrow, a,w,s,d and space keys
-///////////////////////////////////////////////////////////////////////////*/
-
-window.addEventListener("keydown", keysPressed, false);
-window.addEventListener("keyup", keysReleased, false);
-
-function key_check(){
-	//keycodes taken from: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes	
-
-	// Up Arrow or "w" - camera moves forwad = speed up
-	if(keys[38] || keys[87]){ 
-		alpha.incSpeedZ(-0.05);
-	}
-    // Down Arrow or "s" - camera moves back = speed down
-    if(keys[40] || keys[83]){  
-		alpha.incSpeedZ(0.05);
-	}
-
-    // a key: strafe left
-    if (keys[65]) {     
-        player.translateX(-0.2);
-    }
-
-    // d key: strafe right
-    if (keys[68]) {     
-        player.translateX(0.2);
-    }
-
-    // right arrow: turn right
-    if (keys[39]) {     
-        player.rotateY(-1 * Math.PI/180);
-		minimapCamera.rotateZ(-1 * Math.PI/180);
-    }
-
-    // left arrow: turn left
-    if (keys[37]) {     
-        player.rotateY(Math.PI/180);
-        // Rotate the model (in it's Euler angles)
-        while(i < 0.3){
-        	alpha.rotateZ(-i);
-        	i += 0.1;
-        }
-		minimapCamera.rotateZ(Math.PI/180) ;
-    }
-
-   // space key: fight gravity
-   if (keys[90]) {     
-		if (!jumping) {			// Set limit on jumping
-			alpha.incSpeedY(1);
-		}
-		jumping = true;
-    }
-}
-
-// This function gets called when a key is pressed
-function keysPressed(e) {
-	// "p" for pause and play           
-	if(e.keyCode == 80){
-		if(!animating){
-			exitMenu();
-			animating = true;
-			requestAnimationFrame(doFrame);
-		} else {
-			animating = false;
-			displayMenu();
-		}
-		return;
-	}
-
-	// F11 to enter and exit fullscreen
-	if(e.keyCode == 122){
-		if(!fullscreen){
-			fullscreen = true;
-			document.requestFullscreen();
-		} else {
-			fullscreen = false
-			document.exitFullscreen();
-		}
-		return;
-	}
-
-	// F5 to refresh page
-	if(e.keyCode == 116){
-		window.location.reload(false); 
-		return
-	}
-	
-    // store an entry for every key pressed
-    keys[e.keyCode] = true;
-        // NB: prevent default browser behavior - disable during testing
-        //e.preventDefault();
-}
-
-function keysReleased(e) {
-    // mark keys that were released
-    keys[e.keyCode] = false;
-    if (e.keyCode == 90) {
-		jumping = false;
-	}
-	/// reverse model rotation animation
-	if(e.keyCode == 37){
-		while((0.3 - i) < 0.3 ){
-			i -= 0.1;
-		}
-		i=0;	// reset i so it can be used again
-	}
-}
 
 
 
@@ -1135,6 +1032,11 @@ function updateForFrame() {
 	// minimap height stays constant right and captures from right bellow the atmosphere
 	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);	
 
+	// t to stop gravity, for testing
+	if(keys[84]){
+		alpha.setMinSpeedY(0);
+	}
+
 	// Put player on floor if they aren't already on it.
 	if(!putOnFloor()){
 		return;
@@ -1151,13 +1053,8 @@ function updateForFrame() {
 		resetCameraPosition();
 	}
 	
-	if(keys[37]) {
-		if(alpha.rotation.z > 2.8) {
-			console.log(alpha.rotation.z);
-			alpha.rotation.z -= 0.1;
-			//alpha.rotateZ(0.1);
-		}
-	}
+	// Animate the avatar model to rotate back to center in it's z-axis, after banking
+    reCenterAlpha();
 
 	// Animate power-ups
 	for(var i = 0; i < powerups.length; i++){
@@ -1228,6 +1125,8 @@ window.addEventListener("keyup", keysReleased, false);
 // keyboard control taken from: http://www.johannes-raida.de/tutorials/three.js/tutorial07/tutorial07.htm
 // multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
 
+
+
 /*///////////////////////////////////////////////////////////////////////////////// 
 	Keyboard key lookups:  Check if arrow, a,w,s,d and space keys are down using keys array
 	Called by updateForFrame
@@ -1248,23 +1147,35 @@ function keyCheck(){
 
     // a key: strafe left
     if (keys[65]) {     
-        player.translateX(-0.2);
+        player.translateX(-0.5);
     }
 
     // d key: strafe right
     if (keys[68]) {     
-        player.translateX(0.2);
+        player.translateX(0.5);
     }
 
     // right arrow: turn right
     if (keys[39]) {     
         player.rotateY(-1 * Math.PI/180);
+        //animate avatar anti-clockwise in z
+        if(crot < Math.PI + 0.4){
+        	alpha.rotation.z = crot;
+        	crot += 0.1;
+        }
+
 		minimapCamera.rotateZ(-1 * Math.PI/180);
     }
 
     // left arrow: turn left
     if (keys[37]) {     
         player.rotateY(Math.PI/180);
+        // animate avatar clockwise in z
+        if(crot < Math.PI + 0.4){
+        	alpha.rotation.z = -crot;
+        	crot += 0.1;
+        }
+    
 		minimapCamera.rotateZ(Math.PI/180) ;
     }
 
@@ -1316,11 +1227,7 @@ function keysPressed(e) {
 		return
 	}
 	
-	if (e.keyCode == 37) {
-		//if(alpha.rotation.z > Math.PI/2) {
-			//alpha.rotation.z = Math.PI - 0.1;
-		//}
-	}
+
 	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
@@ -1340,10 +1247,41 @@ function keysReleased(e) {
 		alpha.jumping = false;
 	}
 	
-	if(e.keyCode == 37) {
-		alpha.rotation.z = Math.PI;
+	// Undo avatar rotation if left or right arrows are pressed
+	if(e.keyCode == 37 || e.keyCode == 39) {
+		alpha_centered = false;
 	}
+
 }
+
+
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Function to re-center alpha's rotation after making a banking animation while turning.
+	Called in updateForFrame().
+	It's under mouse and keyboard functions because it deals with variables used in keyCheck() and keysReleased(e).
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function reCenterAlpha(){
+	if(alpha_centered == false){
+
+		if(crot == Math.PI){									// If alpha is centered, we are done; so update the vars that track this.
+	    	alpha.rotation.z =  crot;
+			alpha_centered = true;
+		}else if(crot > Math.PI && crot*alpha.rotation.z < 0){	// Exploit the fact that z = -crot for left turns, to determine if we're recovering from a left or right turn.
+			crot -= 0.1;
+	    	alpha.rotation.z =  -crot ;
+		}else {													// Otherwise we're recovering from a right turn
+			crot -= 0.1;
+	    	alpha.rotation.z =  crot ;
+		}
+
+	}
+
+}
+
+
 
  /*///////////////////////////////////////////////////////////////////////////////// 
 	Uses THREE.OrbitControls from the graphics course to allow the user to rotate the view with the mouse
