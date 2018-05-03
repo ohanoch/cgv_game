@@ -1,14 +1,17 @@
 "use strict";
 
+var modelList;
+
 class Map {
 	
-	constructor(width, depth, atmosphereHeight, floorTextureURL, backgroundDirectoryURL) {		//create and initialize map
+	constructor(width, depth, atmosphereHeight, floorTextureURL, backgroundDirectoryURL, inputModelList) {		//create and initialize map
 		
 		this.width = width; // x axis
 		this.atmosphereHeight = atmosphereHeight; // y axis
 		this.depth = depth; // z axis
 		this.buildings = []; // array of buildings
 		this.buildingBoxes = [];
+		modelList = inputModelList;
 
 		//------------------------------------- Atmosphere --------------------------------------------
 		this.atmosphere = new THREE.Mesh(
@@ -75,17 +78,9 @@ class Map {
 		console.log("adding " + numBuildings + " buildings to map")
 
 		var materialLoader = new THREE.MTLLoader();		
-		var modelList = ['models/tree/tree', 'models/mill/mill'];
 		
 		//split numBuildings between different models
-		var numPerModel = [];
-		var currNumBuildings = numBuildings;
-		for(var i = 0; i < modelList.length -1; i++){
-			var currAmount = Math.floor(Math.random() * currNumBuildings);
-			numPerModel.push(currAmount);
-			currNumBuildings -= currAmount;
-		}
-		numPerModel.push(currNumBuildings);
+		var numPerModel = splitNumToParts(numBuildings, modelList.length);
 		console.log("split of building types " + numPerModel);
 
 		var numLoaded = 0;
@@ -151,7 +146,9 @@ class Map {
 				}
 			);
 		
-		}	
+		}
+
+		// Calls loader for each object
 		for (var i = 0; i < modelList.length; i++){
 			modelLoader(modelList[i], numPerModel[i]);
 		}

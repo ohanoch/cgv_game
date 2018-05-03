@@ -2,9 +2,9 @@
 
 class Menu {
 	
-	constructor(cubeSize, skyboxDirectoryURL, buttonDirectoryURL) {
+	constructor(cubeSize, skyboxDirectoryURL, buttonDirectoryURL, buttonNames) {
 
-
+		this.isOpen = false;
 		//-------------------------------------- SKYBOX -------------------------------------------------
         //stolen from: https://jeremypwalton.wordpress.com/2014/09/19/skybox-in-three-js/
         //other maybe useful link: http://learningthreejs.com/blog/2011/08/15/lets-do-a-sky/
@@ -12,24 +12,31 @@ class Menu {
 			this.addSkybox(skyboxDirectoryURL, cubeSize);
 		}
 			//------------------------------------------ BUTTONS ---------------------------------------
-		if(buttonDirectoryURL != "")
+		if(buttonDirectoryURL != []){
 			this.buttons = [];
-			this.addButton(buttonDirectoryURL, "resume_button");
-			this.addButton(buttonDirectoryURL, "exit_button");
-			this.addButton(buttonDirectoryURL, "restart_button");
-
+			for(var i = 0; i < buttonNames.length; i++){
+				this.addButton(buttonDirectoryURL, buttonNames[i]);
+			}
+		}
 		console.log("menu created")
 	}
 
+	/* /////////////////////////////////////////////////////////////
+    Adds skybox to menu
+	called from menu constructor
+    INPUT: URL for skybox images folder, size of skybox cube
+    OUTPUT: none - adds skybox directly to this.skybox
+ *//////////////////////////////////////////////////////////////
 	addSkybox(skyboxDirectoryURL, cubeSize){
 		var textureLoader = new THREE.TextureLoader();
 		var materialArray = [];
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "posx.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "negx.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "posy.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "negy.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "posz.jpg") }));
-		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "negz.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xpos.jpg") }));
+console.log("")
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "xneg.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "ypos.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "yneg.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "zpos.jpg") }));
+		materialArray.push(new THREE.MeshBasicMaterial( { map: textureLoader.load(skyboxDirectoryURL + "zneg.jpg") }));
 
 		for (var i = 0; i < 6; i++) {
 			materialArray[i].side = THREE.BackSide;
@@ -47,6 +54,13 @@ class Menu {
 		console.log("added menu skybox");
 	}
 
+	/* /////////////////////////////////////////////////////////////
+    Adds a button to the menu
+    Called by menu constructor
+    INPUT: directory with button image URLS, name of button
+    OUTPUT: none - adds button directly to this.buttons array
+ *//////////////////////////////////////////////////////////////
+
 	addButton(buttonDirectoryURL, buttonName){
 		var textureLoader = new THREE.TextureLoader();
 		var materialArray = [];
@@ -63,7 +77,6 @@ class Menu {
 		);
 		button.name = buttonName;
 		this.buttons.push(button);
-
 
 		console.log("added menu button " + buttonName);
 	}

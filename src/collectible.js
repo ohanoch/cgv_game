@@ -1,9 +1,6 @@
 "use strict";
 
-
-
 class Collectible extends THREE.Mesh {
-	
 	
 	constructor(geometry, material) {
 	
@@ -13,11 +10,9 @@ class Collectible extends THREE.Mesh {
 		);
 		
 		this.add( new THREE.Mesh(geometry, material) );
-		
 	}
 
 	animate() {
 		this.children[0].rotateX(0.1);
 	}
-
 }

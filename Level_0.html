@@ -17,6 +17,7 @@
 <script src="src/js/dat.gui.min.js"></script>
 
 
+<script src ="src\level.js"></script>
 <script src="src\alpha.js"></script>
 <script src="src\map.js"></script>
 <script src="src\menu.js"></script>
@@ -30,24 +31,28 @@
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
-var WORLD_WIDTH = 200;						// dimensions of world (plane)
-var WORLD_DEPTH = 200;
+var WORLD_WIDTH = 10;						// dimensions of world (plane)
+var WORLD_DEPTH = 10;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
 var STARTING_LIVES = 3;
 var NUM_RANDOM_LIGHTS = 2;
-
-var currLevel = 0; 							// level variable mostly for display purposes at the moment
-
 var canvas, renderer, scene, mainCamera; 	// Standard three.js requirements.
+var currLevel = 0; 							//level variable mostly for display purposes at the moment
+var level = new Level(currLevel, 2000, 2000, 100, 20, 3, 																							// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
+				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
+				"textures/skyboxes/dawnmountain/", 3, 3, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerups, 
+				1, -10, -2, -0.01);																														// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
 
 var container, stats;
 
-var controls;  								// An OrbitControls object that is used to implement
-               								// rotation of the scene using the mouse.  (It actually rotates
-               								// the camera around the scene.)
+var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //minimap variables
 
+var controls;  											// An OrbitControls object that is used to implement
+              											// rotation of the scene using the mouse.  (It actually rotates
+               											// the camera around the scene.)
+
+/* flags for different instances */
 var fullscreen = false;
 
 var animating = false;  					// Set to true when an animation is in progress.
@@ -65,9 +70,16 @@ var jumping = false;						// whether player is jumping or not
 var alpha;									// player stats tracking + model  object
 
 var alphaDone = false;
+
 var mapDone = false;
 
-var gameOver = false; 						//updates to true when lives == 0
+var Score = 0;
+
+var activePowerup = null;
+
+var menusArr = {};
+
+var gameOver = false; 						// updates to true when lives == 0
 
 var worldMap; 								// make global so it can be accessed by collision function
 
@@ -79,10 +91,6 @@ var activePowerup = null;
 var collectibles = [];						// the items that the player needs to collect in order to progress to the next level
 
 var mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
-
-var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //
-
-var worldMap;
 
 var discoBall;
 
@@ -96,19 +104,44 @@ var text_height ;
 var text_size;
 var curveSegments;	
 //
+
 var Score = 0;
 
-var text_object_container;
+var text_object_container;			
 
-var i =0;// iterator for doing object roation animation
+var i =0;									// iterator for doing object roation animation
+
 // for menu class
-var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
+//var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
+
 
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+function createMenus(){
+	var startMenu = new Menu(
+			level.alphaCameraDistance * 2 * 2, 
+			"textures/skyboxes/ulam/", 
+			"sprites/buttons/", 
+			["exit_button", "start_button"]
+		);
+	menusArr.startMenu = startMenu;
+	var pauseMenu = new Menu(
+			level.alphaCameraDistance * 2 * 2, 
+			"textures/skyboxes/tantolunden5/", 
+			"sprites/buttons/", 
+			["exit_button", "restart_button", "resume_button"]
+		);
+		menusArr.pauseMenu = pauseMenu;
+}
 
 
 
+/* /////////////////////////////////////////////////////////////
+	Renders the camera given as input
+	Called by render
+	INPUT: camera to render, left and top are top left corner to start rendering from, width and height are size arguments of renderer
+	OUTPUT: none
+ *//////////////////////////////////////////////////////////////
 function cameraRender( camera, left, top, width, height ){
 	
 	renderer.setViewport( left, top, width, height );
@@ -119,13 +152,19 @@ function cameraRender( camera, left, top, width, height ){
 
 
 
+/* /////////////////////////////////////////////////////////////
+	Places object markers above given object on minimap
+	Called by addMinimapObjects
+	INPUT: objectArray is an array of objects to put objects above, item is what to place above the object
+	OUTPUT: array of objects added to scene
+ *//////////////////////////////////////////////////////////////
 function putAboveObject(objectArray, item){
 	var newItemArray = new Array();
 	for (var i = 0; i < objectArray.length; i++){
 		var currItem = item.clone();
 		currItem.translateX(objectArray[i].position.x - currItem.position.x);
 		currItem.translateZ(objectArray[i].position.z - currItem.position.z);
-		currItem.translateY(ATMOSPHERE_HEIGHT * 2);
+		currItem.translateY(level.atmosphereHeight * 2);
 		scene.add(currItem);
 
 		newItemArray.push(currItem);
@@ -135,7 +174,12 @@ function putAboveObject(objectArray, item){
 
 
 
-
+/* /////////////////////////////////////////////////////////////
+	Adds minimap objects to scene using putAboveObject
+	Called by render
+	INPUT: none
+	OUTPUT: array of objects to be removed from the scene after the minimap view is rendered
+ *//////////////////////////////////////////////////////////////
 function addMinimapObjects(){
 	var removeObjects = new Array();
 
@@ -165,6 +209,13 @@ function addMinimapObjects(){
 	return removeObjects;
 }
 
+
+/* /////////////////////////////////////////////////////////////
+	Removes given objects from the scene
+	Called by render
+	INPUT: array of objects to be removed
+	OUTPUT: none
+ *//////////////////////////////////////////////////////////////
 function removeMinimapObjects( removeObjects ){
 		for(var i = 0; i < removeObjects.length; i++){
 			scene.remove(removeObjects[i]);
@@ -175,7 +226,7 @@ function removeMinimapObjects( removeObjects ){
 
 /* /////////////////////////////////////////////////////////////
 	The render function draws the scene.
-	Called every frame.
+	Called every frame and by init
 	INPUT: none
 	OUTPUT: none
  *//////////////////////////////////////////////////////////////
@@ -198,6 +249,99 @@ function render() {
 	}
 }
 
+/* /////////////////////////////////////////////////////////////
+	Creates random lights, Amount is specified when creating level. Lights are Point lights with shadows enabled
+	Called from createWorld
+	INPUT: none
+	OUTPUT: none - this function adds lights directly to the scene
+ *//////////////////////////////////////////////////////////////
+function createRandomLights(){
+	for(var i = 0; i < level.numRandomLights; i++){
+		var light = new THREE.PointLight(0xffffff, 1, 1000000);
+		light.position.set(
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10),
+			level.atmosphereHeight * (1 + Math.random()), 
+			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10)
+		);
+
+		//shadows for light 1
+		light.castShadow = true;
+		light.shadowDarkness = 0.5;
+		//Set up shadow properties for the light
+		light.shadow.mapSize.width = level.worldWidth;  
+		light.shadow.mapSize.height = level.worldDepth; 
+		light.shadow.camera.near = 0.5;    // default
+		light.shadow.camera.far = Math.sqrt(Math.pow(level.atmosphereHeight,2) + Math.pow(Math.pow(level.worldWidth,2) + Math.pow(level.worldDepth,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
+
+		scene.add(light);
+	}
+}
+
+/* /////////////////////////////////////////////////////////////
+	This function takes a number and splits it randomly into numParts parts.
+	Called from createPowerups
+	INPUT: num - number to be split, numParts - amount of sections to dplit the number to
+	OUTPUT: none - this function adds lights directly to the scene
+ *//////////////////////////////////////////////////////////////
+function splitNumToParts(num, numParts){
+	var numPerSplit = []; 
+	var currNum = num;
+	for(var i = 0; i < numParts -1; i++){
+		var currAmount = Math.floor(Math.random() * currNum);
+		numPerSplit.push(currAmount);
+		currNum -= currAmount;
+	}
+	numPerSplit.push(currNum);
+
+	return numPerSplit;
+}
+
+/* /////////////////////////////////////////////////////////////
+	This function adds powerups to the scene. Amount of powerups specified when creating level.
+	The different powerups are chosen with random probability
+	Called when adding powerups  in createWorld
+	INPUT: none
+	OUTPUT: none - this function adds powerups directly to the scene
+ *//////////////////////////////////////////////////////////////
+function createPowerups(){
+	var powerupsSplit = splitNumToParts(level.numPowerups, powerupTypes.length);
+	console.log("Powerups Split: " + powerupsSplit);
+
+	
+	for(var i = 0; i < powerupTypes.length; i++){
+		for(var j = 0; j < powerupsSplit[i]; j++){
+			powerups.push(new Powerup(i));
+		}
+	}
+	// move powerups to random place on map
+	randomMoveArray(powerups);
+
+	for(var i = 0; i < powerups.length; i++){
+		scene.add(powerups[i]);
+	} 
+}
+
+/* /////////////////////////////////////////////////////////////
+	This function adds collectibles to the scene. Amount of collectibles specified when creating level.
+	Called when adding collectibles in createWorld
+	INPUT: none
+	OUTPUT: none - this function adds collectibles directly to the scene
+ *//////////////////////////////////////////////////////////////
+function createCollectibles(){
+	for(var i = 0; i < level.numCollectibles; i++){
+		collectibles.push(new Collectible(
+				new THREE.CylinderGeometry(1,0.5,1,32),
+				new THREE.MeshPhongMaterial({color: 0xff00ff})
+			)
+		);
+	}
+	// move collectibles to random place on map
+	randomMoveArray(collectibles);
+
+	for(var i = 0; i < collectibles.length; i++){
+		scene.add(collectibles[i]);
+	}
+}
 
 
 /* /////////////////////////////////////////////////////////////
@@ -209,49 +353,28 @@ function render() {
 function createWorld() {
     renderer.setClearColor("black"); // Background color for scene.
     scene = new THREE.Scene();
-    
-    
+    scene.add(player);
+  
+	createMenus();
+
 
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     mainCamera = new THREE.PerspectiveCamera(
 		30, 
 		window.innerWidth/window.innerHeight, 
 		0.1, 
-		ALPHA_CAMERA_DISTANCE * 20							// Determines how far the camera sees
+		level.alphaCameraDistance * 20
 	);
-    mainCamera.position.z = ALPHA_CAMERA_DISTANCE;
-
+  	mainCamera.position.z = level.alphaCameraDistance;
+  	player.add(mainCamera);
 
 
 	//-------------------------------------------- LIGHTING ------------------------------------------------
-	for(var i = 0; i < NUM_RANDOM_LIGHTS; i++){
-		var light = new THREE.PointLight(0xffffff, 1, 1000000);
-		light.position.set(
-			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10),
-			ATMOSPHERE_HEIGHT * (1 + Math.random()), 
-			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * WORLD_WIDTH / (6 + Math.random() * 10)
-		);
-
-		//shadows for light 1
-		light.castShadow = true;
-		light.shadowDarkness = 0.5;
-		//Set up shadow properties for the light
-		light.shadow.mapSize.width = WORLD_WIDTH;  
-		light.shadow.mapSize.height = WORLD_DEPTH; 
-		light.shadow.camera.near = 0.5;    // default
-		light.shadow.camera.far = Math.sqrt(Math.pow(ATMOSPHERE_HEIGHT,2) + Math.pow(Math.pow(WORLD_WIDTH,2) + Math.pow(WORLD_DEPTH,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
-
-		scene.add(light);
-	}
-	
-	//var spotlight = new THREE.SpotLight(0x0000ff, 5);
-	//spotlight.position.z = ALPHA_CAMERA_DISTANCE;
-	//camera.add(spotlight);
-
-    player.add(mainCamera);
-    scene.add(player);
-
-
+	createRandomLights();
+	var viewLight = new THREE.PointLight(0xff00ff, 1);
+	player.add(viewLight);
+	viewLight.position.z = level.alphaCameraDistance;
+    
 
 	//------------------------------------------ MINIMAP ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(		// Orthographic camera does not change according to distance, which is what we want
@@ -259,7 +382,7 @@ function createWorld() {
 		window.innerHeight / 5,							// Right
     	window.innerHeight / 5,							// Top
     	window.innerHeight / -5,						// Bottom
-    	-3 * ATMOSPHERE_HEIGHT,							// Near 
+    	-3 * level.atmosphereHeight,					// Near 
     	10000 );           								// Far 
 	minimapCamera.up = new THREE.Vector3(0,0,-1);		// COMMENT
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );	// COMMENT
@@ -267,13 +390,15 @@ function createWorld() {
 
 
 
-    //---------------------------------- CREATE THE WORLD -------------------------------------------
-	worldMap = new Map(WORLD_WIDTH, WORLD_DEPTH, ATMOSPHERE_HEIGHT, "textures/floor.jpg", "textures/skyboxes/dawnmountain/")
+    //---------------------------------- CREATE THE WORLD ------------------------------------------- 
+	worldMap = new Map(level.worldWidth, level.worldDepth, level.atmosphereHeight, level.floorTextureURL, level.backgroundURL, level.buildingModelURLs) //width, height, atmosphereHight, textureURL, skyboxDirectory
+
 	scene.add(worldMap.floor);
 	scene.background = worldMap.background;
 	scene.add(worldMap.atmosphere);	
 	//add buildings to scene
-	worldMap.createBuildings(0.5); 					//map-buildings ratio is 1/2
+	worldMap.createBuildings(level.mapBuildingRatio); 
+
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
@@ -312,60 +437,24 @@ function createWorld() {
 
 	joshSucks.add(text_object_container);
 	joshSucks.rotateZ(0.2);
-	// var temp_test = player.position.clone();
-	joshSucks.position.set(0,0,10);
+	var temp_test = player.position.clone();
+	joshSucks.position.set(3,3,-2);
 	scene.add(joshSucks);
 
 
 
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
+
 	// alpha is created by modelLoader function and added to player
-	var loader = new THREE.JSONLoader();				// create loader for .js models
-	loader.load("models/stork.js", modelLoader);		// load model and call model_loader
 	
-	
+	var loader = new THREE.JSONLoader();					// create loader for .js models
 
+	loader.load(level.alphaModelURL, modelLoader);			// load model and call model_loader
+	
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
-	var gun = new Powerup("gun");			// add a gun powerup
-	gun.position.set(3,4,3);
-	powerups.push(gun);
-
-	var inv = new Powerup("invisible");		// add invisibility powerup
-	inv.position.set(10,6,10);
-	powerups.push(inv);
-
-	var grav = new Powerup("gravity");		// add a gravity powerup
-	grav.position.set(0,3,-16);
-	powerups.push(grav);
-
-	randomMoveArray(powerups);				// move powerups to random place on map
-
-	for(var i = 0; i < powerups.length; i++){
-		scene.add(powerups[i]);
-	} 
-	
+	createPowerups();
 //--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
-	
-	var collectible0 = new Collectible(						// COMMENT
-		new THREE.CylinderGeometry(1,0.5,1,32),
-		new THREE.MeshPhongMaterial({color: 0xff00ff})
-	);
-	collectible0.position.set(-7,5,3);
-	collectibles.push(collectible0);
-	
-	var collectible1 = new Collectible(						// COMMENT
-		new THREE.CylinderGeometry(1,0.5,1,32),
-		new THREE.MeshPhongMaterial({color: 0x00ffff})
-	);
-	collectible1.position.set(7,3,-4);
-	collectibles.push(collectible1);
-	
-	randomMoveArray(collectibles);							// Move collectibles to random place on map
-
-	for (var i = 0; i < collectibles.length; i++) {
-		scene.add(collectibles[i]);
-		console.log(collectibles[i].position);
-	}
+	createCollectibles();
 
 } // end function createWorld()
 
@@ -397,9 +486,7 @@ function modelLoader(geometry, materials) {
 	alphaDone = true;
 	alpha.startup();
 
-	var temp_test = player.position.clone();
-	joshSucks.position.set(temp_test.x,temp_test.y,temp_test.z);
-	scene.add(joshSucks);
+
 // ANIMATION STUFF
 	mixer = new THREE.AnimationMixer( alpha );
 	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
@@ -432,7 +519,7 @@ function modelLoader(geometry, materials) {
 function randomPlace(){
 	var move = [];
 	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.width / 2));
-	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight);
+	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight + 5);
 	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.depth / 2));
 	return new THREE.Vector3(move[0],move[1],move[2]);
 
@@ -467,12 +554,12 @@ function resetCameraPosition(){
 	var cameraRotationSpeed = 0.1;
 	mainCamera.translateX((alpha.position.x - mainCamera.position.x) * cameraRotationSpeed);
 	mainCamera.translateY((alpha.position.y - mainCamera.position.y) * cameraRotationSpeed);
-	mainCamera.translateZ((alpha.position.z + ALPHA_CAMERA_DISTANCE - mainCamera.position.z) * cameraRotationSpeed);
+	mainCamera.translateZ((alpha.position.z + level.alphaCameraDistance - mainCamera.position.z) * cameraRotationSpeed);
 	mainCamera.lookAt(alpha.position);
 
 	if(Math.abs(alpha.position.x - mainCamera.position.x) <= 0.01 &&
 		Math.abs(alpha.position.y - mainCamera.position.y <= 0.01) &&
-		Math.abs(alpha.position.z + ALPHA_CAMERA_DISTANCE - mainCamera.position.z <= 0.01)){
+		Math.abs(alpha.position.z + level.alphaCameraDistance - mainCamera.position.z <= 0.01)){
 		
 		resetCameraFlag = false;
 	}
@@ -480,23 +567,40 @@ function resetCameraPosition(){
 
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< M E N U   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
 /*///////////////////////////////////////////////////////////////////////////////// 
-	Exits the menu.
+	Returns the current open menu
 	Called by menuInteraction and keysPressed
 	INPUT: none
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
+function openMenu(){
+	var menu;
+	if(menusArr.startMenu.isOpen){
+		menu = menusArr.startMenu;
+	} else {
+		menu = menusArr.pauseMenu;
+	}
+	return menu;
+}
+
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Exits the menu.
+	Called by exitMenu and menuInteraction
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
 function exitMenu(){
+	var menu = openMenu();
+	
+	console.log("exiting menu");
 	scene.remove(menu.skybox);
 	for(var i = 0; i< menu.buttons.length; i++){
 		scene.remove(menu.buttons[i]);
 	}
+	
+	menu.isOpen = false;
 	document.removeEventListener("mousedown", menuInteraction);
-	animating = true;
-	requestAnimationFrame(doFrame);
 }
 
 
@@ -508,7 +612,8 @@ function exitMenu(){
 //////////////////////////////////////////////////////////////////////////////////*/
 function menuInteraction(e){
 	var raycaster = new THREE.Raycaster();
-	
+	var menu = openMenu();
+
 	//var r = window.getBoundingClientRect();
 	var x = e.clientX							// take in click coordinates
 	var y = e.clientY	// 
@@ -522,10 +627,18 @@ function menuInteraction(e){
 	if(intersections.length >= 1){
 		if(intersections[0].object.name == "restart_button"){
 			console.log("restarting game");
+			exitMenu();
 			restartGame();
+		} else if(intersections[0].object.name == "start_button"){
+			console.log("starting game");
+			exitMenu();
+			animating = true;
+			requestAnimationFrame(doFrame);
 		} else if (intersections[0].object.name == "resume_button"){
 			console.log("resuming game");
 			exitMenu();
+			animating = true;
+			requestAnimationFrame(doFrame);
 		} else if(intersections[0].object.name == "exit_button"){
 			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
 		}
@@ -538,16 +651,17 @@ function menuInteraction(e){
 	INPUT: none
 	OUTPUT: none
 /////////////////////////////////////////////////////////////////////////////////*/
-function displayMenu(){
+function displayMenu(menu){
+	menu.isOpen = true;
 	menu.skybox.position.x = player.position.x;
 	menu.skybox.position.y = player.position.y;
 	menu.skybox.position.z = player.position.z;
 	scene.add(menu.skybox);
 
 	for(var i = 0; i < menu.buttons.length; i++){
-		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-		menu.buttons[i].position.y = player.position.y + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
-		menu.buttons[i].position.z = player.position.z + Math.random() * ((ALPHA_CAMERA_DISTANCE * 2 - 5) / 2);
+		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+		menu.buttons[i].position.y = player.position.y +  Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
+		menu.buttons[i].position.z = player.position.z + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
 
 		scene.add(menu.buttons[i]);
 	}
@@ -711,7 +825,7 @@ function reinitializeGlobals(){
 ////////////////////////////////////////////////////////////////////////////////////*/
 function restartGame(){
 	console.log("restarting game");
-	reinitializeGlobals();
+	level.reinitializeGlobals();
 	createWorld();
 	installOrbitControls();
 	console.log("game restarted");	
@@ -749,11 +863,9 @@ function Crash() {
 	
 	// if no more lives, game over
 	if (alpha.lives == 0){
-		gameOver = true;
 		animating = false;
 		window.alert("G A M E    O V E R\nYour final score: " + Score + "\nClick OK to start a new game");
 		restartGame();
-		//do other stuff
 	}else{
 	// TODO : Crash animation, respawn
 		console.log("alpha crashed...");
@@ -761,7 +873,6 @@ function Crash() {
 		window.alert("C R A S H E D!\n Lives left: " + alpha.lives);
 		alpha.respawn();
 	}
-
 }
 
 
@@ -999,7 +1110,6 @@ function createText() {
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function updateForFrame() {
-	console.log(player.position)
 
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
@@ -1017,7 +1127,7 @@ function updateForFrame() {
 	}
 
 	//check for death by atmosphere (lasers) (height) + some leeway
-	if(player.position.y > ATMOSPHERE_HEIGHT + 1){
+	if(player.position.y > level.atmosphereHeight + 1){
 		Crash();
 		return;
 	}
@@ -1062,9 +1172,8 @@ function updateForFrame() {
 	keyCheck(); 		
 
 	//Collision
-	var tempCurrLevel = currLevel;
 	collisions();
-	if(currLevel != tempCurrLevel){
+	if(alpha == null){
 		return;
 	}
 
@@ -1075,7 +1184,14 @@ function updateForFrame() {
 	//cubeCamera.update(renderer, scene);
 	
 	// Score update: TODO: ut in function and tidy up
-	Score++;
+	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
+		console.log("player.position.x " + player.position.x + " player.position.z " + player.position.z)  
+		console.log("level.worldWidth " + level.worldWidth + " level.worldDepth " + level.worldDepth)
+		Score++;
+	} else {
+		Score = Score - 5;
+	}
+
  	document.getElementById("s1").innerHTML = "Score: " + Score;
  	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
 
@@ -1132,12 +1248,12 @@ function keyCheck(){
 		minimapCamera.rotateZ(Math.PI/180) ;
     }
 
-   // space key: fight gravity
-   if (keys[90]) {     
-		if (!jumping) {			// Set limit on jumping
+   // z key: fight gravity
+   if (keys[90]) {
+		if (!alpha.jumping) {			// Set limit on jumping
 			alpha.incSpeedY(1);
 		}
-		jumping = true;
+		alpha.jumping = true;
     }
 }
 
@@ -1157,7 +1273,7 @@ function keysPressed(e) {
 			requestAnimationFrame(doFrame);
 		} else {
 			animating = false;
-			displayMenu();
+			displayMenu(menusArr.pauseMenu);
 		}
 		return;
 	}
@@ -1182,8 +1298,8 @@ function keysPressed(e) {
 	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
-        // NB: prevent default browser behavior - disable during testing
-        //e.preventDefault();
+    // NB: prevent default browser behavior - disable during testing
+    //e.preventDefault();
 }
 
 /*///////////////////////////////////////////////////////////////////////////////// 
@@ -1195,7 +1311,7 @@ function keysReleased(e) {
     // mark keys that were released
     keys[e.keyCode] = false;
     if (e.keyCode == 90) {
-		jumping = false;
+		alpha.jumping = false;
 	}
 }
 
@@ -1242,7 +1358,6 @@ function installOrbitControls() {
 //////////////////////////////////////////////////////////////////////////////////*/
 function doFrame() {
     if (animating) {
-        frameNumber++;
         updateForFrame();
         render();
 		stats.update();
@@ -1260,20 +1375,18 @@ function doFrame() {
 function init() {
     try {
 		container = document.getElementById( 'container' );
-		document.getElementById("s0").innerHTML = "Level: " + currLevel;
+		document.getElementById("s0").innerHTML = "Level: " + level.levelNum;
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.shadowMap.enabled = true;
 		renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
-		renderer.setSize(window.innerWidth, window.innerHeight);
 		//renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
 		container.appendChild( renderer.domElement );
 
 		stats = new Stats();
 		container.appendChild( stats.dom );
-
     }
     catch (e) {
         document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
