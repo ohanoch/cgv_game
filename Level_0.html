@@ -111,8 +111,9 @@ var curveSegments;
 
 var text_object_container;			
 
-var i =0;									// iterator for doing object roation animation
+var crot = Math.PI;									// iterator for doing object rotation animation
 
+var alpha_centered =true;							// used to recenter alpha avater after doing a rotation animation
 // for menu class
 //var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
@@ -690,118 +691,6 @@ function displayMenu(menu){
 //END OF MENU FUNCTIONS
 
 
-/*//////////////////////////////////////////////////////////////////////////
- Keyboard key lookups:  Check arrow, a,w,s,d and space keys
-///////////////////////////////////////////////////////////////////////////*/
-
-window.addEventListener("keydown", keysPressed, false);
-window.addEventListener("keyup", keysReleased, false);
-
-function key_check(){
-	//keycodes taken from: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes	
-
-	// Up Arrow or "w" - camera moves forwad = speed up
-	if(keys[38] || keys[87]){ 
-		alpha.incSpeedZ(-0.05);
-	}
-    // Down Arrow or "s" - camera moves back = speed down
-    if(keys[40] || keys[83]){  
-		alpha.incSpeedZ(0.05);
-	}
-
-    // a key: strafe left
-    if (keys[65]) {     
-        player.translateX(-0.2);
-    }
-
-    // d key: strafe right
-    if (keys[68]) {     
-        player.translateX(0.2);
-    }
-
-    // right arrow: turn right
-    if (keys[39]) {     
-        player.rotateY(-1 * Math.PI/180);
-		minimapCamera.rotateZ(-1 * Math.PI/180);
-    }
-
-    // left arrow: turn left
-    if (keys[37]) {     
-        player.rotateY(Math.PI/180);
-        // Rotate the model (in it's Euler angles)
-        while(i < 0.3){
-        	alpha.rotateZ(-i);
-        	i += 0.1;
-        }
-		minimapCamera.rotateZ(Math.PI/180) ;
-    }
-
-   // space key: fight gravity
-   if (keys[90]) {     
-		if (!jumping) {			// Set limit on jumping
-			alpha.incSpeedY(1);
-		}
-		jumping = true;
-    }
-}
-
-// This function gets called when a key is pressed
-function keysPressed(e) {
-	// "p" for pause and play           
-	if(e.keyCode == 80){
-		if(!animating){
-			exitMenu();
-			animating = true;
-			requestAnimationFrame(doFrame);
-		} else {
-			animating = false;
-			displayMenu();
-		}
-		return;
-	}
-
-	// F11 to enter and exit fullscreen
-	if(e.keyCode == 122){
-		if(!fullscreen){
-			fullscreen = true;
-			document.requestFullscreen();
-		} else {
-			fullscreen = false
-			document.exitFullscreen();
-		}
-		return;
-	}
-
-	// F5 to refresh page
-	if(e.keyCode == 116){
-		window.location.reload(false); 
-		return
-	}
-	
-    // store an entry for every key pressed
-    keys[e.keyCode] = true;
-        // NB: prevent default browser behavior - disable during testing
-        //e.preventDefault();
-}
-
-function keysReleased(e) {
-    // mark keys that were released
-    keys[e.keyCode] = false;
-    if (e.keyCode == 90) {
-		jumping = false;
-	}
-	//reverse the model rotation done during banking
-	if(e.keyCode == 37){
-		console.log(i);
-		while((0.3 - i) < 0.3){
-        	alpha.rotateZ(i);
-        	i -= 0.1;
-        	console.log(i);
-    	}
-    	i=0;
-    	alpha.rotation.z =Math.PI;
-	}
-}
 
 
 
@@ -1143,6 +1032,11 @@ function updateForFrame() {
 	// minimap height stays constant right and captures from right bellow the atmosphere
 	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);	
 
+	// t to stop gravity, for testing
+	if(keys[84]){
+		alpha.setMinSpeedY(0);
+	}
+
 	// Put player on floor if they aren't already on it.
 	if(!putOnFloor()){
 		return;
@@ -1159,13 +1053,23 @@ function updateForFrame() {
 		resetCameraPosition();
 	}
 	
-	if(keys[37]) {
-		if(alpha.rotation.z > 2.8) {
-			console.log(alpha.rotation.z);
-			alpha.rotation.z -= 0.1;
-			//alpha.rotateZ(0.1);
-		}
-	}
+	// Animate the avatar model to rotate back to center in z anti-clockwise
+    if(alpha_centered == false){
+
+    	if(crot == Math.PI){
+	    	alpha.rotation.z =  crot;
+    		alpha_centered = true;
+    	}else if(crot > Math.PI && crot*alpha.rotation.z < 0){	// exploit fact that z= -crot for left turns, to determine if we're recovering from a left or right turn.
+    		crot -= 0.1;
+	    	alpha.rotation.z =  -crot ;
+    	}else {
+    		crot -= 0.1;
+	    	alpha.rotation.z =  crot ;
+    	}
+    }
+
+
+
 
 	// Animate power-ups
 	for(var i = 0; i < powerups.length; i++){
@@ -1236,6 +1140,8 @@ window.addEventListener("keyup", keysReleased, false);
 // keyboard control taken from: http://www.johannes-raida.de/tutorials/three.js/tutorial07/tutorial07.htm
 // multiple keypresses from: https://www.kirupa.com/html5/keyboard_events_in_javascript.htm
 
+
+
 /*///////////////////////////////////////////////////////////////////////////////// 
 	Keyboard key lookups:  Check if arrow, a,w,s,d and space keys are down using keys array
 	Called by updateForFrame
@@ -1256,23 +1162,35 @@ function keyCheck(){
 
     // a key: strafe left
     if (keys[65]) {     
-        player.translateX(-0.2);
+        player.translateX(-0.5);
     }
 
     // d key: strafe right
     if (keys[68]) {     
-        player.translateX(0.2);
+        player.translateX(0.5);
     }
 
     // right arrow: turn right
     if (keys[39]) {     
         player.rotateY(-1 * Math.PI/180);
+        //animate avatar anti-clockwise in z
+        if(crot < Math.PI + 0.4){
+        	alpha.rotation.z = crot;
+        	crot += 0.1;
+        }
+
 		minimapCamera.rotateZ(-1 * Math.PI/180);
     }
 
     // left arrow: turn left
     if (keys[37]) {     
         player.rotateY(Math.PI/180);
+        // animate avatar clockwise in z
+        if(crot < Math.PI + 0.4){
+        	alpha.rotation.z = -crot;
+        	crot += 0.1;
+        }
+    
 		minimapCamera.rotateZ(Math.PI/180) ;
     }
 
@@ -1324,11 +1242,7 @@ function keysPressed(e) {
 		return
 	}
 	
-	if (e.keyCode == 37) {
-		//if(alpha.rotation.z > Math.PI/2) {
-			//alpha.rotation.z = Math.PI - 0.1;
-		//}
-	}
+
 	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
@@ -1348,9 +1262,13 @@ function keysReleased(e) {
 		alpha.jumping = false;
 	}
 	
-	if(e.keyCode == 37) {
-		alpha.rotation.z = Math.PI;
+	// Undo avatar rotation if left or right arrows are pressed
+	if(e.keyCode == 37 || e.keyCode == 39) {
+		alpha_centered = false;
 	}
+		
+
+
 }
 
  /*///////////////////////////////////////////////////////////////////////////////// 
