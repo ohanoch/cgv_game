@@ -47,8 +47,8 @@ class Alpha extends THREE.Mesh{
 			console.log("respawning alpha");
 			var randomX = Math.random();
 			var randomZ = Math.random();
-			//player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
-			player.position.set(0,0,10);
+			player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
+			//player.position.set(0,0,10);	// Leave this here for testing purposes
 			minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
 			collisions();
 			if(this.lives != currLives){

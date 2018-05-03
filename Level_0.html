@@ -14,6 +14,7 @@
 <script src="src\js\threex.geometricglowmesh.js"></script>
 <script src="src/js/GeometryUtils.js"></script>
 <script src="src/js/BendModifier.js"></script>
+<script src="src/js/dat.gui.min.js"></script>
 
 
 <script src="src\alpha.js"></script>
@@ -30,8 +31,8 @@
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-var WORLD_WIDTH = 2000;						// dimensions of world (plane)
-var WORLD_DEPTH = 2000;
+var WORLD_WIDTH = 200;						// dimensions of world (plane)
+var WORLD_DEPTH = 200;
 var ATMOSPHERE_HEIGHT = 100;
 var ALPHA_CAMERA_DISTANCE = 20;
 var STARTING_LIVES = 3;
@@ -83,25 +84,26 @@ var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.i
 
 var worldMap;
 
-var mesh;
+var discoBall;
 
 var joshSucks;								// he does
 
+// for the text; there is no better way, sorry.
+var textMesh1;
+var font;
+var text ;
+var text_height ;
+var text_size;
+var curveSegments;	
+//
 var Score = 0;
-
 
 var text_object_container;
 
+var i =0;// iterator for doing object roation animation
 // for menu class
 var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
-
-	var textMesh1;
-	var font;
-	var text 
-	var text_height ;
-	var text_size;
-	var curveSegments;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -278,51 +280,40 @@ function createWorld() {
 
 
 	
-	//---------------------------------- CUBE MAP OBJECT THING// TODO: DECIDE WHERE TO PUT THIS and CLEAN IT UP and 
-
+    //---------------------------------- Dynamic Sculpture -------------------------------------------
+    // TODO: try cubecamera on lab computers
 	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
 	
-	joshSucks = new THREE.Object3D();
+	joshSucks = new THREE.Object3D();		// Sculpture object
 
-
-	// make a shiny sphere
+	// Make a reflective sphere (only reflects skybox, at the moment)
 	var geometry = new THREE.SphereGeometry(5, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
     color   : 'chrome',
 	envMap 	: scene.background
 	});
-	mesh = new THREE.Mesh(geometry, material); //TODO:
-	//mesh.scale.set(5,10,10);
-	mesh.position.set(0,0,0);	// centre obj coords of sphere
-	scene.add(mesh);
-
-	joshSucks.add(mesh);
+	discoBall = new THREE.Mesh(geometry, material); 
+	discoBall.position.set(0,0,0);	// centre obj coords of sphere
+	joshSucks.add(discoBall);
 		
 
 //////////////////////////////////////////////////////////////////////////////////
 //		add  text	 														//
 ///	///////////////////////////////////////////////////////////////////////////////
-	//text_object_container.add(glowMesh.object3d); 	// after glowMaker(textMesh1)
-/// TODO: Put these with global vars or somewhere else
-	var text = "JOSH  SUCKS",
-		height = 0.5,
-		size = 2,
-		curveSegments = 4,
-		font = undefined;
+	text = "JOSH  SUCKS";
+	text_height = 0.5;
+	text_size = 2;
+	curveSegments = 4;
+	font = undefined;
 		
-	text_object_container = new THREE.Group();
-	text_object_container.position.set(-8,0,10);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely 
-loadFont();
-	text_object_container.scale.set(0.5,0.5,0.5);
+	text_object_container = new THREE.Group();	
+	text_object_container.position.set(-8,0,7);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely 
+	loadFont();
 
-bendText();
-
-	// //scene.add( group );
-	// loadFont();	// load up the font
-	// console.log("Loadfont was called");	
 	joshSucks.add(text_object_container);
-	var temp_test = player.position.clone()
-	joshSucks.position.set(temp_test.x,temp_test.y,temp_test.z);
+	joshSucks.rotateZ(0.2);
+	// var temp_test = player.position.clone();
+	joshSucks.position.set(0,0,10);
 	scene.add(joshSucks);
 
 
@@ -406,7 +397,9 @@ function modelLoader(geometry, materials) {
 	alphaDone = true;
 	alpha.startup();
 
-	
+	var temp_test = player.position.clone();
+	joshSucks.position.set(temp_test.x,temp_test.y,temp_test.z);
+	scene.add(joshSucks);
 // ANIMATION STUFF
 	mixer = new THREE.AnimationMixer( alpha );
 	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
@@ -605,6 +598,11 @@ function key_check(){
     // left arrow: turn left
     if (keys[37]) {     
         player.rotateY(Math.PI/180);
+        // Rotate the model (in it's Euler angles)
+        while(i < 0.3){
+        	alpha.rotateZ(-i);
+        	i += 0.1;
+        }
 		minimapCamera.rotateZ(Math.PI/180) ;
     }
 
@@ -662,6 +660,13 @@ function keysReleased(e) {
     if (e.keyCode == 90) {
 		jumping = false;
 	}
+	/// reverse model rotation animation
+	if(e.keyCode == 37){
+		while((0.3 - i) < 0.3 ){
+			i -= 0.1;
+		}
+		i=0;	// reset i so it can be used again
+	}
 }
 
 
@@ -691,9 +696,9 @@ function reinitializeGlobals(){
 	mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
 	minimapCamera = null; 
 	worldMap = null;
-	mesh = null;
-	joshSucks = null; 						// he does
+	//joshSucks = null; 						// he does
 	Score = 0;
+	i=0;
 }
 
 
@@ -877,11 +882,6 @@ function  collisions() {
 Fucking Text!
 ///////////////////////////////////////////////////////////////////////////*/
 
-function spawnText(text1, text_height1, text_size1, curveSegments1){
-
-	loadFont();
-
-}
 
 // get the font then run create text fn
 // kind of redundant
@@ -953,51 +953,43 @@ function createText() {
 	new THREE.MeshPhongMaterial( { color: 0xffffff } ) 						// side material
 	];
 	textMesh1 = new THREE.Mesh( textGeo, Text_materials );
-	//text_object_container.add(textMesh1);
-	//return textMesh1;	// returns a 3D text object. Woohooo. TODO: Create a tutorial for doing this, because the THREE js docs suck!
+	//////////////////////////////////////////////////////////////////////////////////
+	// Bend text
+	// Source: https://github.com/alexan0308/threejs/blob/master/examples/webgl_simple_modifiers.html
+	//////////////////////////////////////////////////////////////////////////////////
+	
 	var direction = new THREE.Vector3( 0, 0, -1 );
-	var axis =  new THREE.Vector3( 0, 1, 0 );
-	var angle = Math.PI / 2.5;
+	var axis =  new THREE.Vector3( 0, 1, 0 );		// axis to bend in
+	var angle = Math.PI / 3;
 	var modifier = new THREE.BendModifier();
 	modifier.set( direction, axis, angle ).modify( textMesh1.geometry );
+	text_object_container.add(textMesh1);
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	// Make text glow
+	// source: https://github.com/jeromeetienne/threex.geometricglow
+	//////////////////////////////////////////////////////////////////////////////////
 
+	var glowMesh	= new THREEx.GeometricGlowMesh(textMesh1);
+	text_object_container.add(glowMesh.object3d);
 
-}
+	//////////////////////////////////////////////////////////////////////////////////
+	//		customize glow mesh if needed											//
+	//////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////
-// Bends text- currently only in z. TODO, make it take in which axis to bend along, and other params
-// This sadly did not work. Maybe Richard can explain why
-//////////////////////
-// function bendText(textMesh1){	
-// 	// bend the text - this took hours to figure out because all the docs and examples are deprecated - FUCK
-// 	// Had to modify a lib file (BendModifier.js)
-// 	var direction = new THREE.Vector3( 0, 0, -1 );
-// 	var axis =  new THREE.Vector3( 0, 1, 0 );
-// 	var angle = Math.PI / 2.5;
-// 	var modifier = new THREE.BendModifier();
-// 	// modifier.set( direction, axis, angle ).modify( textMesh1.geometry );
-// 	return modifier;
-	//return textMesh; // returns bent 3D text object
-}
-
-
-
-//////////
-// Adds a glow effect to a 3D object
-// uses THREE extension (threex) shaders
-// Source: https://github.com/jeromeetienne/threex.geometricglow
-// TODO: try make my own shader, add params for colours, brightness, etc
-////////
-function glowMaker(mesh){
-	var glowMesh	= new THREEx.GeometricGlowMesh(mesh);
-	//return glowMesh.object3d;			// returns a glowing 3d Object
-}
+	var insideUniforms	= glowMesh.insideMesh.material.uniforms
+	insideUniforms.glowColor.value.set('hotpink')
+	var outsideUniforms	= glowMesh.outsideMesh.material.uniforms
+	outsideUniforms.glowColor.value.set('hotpink')
+	
+}	// end createText
 
 
 
 ///////////////////////////////////\				  //////////////////////////////
 //================================== end sub routines =============================
 ///////////////////////////////////////////////////////////////////////////////////
+
 
 
 /*///////////////////////////////////////////////////////////////////////////////// 
