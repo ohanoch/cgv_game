@@ -103,7 +103,7 @@ function createMenus(){
 			level.alphaCameraDistance * 2 * 2, 
 			"textures/skyboxes/ulam/", 
 			"sprites/buttons/", 
-			["exit_button", "start_button"]
+			["exit_button", "start_button","controls_button","credits_button"]
 		);
 	menusArr.startMenu = startMenu;
 	var pauseMenu = new Menu(
@@ -583,7 +583,8 @@ function exitMenu(){
 }
 
 
-/*///////////////////////////////////////////////////////////////////////////////// 
+
+/*y///////////////////////////////////////////////////////////////////////////////// 
 	Uses raycasting to check which menu box the user clicks
 	Callback function for mouseclick event listener in displayMenu
 	INPUT: click event
@@ -592,7 +593,6 @@ function exitMenu(){
 function menuInteraction(e){
 	var raycaster = new THREE.Raycaster();
 	var menu = openMenu();
-
 	//var r = window.getBoundingClientRect();
 	var x = e.clientX	// take in click coordinates
 	var y = e.clientY	// 
@@ -620,6 +620,10 @@ function menuInteraction(e){
 			requestAnimationFrame(doFrame);
 		} else if(intersections[0].object.name == "exit_button"){
 			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
+		} else if(intersections[0].object.name == "controls_button"){
+			window.alert("P - Play/Pause\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe");
+		} else if(intersections[0].object.name == "credits_button"){
+			window.alert("This game was technically made by Avi Bank, Niambh Blundell, Or Hanoch but..\nIt was actually brought to life by the awesome Dr. Richard Klein, Phd, who taught us everything we know and inspired us to be better people. Everything we Do we owe to him.\nWE LOVE YOU RICHARD!");
 		}
 	}
 }
