@@ -1053,23 +1053,8 @@ function updateForFrame() {
 		resetCameraPosition();
 	}
 	
-	// Animate the avatar model to rotate back to center in z anti-clockwise
-    if(alpha_centered == false){
-
-    	if(crot == Math.PI){
-	    	alpha.rotation.z =  crot;
-    		alpha_centered = true;
-    	}else if(crot > Math.PI && crot*alpha.rotation.z < 0){	// exploit fact that z= -crot for left turns, to determine if we're recovering from a left or right turn.
-    		crot -= 0.1;
-	    	alpha.rotation.z =  -crot ;
-    	}else {
-    		crot -= 0.1;
-	    	alpha.rotation.z =  crot ;
-    	}
-    }
-
-
-
+	// Animate the avatar model to rotate back to center in it's z-axis, after banking
+    reCenterAlpha();
 
 	// Animate power-ups
 	for(var i = 0; i < powerups.length; i++){
@@ -1266,10 +1251,37 @@ function keysReleased(e) {
 	if(e.keyCode == 37 || e.keyCode == 39) {
 		alpha_centered = false;
 	}
-		
-
 
 }
+
+
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Function to re-center alpha's rotation after making a banking animation while turning.
+	Called in updateForFrame().
+	It's under mouse and keyboard functions because it deals with variables used in keyCheck() and keysReleased(e).
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function reCenterAlpha(){
+	if(alpha_centered == false){
+
+		if(crot == Math.PI){									// If alpha is centered, we are done; so update the vars that track this.
+	    	alpha.rotation.z =  crot;
+			alpha_centered = true;
+		}else if(crot > Math.PI && crot*alpha.rotation.z < 0){	// Exploit the fact that z = -crot for left turns, to determine if we're recovering from a left or right turn.
+			crot -= 0.1;
+	    	alpha.rotation.z =  -crot ;
+		}else {													// Otherwise we're recovering from a right turn
+			crot -= 0.1;
+	    	alpha.rotation.z =  crot ;
+		}
+
+	}
+
+}
+
+
 
  /*///////////////////////////////////////////////////////////////////////////////// 
 	Uses THREE.OrbitControls from the graphics course to allow the user to rotate the view with the mouse
