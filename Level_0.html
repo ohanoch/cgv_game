@@ -84,6 +84,10 @@ var joshSucks; // he does
 
 var Score = 0;
 
+
+var i =0;
+
+
 /// TODO: Put these with global vars or somewhere else
 var text = "JOSH  SUCKS",
 	height = 0.5,
@@ -423,6 +427,11 @@ function key_check(){
     // left arrow: turn left
     if (keys[37]) {     
         player.rotateY(Math.PI/180);
+        //try rotate model a bit
+        while(i < 0.3){
+        alpha.rotateZ(-i);
+        i += 0.1;
+    	}
 		minimapCamera.rotateZ(Math.PI/180) ;
     }
 
@@ -477,6 +486,16 @@ function keysReleased(e) {
     keys[e.keyCode] = false;
     if (e.keyCode == 90) {
 		jumping = false;
+	}
+	//reverse the model rotation done during banking
+	if(e.keyCode == 37){
+		console.log(i);
+		while((0.3 - i) < 0.3){
+        alpha.rotateZ(i);
+        i -= 0.1;
+        console.log(i);
+    	}i=0;
+    	alpha.rotation.z =Math.PI;
 	}
 }
 
@@ -803,7 +822,6 @@ function createText() {
  *  animated properties.  The value of the global variable frameNumber
  *  is incrementd 1 before this function is called.
  */
-var everyNframes = 0; // Global counter to do stuff every Nth frame. 
 
 function updateForFrame() {
 	//Move player backwards or forwards by their Z velocity
@@ -847,13 +865,6 @@ function updateForFrame() {
 	
 	// Summon keyboard control lookups in one line.
 	key_check(); 		
-
-	// Increment Nth frame counter
-	everyNframes ++;
-	console.log("N counter: ",everyNframes);
-
-	//Every N frames, save position.
-	//SavePosition();	//avi_respawn
 
 	//Collision
 	collissions();	
