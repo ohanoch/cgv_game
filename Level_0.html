@@ -59,6 +59,7 @@ var alphaDone = false;
 var mapDone = false;
 var Score = 0;
 var activePowerup = null;
+var collectibleCount = 0;
 
 /* Global object variables */
 var player = new THREE.Object3D();
@@ -816,8 +817,9 @@ function  collisions() {
 			collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
 			scene.remove(CollectibleCollisionResults[0].object);
 			Score = Score + 1000000
+			collectibleCount++;
 			
-			if(collectibles.length == 0) {
+			if(collectibleCount == 3/*collectibles.length == 0*/) {
 				window.alert( "You won the level!");
 				currLevel++;
 				restartGame();
