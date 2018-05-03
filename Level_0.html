@@ -12,8 +12,9 @@
 <script src="src\js\threex.atmospherematerialdatgui.js"></script>
 <script src="src\js\threex.dilategeometry.js"></script>
 <script src="src\js\threex.geometricglowmesh.js"></script>
-<script src="src\js\GeometryUtils.js"></script>
-<script src="src\js\BendModifier.js"></script>
+<script src="src/js/GeometryUtils.js"></script>
+<script src="src/js/BendModifier.js"></script>
+<script src="src/js/dat.gui.min.js"></script>
 
 
 <script src ="src\level.js"></script>
@@ -27,69 +28,91 @@
 
 "use strict";
 
+
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
-var currLevel = 0; //level variable mostly for display purposes at the moment
-
-var level = new Level(currLevel, 2000, 2000, 100, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
+var WORLD_WIDTH = 10;						// dimensions of world (plane)
+var WORLD_DEPTH = 10;
+var ATMOSPHERE_HEIGHT = 100;
+var ALPHA_CAMERA_DISTANCE = 20;
+var STARTING_LIVES = 3;
+var NUM_RANDOM_LIGHTS = 2;
+var canvas, renderer, scene, mainCamera; 	// Standard three.js requirements.
+var currLevel = 0; 							//level variable mostly for display purposes at the moment
+var level = new Level(currLevel, 2000, 2000, 100, 20, 3, 																							// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
 				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
 				"textures/skyboxes/dawnmountain/", 3, 3, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerups, 
 				1, -10, -2, -0.01);																														// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
 
-
-/* General mechanics variables */
-var canvas, renderer, scene, mainCamera; // Standard three.js requirements.
 var container, stats;
+
 var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //minimap variables
-var controls;  // An OrbitControls object that is used to implement
-               // rotation of the scene using the mouse.  (It actually rotates
-               // the camera around the scene.)
+
+var controls;  											// An OrbitControls object that is used to implement
+              											// rotation of the scene using the mouse.  (It actually rotates
+               											// the camera around the scene.)
 
 /* flags for different instances */
 var fullscreen = false;
-var animating = false;  // Set to true when an animation is in progress.
-var keys = []; //records current keys being pressed
-var resetCameraFlag = false //flag to reset the camera position to original position
+
+var animating = false;  					// Set to true when an animation is in progress.
+
+var frameNumber = 0;  						// Frame number is advanced by 1 for each frame while animating.
+
+var player = new THREE.Object3D();
+
+var keys = []; 								// records current keys being pressed
+
+var resetCameraFlag = false 				// flag to reset the camera position to original position
+
+var jumping = false;						// whether player is jumping or not
+
+var alpha;									// player stats tracking + model  object
+
 var alphaDone = false;
+
 var mapDone = false;
+
 var Score = 0;
+
 var activePowerup = null;
 
-/* Global object variables */
-var player = new THREE.Object3D();
-var alpha;	// player stats tracking + model  object
-var worldMap; // make global so it can be accessed by collision function
-
-/* Global object arrays */
-var powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
-var collectibles = [];			// the items that the player needs to collect in order to progress to the next level
 var menusArr = {};
 
+var gameOver = false; 						// updates to true when lives == 0
 
+var worldMap; 								// make global so it can be accessed by collision function
 
-/* Avi stuff */
+var collideMeshArray = []; 					// array to store  all collidable mesh's (buildings + items)
 
-var collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
+var powerups = [];							// items providing certain powerups or "boosts" to the player for a short time when picked up
+var activePowerup = null;
 
+var collectibles = [];						// the items that the player needs to collect in order to progress to the next level
 
+var mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
 
-var mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
+var discoBall;
 
+var joshSucks;								// he does
 
-var mesh;
+// for the text; there is no better way, sorry.
+var textMesh1;
+var font;
+var text ;
+var text_height ;
+var text_size;
+var curveSegments;	
+//
 
-var joshSucks; // he does
+var Score = 0;
 
+var text_object_container;			
 
-/// TODO: Put these with global vars or somewhere else
-var text = "JOSH  SUCKS",
-	height = 0.5,
-	size = 2,
-	curveSegments = 4,
-	font = undefined;
-var group, textMesh1, textGeo, materials;
+var i =0;									// iterator for doing object roation animation
 
+// for menu class
+//var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
 
 
@@ -111,6 +134,8 @@ function createMenus(){
 		menusArr.pauseMenu = pauseMenu;
 }
 
+
+
 /* /////////////////////////////////////////////////////////////
 	Renders the camera given as input
 	Called by render
@@ -124,6 +149,8 @@ function cameraRender( camera, left, top, width, height ){
 	camera.updateProjectionMatrix();
     renderer.render(scene, camera);
 }
+
+
 
 /* /////////////////////////////////////////////////////////////
 	Places object markers above given object on minimap
@@ -144,6 +171,8 @@ function putAboveObject(objectArray, item){
 	}
 	return newItemArray;
 }
+
+
 
 /* /////////////////////////////////////////////////////////////
 	Adds minimap objects to scene using putAboveObject
@@ -192,6 +221,7 @@ function removeMinimapObjects( removeObjects ){
 			scene.remove(removeObjects[i]);
 		}
 }
+
 
 
 /* /////////////////////////////////////////////////////////////
@@ -313,6 +343,7 @@ function createCollectibles(){
 	}
 }
 
+
 /* /////////////////////////////////////////////////////////////
 	Creates the world map, lights, cameras, player and collectibles and powerups.
 	Called by restartGame and init.
@@ -323,18 +354,20 @@ function createWorld() {
     renderer.setClearColor("black"); // Background color for scene.
     scene = new THREE.Scene();
     scene.add(player);
-    
+  
 	createMenus();
+
+
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
-    
     mainCamera = new THREE.PerspectiveCamera(
 		30, 
 		window.innerWidth/window.innerHeight, 
 		0.1, 
 		level.alphaCameraDistance * 20
 	);
-  mainCamera.position.z = level.alphaCameraDistance;
-  player.add(mainCamera);
+  	mainCamera.position.z = level.alphaCameraDistance;
+  	player.add(mainCamera);
+
 
 	//-------------------------------------------- LIGHTING ------------------------------------------------
 	createRandomLights();
@@ -342,123 +375,118 @@ function createWorld() {
 	player.add(viewLight);
 	viewLight.position.z = level.alphaCameraDistance;
     
+
 	//------------------------------------------ MINIMAP ----------------------------------------------
-	minimapCamera = new THREE.OrthographicCamera(
+	minimapCamera = new THREE.OrthographicCamera(		// Orthographic camera does not change according to distance, which is what we want
 	    window.innerHeight / -5,						// Left
 		window.innerHeight / 5,							// Right
     	window.innerHeight / 5,							// Top
     	window.innerHeight / -5,						// Bottom
     	-3 * level.atmosphereHeight,					// Near 
     	10000 );           								// Far 
-	minimapCamera.up = new THREE.Vector3(0,0,-1);
-	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );
-
-	scene.add(minimapCamera);
-
-
-    //---------------------------------- CREATE THE WORLD -------------------------------------------
-    
+	minimapCamera.up = new THREE.Vector3(0,0,-1);		// COMMENT
+	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );	// COMMENT
+	scene.add(minimapCamera);							// Add minimap camera to scene
 
 
+
+    //---------------------------------- CREATE THE WORLD ------------------------------------------- 
 	worldMap = new Map(level.worldWidth, level.worldDepth, level.atmosphereHeight, level.floorTextureURL, level.backgroundURL, level.buildingModelURLs) //width, height, atmosphereHight, textureURL, skyboxDirectory
 
 	scene.add(worldMap.floor);
 	scene.background = worldMap.background;
 	scene.add(worldMap.atmosphere);	
-
 	//add buildings to scene
-	worldMap.createBuildings(level.mapBuildingRatio); //map-buildings ratio is 1/2
+	worldMap.createBuildings(level.mapBuildingRatio); 
 
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
 
 
-
-
 	
-	//---------------------------------- CUBE MAP OBJECT THING// TODO: DECIDE WHERE TO PUT THIS and CLEAN IT UP and TRY using NOT THREEx OR maybe keep it if Richard gives points for using extensions??--------------------------------------
-	// try using https://threejs.org/examples/#webgl_materials_cubemap_dynamic2
-
-
+    //---------------------------------- Dynamic Sculpture -------------------------------------------
+    // TODO: try cubecamera on lab computers
 	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
-	joshSucks = new THREE.Object3D();
+	
+	joshSucks = new THREE.Object3D();		// Sculpture object
 
+	// Make a reflective sphere (only reflects skybox, at the moment)
 	var geometry = new THREE.SphereGeometry(5, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
     color   : 'chrome',
 	envMap 	: scene.background
 	});
-	mesh = new THREE.Mesh(geometry, material);
-	//mesh.scale.set(5,10,10);
-	mesh.position.set(0,0,0);	// centre obj coords of sphere
-	scene.add(mesh);
-
-	joshSucks.add(mesh);
-
-	// GLOW THING
-	// Source: https://github.com/jeromeetienne/threex.geometricglow
+	discoBall = new THREE.Mesh(geometry, material); 
+	discoBall.position.set(0,0,0);	// centre obj coords of sphere
+	joshSucks.add(discoBall);
 		
 
 //////////////////////////////////////////////////////////////////////////////////
 //		add  text	 														//
 ///	///////////////////////////////////////////////////////////////////////////////
-	group = new THREE.Group();
-	group.position.set(-8,0,10);	// obj translation of text object onto sphere. Currently doesn't reflect close objects nicely 
+	text = "JOSH  SUCKS";
+	text_height = 0.5;
+	text_size = 2;
+	curveSegments = 4;
+	font = undefined;
+		
+	text_object_container = new THREE.Group();	
+	text_object_container.position.set(-8,0,7);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely 
+	loadFont();
 
-	//scene.add( group );
-	loadFont();	// create the text object
-	console.log("Loadfont was called");	
-	joshSucks.add(group);
-	joshSucks.position.set(3,3,-30);
+	joshSucks.add(text_object_container);
+	joshSucks.rotateZ(0.2);
+	var temp_test = player.position.clone();
+	joshSucks.position.set(3,3,-2);
 	scene.add(joshSucks);
 
 
 
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 
-// alpha is created by modelLoader function and added to player
+	// alpha is created by modelLoader function and added to player
 	
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 
-	loader.load(level.alphaModelURL, modelLoader);		// load model and call model_loader
-	
+	loader.load(level.alphaModelURL, modelLoader);			// load model and call model_loader
 	
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
 	createPowerups();
 //--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
 	createCollectibles();
+
 } // end function createWorld()
+
 
 
 /*//////////////////////////////////////////////////////////////////////////
 	Model Loader function for alpha object. Creates alpha, places it in the scene and sets up animation
-	Callback function for JSON loader in createWorld
+	Callback function for JSON loader in createWorld()
 	INPUT: THREE geometry and material objects
 	OUTPUT: none
 ///////////////////////////////////////////////////////////////////////////*/
 function modelLoader(geometry, materials) {
 
 	var material = new THREE.MeshLambertMaterial( {
-        vertexColors: THREE.FaceColors,  	// use colors from the geometry
+        vertexColors: THREE.FaceColors,  			// use colors from the geometry
         morphTargets: true							// for animation
     });
-    
-	alpha = new Alpha(geometry,material, 1);	// create alpha object
+	alpha = new Alpha(geometry,material, 1);		// create alpha object
 	
 // TRANSFORMS
 	alpha.scale.set(0.05,0.05,0.05);
 	alpha.position.set(0,0,0);
 	alpha.rotateY(Math.PI);
 	alpha.castShadow = true;
-	player.add(alpha);				// add alpha to player
-	player.translateY(10);			// move player so that alpha doesn't crash on game start
+	player.add(alpha);								// add alpha to player
+	player.translateY(10);							// move player so that alpha doesn't crash on game start
 
-	alpha.geometry.computeBoundingBox();
+	alpha.geometry.computeBoundingBox();			// Get bounding box for model, for doing collisions
 	alphaDone = true;
 	alpha.startup();
 
-	
+
 // ANIMATION STUFF
 	mixer = new THREE.AnimationMixer( alpha );
 	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
@@ -471,6 +499,7 @@ function modelLoader(geometry, materials) {
 // END OF INITIALISATION
 
 
+
 /*<<<<<<<<<<<<<<<<<<<<<< C U S T O M 	S U B   R O U T I N E S >>>>>>>>>>>>>>>>>>>>>>>>>>>
 			                                 |_
 			                           _____|~ |____
@@ -478,6 +507,8 @@ function modelLoader(geometry, materials) {
 			                           ~~~~~~~~~~~~~~~~~~~'`  
 
 */
+
+
 
 /*///////////////////////////////////////////////////////////////////////////////// 
 	Gets a random vector for a new position.
@@ -552,6 +583,7 @@ function openMenu(){
 	return menu;
 }
 
+
 /*///////////////////////////////////////////////////////////////////////////////// 
 	Exits the menu.
 	Called by exitMenu and menuInteraction
@@ -583,13 +615,13 @@ function menuInteraction(e){
 	var menu = openMenu();
 
 	//var r = window.getBoundingClientRect();
-	var x = e.clientX	// take in click coordinates
+	var x = e.clientX							// take in click coordinates
 	var y = e.clientY	// 
 
 	var a = 2 * x / window.innerWidth - 1; // convert canvas pixel coords to clip coords
 	var b = 1 - 2 * y / window.innerHeight;
 
-	raycaster.setFromCamera( new THREE.Vector2(a,b), mainCamera );
+	raycaster.setFromCamera( new THREE.Vector2(a,b), mainCamera );		//COMMENT
 
 	var intersections = raycaster.intersectObjects( menu.buttons, true );
 	if(intersections.length >= 1){
@@ -642,6 +674,149 @@ function displayMenu(menu){
 //END OF MENU FUNCTIONS
 
 
+/*//////////////////////////////////////////////////////////////////////////
+ Keyboard key lookups:  Check arrow, a,w,s,d and space keys
+///////////////////////////////////////////////////////////////////////////*/
+
+window.addEventListener("keydown", keysPressed, false);
+window.addEventListener("keyup", keysReleased, false);
+
+function key_check(){
+	//keycodes taken from: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes	
+
+	// Up Arrow or "w" - camera moves forwad = speed up
+	if(keys[38] || keys[87]){ 
+		alpha.incSpeedZ(-0.05);
+	}
+    // Down Arrow or "s" - camera moves back = speed down
+    if(keys[40] || keys[83]){  
+		alpha.incSpeedZ(0.05);
+	}
+
+    // a key: strafe left
+    if (keys[65]) {     
+        player.translateX(-0.2);
+    }
+
+    // d key: strafe right
+    if (keys[68]) {     
+        player.translateX(0.2);
+    }
+
+    // right arrow: turn right
+    if (keys[39]) {     
+        player.rotateY(-1 * Math.PI/180);
+		minimapCamera.rotateZ(-1 * Math.PI/180);
+    }
+
+    // left arrow: turn left
+    if (keys[37]) {     
+        player.rotateY(Math.PI/180);
+        // Rotate the model (in it's Euler angles)
+        while(i < 0.3){
+        	alpha.rotateZ(-i);
+        	i += 0.1;
+        }
+		minimapCamera.rotateZ(Math.PI/180) ;
+    }
+
+   // space key: fight gravity
+   if (keys[90]) {     
+		if (!jumping) {			// Set limit on jumping
+			alpha.incSpeedY(1);
+		}
+		jumping = true;
+    }
+}
+
+// This function gets called when a key is pressed
+function keysPressed(e) {
+	// "p" for pause and play           
+	if(e.keyCode == 80){
+		if(!animating){
+			exitMenu();
+			animating = true;
+			requestAnimationFrame(doFrame);
+		} else {
+			animating = false;
+			displayMenu();
+		}
+		return;
+	}
+
+	// F11 to enter and exit fullscreen
+	if(e.keyCode == 122){
+		if(!fullscreen){
+			fullscreen = true;
+			document.requestFullscreen();
+		} else {
+			fullscreen = false
+			document.exitFullscreen();
+		}
+		return;
+	}
+
+	// F5 to refresh page
+	if(e.keyCode == 116){
+		window.location.reload(false); 
+		return
+	}
+	
+    // store an entry for every key pressed
+    keys[e.keyCode] = true;
+        // NB: prevent default browser behavior - disable during testing
+        //e.preventDefault();
+}
+
+function keysReleased(e) {
+    // mark keys that were released
+    keys[e.keyCode] = false;
+    if (e.keyCode == 90) {
+		jumping = false;
+	}
+	/// reverse model rotation animation
+	if(e.keyCode == 37){
+		while((0.3 - i) < 0.3 ){
+			i -= 0.1;
+		}
+		i=0;	// reset i so it can be used again
+	}
+}
+
+
+
+/*///////////////////////////////////////////////////////////////////////////////////
+	Reinitialize global variables
+	Called by restartGame
+	INPUT: none
+	OUTPUT: none
+////////////////////////////////////////////////////////////////////////////////////*/
+function reinitializeGlobals(){
+	scene = null;
+	mainCamera = null;
+	frameNumber = 0;
+	animating = false;
+	player = new THREE.Object3D();
+	keys = []; 								// records current keys being pressed
+	resetCameraFlag = false 				// flag to reset the camera position to original position
+	jumping = false;						// whether player is jumping or not
+	alpha = null;							// player stats tracking + model  object
+	gameOver = false; 						// updates to true when lives == 0
+	worldMap = null;                        // make global so it can be accessed by collision function
+	powerups = [];							// items providing certain powerups or "boosts" to the player for a short time when picked up
+	activePowerup = null;
+	collectibles = [];						// the items that the player needs to collect in order to progress to the next level
+	//var collectiblesLeft = 0;				// the number of collectibles left to collect. when this reaches zero, go to next level
+	mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
+	minimapCamera = null; 
+	worldMap = null;
+	//joshSucks = null; 						// he does
+	Score = 0;
+	i=0;
+}
+
+
+
 /*///////////////////////////////////////////////////////////////////////////////////
 	Restart game - reset all alpha variables, reload all models, respawn alpha at origin
 	Called by Crash when the player crashes and has no more lives, menuInteraction when the restart game option is chosen and collisions when all collectibles are found
@@ -656,6 +831,8 @@ function restartGame(){
 	console.log("game restarted");	
 }
 
+
+
 /*//////////////////////////////////////////////////////////////////////////
 	Reduce player Y speed for for gravity and make them crash if they touch the floor
 	Called by updateForFrame every frame
@@ -663,14 +840,15 @@ function restartGame(){
 	OUTPUT: returns false if the player crashes and true if they dont
 ///////////////////////////////////////////////////////////////////////////*/
 function putOnFloor() {
-	if(player.position.y > worldMap.floorHeight + alpha.getRadius() - 2) {	//check if player has reached the "floor" + some leeway
+	if(player.position.y > worldMap.floorHeight + alpha.getRadius() - 2) {			//check if player has reached the "floor" + some leeway
 		alpha.incSpeedY(-0.01);																		//if they have not, reduce speed (gravity)
 		return true;
-	} else {						//if they have, the player crashes
+	} else {																		//if they have, the player crashes
 		Crash();
 		return false;
 	}	
 }
+
 
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -723,13 +901,13 @@ function twoBoxCollision(box1, box2){
 /*///////////////////////////////////////////////////////////////////////////////// 
 	This function checks for collision of bounding boxes of alpha and the map buildings
 	Called by collisions and randomMoveArray
-	INPUT: object to check collision for
+	INPUT: object to check collision with
 	OUTPUT: object array of suspected collisions with input objects
 //////////////////////////////////////////////////////////////////////////////////*/
 function buildingBoxCollision( object ){
 	var suspectObjects = [];
 	var objectBox = new THREE.Box3();
-    objectBox.setFromObject( object );
+    objectBox.setFromObject( object );		//Computes the world-axis-aligned bounding box of an Object3D (including its children), accounting for the object's, and children's, world transforms
 
 	for(var i = 0; i < worldMap.buildingBoxes.length; i++){
 		if(twoBoxCollision(worldMap.buildingBoxes[i], objectBox)){
@@ -740,33 +918,27 @@ function buildingBoxCollision( object ){
 }
 
 
-// credit to Lee Stemkoski for his tutorial
-// insert link to page
-/*///////////////////////////////////////////////////////////////////////////////// 
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 	Function to check for collisions between player and buildings, collectibles and powerups
 	Called by updateForFrame and alpha.respawn
 	INPUT: none
 	OUTPUT: none
-//////////////////////////////////////////////////////////////////////////////////*/
+	credit: // https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/Collision-Detection.html
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 function  collisions() {
-	var originPoint = player.position.clone();	// players position
+	var originPoint = player.position.clone();					// players position
 	var suspectObjects = buildingBoxCollision(alpha);
 
 	for (var vertexIndex = 0; vertexIndex < alpha.geometry.vertices.length; vertexIndex++){		
 		var localVertex = alpha.geometry.vertices[vertexIndex].clone();
 		var globalVertex = localVertex.applyMatrix4( alpha.matrix );
 		var directionVector = globalVertex.sub( alpha.position );
-		
 		var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+		var BuildingCollisionResults = ray.intersectObjects( suspectObjects , true );
+		var PowerupsCollisionResults = ray.intersectObjects(powerups);
+		var CollectibleCollisionResults = ray.intersectObjects(collectibles);
 		
 		// Check building collisions
-		var BuildingCollisionResults = ray.intersectObjects( suspectObjects , true );
-		
-		// Check Powerups[] collisions
-			// TODO
-		var PowerupsCollisionResults = ray.intersectObjects(powerups);
-		
-		var CollectibleCollisionResults = ray.intersectObjects(collectibles);
 		if ( 
 			BuildingCollisionResults.length > 0 &&
 			BuildingCollisionResults[0].distance < directionVector.length() - 1 &&
@@ -776,7 +948,9 @@ function  collisions() {
 			Crash();
 			break;
 		}
-		//TODO: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray,and remove from scene (maybe with a fancy animation)
+
+		// Check Powerups[] collisions: if powerup 0,1,2 do stuff to alpha.stats, delete power up from powerupsarray, and remove from scene (maybe with a fancy animation):
+
 		if (PowerupsCollisionResults.length > 0 && PowerupsCollisionResults[0].distance < directionVector.length()){
 			//Check what type of powerup it was
 			if(PowerupsCollisionResults[0].object.type == powerupTypes["gun"]){
@@ -793,6 +967,7 @@ function  collisions() {
 			scene.remove(PowerupsCollisionResults[0].object);
 		}
 		
+		// Check the Collectibles[] collisions: much like the powerups check above:
 		if ( CollectibleCollisionResults.length > 0 && CollectibleCollisionResults[0].distance < directionVector.length() ){ 
 			console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
 			collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
@@ -819,31 +994,30 @@ Fucking Text!
 ///////////////////////////////////////////////////////////////////////////*/
 
 
-materials = [
-	new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } ), // front
-	new THREE.MeshPhongMaterial( { color: 0xffffff } ) // side
-];
 // get the font then run create text fn
+// kind of redundant
+// TODO: fix redundancy 
 function loadFont() {
-
 	var loader = new THREE.FontLoader();
-	loader.load( 'fonts/Etienne/helvetiker_regular.typeface.json', function ( response ) {
+	loader.load( 'fonts/Etienne/helvetiker_regular.typeface.js', function ( response ) {
 
-		font = response;
-		createText();
-		console.log("loadFont()");
+		font = response;		// This is simply the URL of the font
+		console.log("loadFont:" ,response);
+		createText();			// Calls the text_geometry making function
 
 	} );
-
 }
 
+
 // create text fn
+// note: I tried changing this to take in text text,height,size etc, but javascript didn't like that
+// main problem is returning the mesh...doesn't work out/ no time to think about it
 function createText() {
 	console.log("createText()");
-	textGeo = new THREE.TextGeometry( text, {
+	var textGeo = new THREE.TextGeometry( text, {			// This is where we actually pass in the required text.
 		font: font,
-		size: size,
-		height: height,
+		size: text_size,
+		height: text_height,
 		curveSegments: curveSegments
 	});
 
@@ -852,7 +1026,7 @@ function createText() {
 
 	// "fix" side normals by removing z-component of normals for side faces
 	// (this doesn't work well for beveled geometry as then we lose nice curvature around z-axis)
-	var triangleAreaHeuristics = 0.1 * ( height * size );
+	var triangleAreaHeuristics = 0.1 * ( text_height * text_size );
 
 	for ( var i = 0; i < textGeo.faces.length; i ++ ) {
 
@@ -878,40 +1052,55 @@ function createText() {
 				for ( var j = 0; j < face.vertexNormals.length; j ++ ) {
 
 					face.vertexNormals[ j ].copy( face.normal );
-
 				}
-			
 			}
-
 		}
-
 	}
 
 	var centerOffset = -0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
-
-	textMesh1 = new THREE.Mesh( textGeo, materials );
-
-	// bend the text - this took hours to figure out because all the docs and examples are deprecated - FUCK
-	// Had to modify a lib file (BendModifier.js)
+	
+	var Text_materials = [														
+	new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } ), 	// front material
+	new THREE.MeshPhongMaterial( { color: 0xffffff } ) 						// side material
+	];
+	textMesh1 = new THREE.Mesh( textGeo, Text_materials );
+	//////////////////////////////////////////////////////////////////////////////////
+	// Bend text
+	// Source: https://github.com/alexan0308/threejs/blob/master/examples/webgl_simple_modifiers.html
+	//////////////////////////////////////////////////////////////////////////////////
+	
 	var direction = new THREE.Vector3( 0, 0, -1 );
-	var axis =  new THREE.Vector3( 0, 1, 0 );
-	var angle = Math.PI / 2.5;
+	var axis =  new THREE.Vector3( 0, 1, 0 );		// axis to bend in
+	var angle = Math.PI / 3;
 	var modifier = new THREE.BendModifier();
 	modifier.set( direction, axis, angle ).modify( textMesh1.geometry );
+	text_object_container.add(textMesh1);
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	// Make text glow
+	// source: https://github.com/jeromeetienne/threex.geometricglow
+	//////////////////////////////////////////////////////////////////////////////////
 
-
-	group.add( textMesh1 );
-
-	// create a glowMesh to make the text glow like neon
 	var glowMesh	= new THREEx.GeometricGlowMesh(textMesh1);
-	group.add(glowMesh.object3d);
+	text_object_container.add(glowMesh.object3d);
 
-}
+	//////////////////////////////////////////////////////////////////////////////////
+	//		customize glow mesh if needed											//
+	//////////////////////////////////////////////////////////////////////////////////
+
+	var insideUniforms	= glowMesh.insideMesh.material.uniforms
+	insideUniforms.glowColor.value.set('hotpink')
+	var outsideUniforms	= glowMesh.outsideMesh.material.uniforms
+	outsideUniforms.glowColor.value.set('hotpink')
+	
+}	// end createText
+
 
 
 ///////////////////////////////////\				  //////////////////////////////
 //================================== end sub routines =============================
 ///////////////////////////////////////////////////////////////////////////////////
+
 
 
 /*///////////////////////////////////////////////////////////////////////////////// 

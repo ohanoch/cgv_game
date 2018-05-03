@@ -52,6 +52,13 @@ class Alpha extends THREE.Mesh{
 			console.log("respawning alpha");
 			var randomX = Math.random();
 			var randomZ = Math.random();
+			player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
+			// player.position.set(0,0,0);	// Leave this here for testing purposes
+			minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
+			collisions();
+			if(this.lives != currLives){
+				this.lives = currLives;
+			} else {
 			player.position.set(randomX * (worldMap.width / 2), 40, randomZ * (worldMap.depth / 2));
 			minimapCamera.position.set(randomX * (worldMap.width / 2), 40, randomZ * (worldMap.depth / 2));
 			if(buildingBoxCollision(player).length == 0){
@@ -68,11 +75,12 @@ class Alpha extends THREE.Mesh{
 			displayMenu( menusArr.startMenu );
 		}
 	}
+}
 	
 	
 //make sure alpha doesn't spawn on an object
 // this function gets called as a callback for when alpha finishes loading and for when map buildings get loaded
-	startup() {
+	startup(){
 		if(alphaDone && mapDone){
 			console.log("checking if alpha initialized on building");
 			this.respawn();

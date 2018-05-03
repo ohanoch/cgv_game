@@ -135,7 +135,7 @@ class Map {
 								worldMap.buildings.push( currObject );
 								scene.add( currObject );
 
-								//get geometry of object after it moved to get correct bounding box coordinats
+								//get geometry of object after it moved to get correct bounding box coordinates
 								var box = new THREE.Box3();
 								box.setFromObject( currObject );
 								worldMap.buildingBoxes.push(box);
@@ -154,4 +154,6 @@ class Map {
 		}
 
 	}
+
+
 }
