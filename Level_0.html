@@ -601,9 +601,7 @@ function exitMenu(){
 	for(var i = 0; i< menu.buttons.length; i++){
 		scene.remove(menu.buttons[i]);
 	}
-	if(menu == menusArr.pauseMenu){
-		scene.add(worldMap.floor);
-	}
+	scene.add(worldMap.floor);
 	
 	menu.isOpen = false;
 	document.removeEventListener("mousedown", menuInteraction);
@@ -679,9 +677,7 @@ function displayMenu(menu){
 
 		scene.add(menu.buttons[i]);
 	}
-	if(menu == menusArr.pauseMenu){
-		scene.remove(worldMap.floor);
-	}
+	scene.remove(worldMap.floor);
 
 	console.log("displaying menu...");
 
