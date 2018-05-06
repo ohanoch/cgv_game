@@ -42,63 +42,49 @@ var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// le
 				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
 				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerupsTypes, 
 				1, -10, -2, -0.01,	// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
-				lore); //lore for level story
+				window.innerHeight/5,window.innerHeight/5,lore); //minimapWidth, minimapHeight, lore for level story
 
-/* General mechanics variables */
-var canvas, renderer, scene, mainCamera; // Standard three.js requirements.
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+/* General mechanics variables */
+var canvas, renderer, scene, mainCamera; // Standard three.js requirements.
 var container, stats;
-
-var minimapCamera, minimapWidth = window.innerHeight/5, minimapHeight = window.innerHeight/5; //minimap variables
-
+var minimapCamera;  //minimap variables
 var controls;  											// An OrbitControls object that is used to implement
               											// rotation of the scene using the mouse.  (It actually rotates
                											// the camera around the scene.)
 
 /* flags for different instances */
 var fullscreen = false;
-
 var animating = false;  					// Set to true when an animation is in progress.
-
-var frameNumber = 0;  						// Frame number is advanced by 1 for each frame while animating.
-
-var player = new THREE.Object3D();
-
+var alpha_centered =true;							// used to recenter alpha avater after doing a rotation animation
 var keys = []; 								// records current keys being pressed
-
 var resetCameraFlag = false 				// flag to reset the camera position to original position
-
 var jumping = false;						// whether player is jumping or not
-
-var alpha;									// player stats tracking + model  object
-
 var alphaDone = false;
-
 var mapDone = false;
-
 var Score = 0;
-
 var collectibleCount = 0;
-
-var menusArr = {};
-
-var worldMap; 								// make global so it can be accessed by collision function
-
-var collideMeshArray = []; 					// array to store  all collidable mesh's (buildings + items)
-
-var powerups = [];							// items providing certain powerups or "boosts" to the player for a short time when picked up
 var activePowerup = null;
-
-var collectibles = [];						// the items that the player needs to collect in order to progress to the next level
-
+var crot = Math.PI;									// iterator for doing object rotation animation
 var mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
 
+/* Global object variables */
+var player = new THREE.Object3D();
+var alpha;									// player stats tracking + model  object
+var worldMap; 								// make global so it can be accessed by collision function
+
+/* Global object arrays */
+var menusArr = {};
+var collideMeshArray = []; 					// array to store  all collidable mesh's (buildings + items)
+var powerups = [];							// items providing certain powerups or "boosts" to the player for a short time when picked up
+var collectibles = [];						// the items that the player needs to collect in order to progress to the next level
+
+
+/* text sculputure*/
 var discoBall;
-
 var joshSucks;								// he does
-
 // for the text; there is no better way, sorry.
 var textMesh1;
 var font;
@@ -106,14 +92,9 @@ var text ;
 var text_height ;
 var text_size;
 var curveSegments;	
-//
-
-
 var text_object_container;			
 
-var crot = Math.PI;									// iterator for doing object rotation animation
 
-var alpha_centered =true;							// used to recenter alpha avater after doing a rotation animation
 // for menu class
 //var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
@@ -244,7 +225,7 @@ function render() {
 		//add objects to minimap so it will be easier to see
 		var removeObjects = addMinimapObjects();
 		// Render minimap camera in top right corner
-		cameraRender(minimapCamera, window.innerWidth - minimapWidth - 50, 20, minimapWidth, minimapHeight);
+		cameraRender(minimapCamera, window.innerWidth - level.minimapWidth - 50, 20, level.minimapWidth, level.minimapHeight);
 	
 		// remove objects from minimap
 		removeMinimapObjects(removeObjects);
@@ -601,9 +582,7 @@ function exitMenu(){
 	for(var i = 0; i< menu.buttons.length; i++){
 		scene.remove(menu.buttons[i]);
 	}
-	if(menu == menusArr.pauseMenu){
-		scene.add(worldMap.floor);
-	}
+	scene.add(worldMap.floor);
 	
 	menu.isOpen = false;
 	document.removeEventListener("mousedown", menuInteraction);
@@ -679,9 +658,7 @@ function displayMenu(menu){
 
 		scene.add(menu.buttons[i]);
 	}
-	if(menu == menusArr.pauseMenu){
-		scene.remove(worldMap.floor);
-	}
+	scene.remove(worldMap.floor);
 
 	console.log("displaying menu...");
 

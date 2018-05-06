@@ -13,7 +13,7 @@
 
 class Level {
 
-	constructor(levelNum, worldWidth, worldDepth, atmosphereHeight, alphaCameraDistance, startingLives, numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL, backgroundURL, numPowerups, numCollectibles, powerupTypes, alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ, lore) {
+	constructor(levelNum, worldWidth, worldDepth, atmosphereHeight, alphaCameraDistance, startingLives, numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL, backgroundURL, numPowerups, numCollectibles, powerupTypes, alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ, minimapWidth, minimapHeight,lore) {
 		
 		this.levelNum = levelNum;
 		this.worldWidth = worldWidth;
@@ -34,6 +34,8 @@ class Level {
 		this.alphaMaxSpeedZ = alphaMaxSpeedZ;
 		this.alphaMinSpeedZ  = alphaMinSpeedZ;
 		this.mapBuildingRatio = mapBuildingRatio;
+		this.minimapWidth = minimapWidth;
+		this.minimapHeight = minimapHeight;
 		this.lore = lore;
 	}
 
