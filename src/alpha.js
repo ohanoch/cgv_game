@@ -56,11 +56,6 @@ class Alpha extends THREE.Mesh{
 			// player.position.set(0,0,0);	// Leave this here for testing purposes
 			minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
 			collisions();
-			if(this.lives != currLives){
-				this.lives = currLives;
-			} else {
-			player.position.set(randomX * (worldMap.width / 2), 40, randomZ * (worldMap.depth / 2));
-			minimapCamera.position.set(randomX * (worldMap.width / 2), 40, randomZ * (worldMap.depth / 2));
 			if(buildingBoxCollision(player).length == 0){
 				console.log("alpha respawned to empty location");
 				break;
@@ -75,7 +70,6 @@ class Alpha extends THREE.Mesh{
 			displayMenu( menusArr.startMenu );
 		}
 	}
-}
 	
 	
 //make sure alpha doesn't spawn on an object
@@ -150,7 +144,4 @@ class Alpha extends THREE.Mesh{
 			this.speedZ = this.minSpeedZ;
 		}
 	}
-	
-	
-	
 }
