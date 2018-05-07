@@ -16,13 +16,15 @@
 <script src="libs\BendModifier.js"></script>
 <script src="libs\dat.gui.min.js"></script>
 
+<script src="src\classes\level.js"></script>
+<script src="src\classes\alpha.js"></script>
+<script src="src\classes\map.js"></script>
+<script src="src\classes\menu.js"></script>
+<script src="src\classes\powerup.js"></script>
+<script src="src\classes\collectible.js"></script>
 
-<script src ="src\level.js"></script>
-<script src="src\alpha.js"></script>
-<script src="src\map.js"></script>
-<script src="src\menu.js"></script>
-<script src="src\powerup.js"></script>
-<script src="src\collectible.js"></script>
+<script src="src\render.js"></script>
+<script src="src\menuFunctions.js"></script>
 
 <script>
 
@@ -101,7 +103,7 @@ var text_object_container;
 
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-function createMenus(){
+/**function createMenus(){
 	var startMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
 			"textures/skyboxes/ulam_words/", 
@@ -116,122 +118,9 @@ function createMenus(){
 			["exit_button", "restart_button", "resume_button"]
 		);
 		menusArr.pauseMenu = pauseMenu;
-}
+} */
 
 
-
-/* /////////////////////////////////////////////////////////////
-	Renders the camera given as input
-	Called by render
-	INPUT: camera to render, left and top are top left corner to start rendering from, width and height are size arguments of renderer
-	OUTPUT: none
- *//////////////////////////////////////////////////////////////
-function cameraRender( camera, left, top, width, height ){
-	
-	renderer.setViewport( left, top, width, height );
-	renderer.setScissor( left, top, width, height );
-	camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
-}
-
-
-
-/* /////////////////////////////////////////////////////////////
-	Places object markers above given object on minimap
-	Called by addMinimapObjects
-	INPUT: objectArray is an array of objects to put objects above, item is what to place above the object
-	OUTPUT: array of objects added to scene
- *//////////////////////////////////////////////////////////////
-function putAboveObject(objectArray, item){
-	var newItemArray = new Array();
-	for (var i = 0; i < objectArray.length; i++){
-		var currItem = item.clone();
-		currItem.translateX(objectArray[i].position.x - currItem.position.x);
-		currItem.translateZ(objectArray[i].position.z - currItem.position.z);
-		currItem.translateY(level.atmosphereHeight * 2);
-		scene.add(currItem);
-
-		newItemArray.push(currItem);
-	}
-	return newItemArray;
-}
-
-
-
-/* /////////////////////////////////////////////////////////////
-	Adds minimap objects to scene using putAboveObject
-	Called by render
-	INPUT: none
-	OUTPUT: array of objects to be removed from the scene after the minimap view is rendered
- *//////////////////////////////////////////////////////////////
-function addMinimapObjects(){
-	var removeObjects = new Array();
-
-	//add yellow sphere for player
-	var alphaMarker = new THREE.Mesh(
-		new THREE.SphereGeometry( 20 ),
-		new THREE.MeshBasicMaterial( {color: 0xffff00} )	
-	);
-	removeObjects = removeObjects.concat(putAboveObject(new Array(player), alphaMarker));
-
-	// add red cube for powerups
-	var minimapPowerups = [];
-	var powerupCube = new THREE.Mesh(
-		new THREE.BoxGeometry( 20, 20, 20 ),
-		new THREE.MeshBasicMaterial( {color: 0xff0000} )
-	);
-	removeObjects = removeObjects.concat(putAboveObject(powerups, powerupCube));
-
-	//add blue dodecahedron for collectibles
-	var minimapCollectibles = [];
-	var collectibleDodec = new THREE.Mesh(
-		new THREE.DodecahedronGeometry( 20 ),
-		new THREE.MeshBasicMaterial( {color: 0x0000ff} )
-	);
-	removeObjects = removeObjects.concat(putAboveObject(collectibles, collectibleDodec));
-
-	return removeObjects;
-}
-
-
-/* /////////////////////////////////////////////////////////////
-	Removes given objects from the scene
-	Called by render
-	INPUT: array of objects to be removed
-	OUTPUT: none
- *//////////////////////////////////////////////////////////////
-function removeMinimapObjects( removeObjects ){
-		for(var i = 0; i < removeObjects.length; i++){
-			scene.remove(removeObjects[i]);
-		}
-}
-
-
-
-/* /////////////////////////////////////////////////////////////
-	The render function draws the scene.
-	Called every frame and by init
-	INPUT: none
-	OUTPUT: none
- *//////////////////////////////////////////////////////////////
-function render() {
-
-	// Render main camera on entire screen
-	cameraRender (mainCamera, 0, 0, window.innerWidth, window.innerHeight)	
-
-	//if paused don't show minimap
-	if(animating){
-		scene.remove(worldMap.atmosphere);
-		//add objects to minimap so it will be easier to see
-		var removeObjects = addMinimapObjects();
-		// Render minimap camera in top right corner
-		cameraRender(minimapCamera, window.innerWidth - level.minimapWidth - 50, 20, level.minimapWidth, level.minimapHeight);
-	
-		// remove objects from minimap
-		removeMinimapObjects(removeObjects);
-		scene.add(worldMap.atmosphere)
-	}
-}
 
 /* /////////////////////////////////////////////////////////////
 	Creates random lights, Amount is specified when creating level. Lights are Point lights with shadows enabled
@@ -548,160 +437,6 @@ function resetCameraPosition(){
 		resetCameraFlag = false;
 	}
 }
-
-
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< M E N U   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-/*///////////////////////////////////////////////////////////////////////////////// 
-	Returns the current open menu
-	Called by menuInteraction and keysPressed
-	INPUT: none
-	OUTPUT: none
-//////////////////////////////////////////////////////////////////////////////////*/
-function openMenu(){
-	var menu;
-	if(menusArr.startMenu.isOpen){
-		menu = menusArr.startMenu;
-	} else {
-		menu = menusArr.pauseMenu;
-	}
-	return menu;
-}
-
-
-/*///////////////////////////////////////////////////////////////////////////////// 
-	Exits the menu.
-	Called by exitMenu and menuInteraction
-	INPUT: none
-	OUTPUT: none
-//////////////////////////////////////////////////////////////////////////////////*/
-function exitMenu(){
-	var menu = openMenu();
-	
-	console.log("exiting menu");
-	scene.remove(menu.skybox);
-	for(var i = 0; i< menu.buttons.length; i++){
-		scene.remove(menu.buttons[i]);
-	}
-	scene.add(worldMap.floor);
-	
-	menu.isOpen = false;
-	document.removeEventListener("mousedown", menuInteraction);
-
-	if(menu == menusArr.startMenu){
-		window.alert(level.lore);
-	}
-}
-
-
-
-/*y///////////////////////////////////////////////////////////////////////////////// 
-	Uses raycasting to check which menu box the user clicks
-	Callback function for mouseclick event listener in displayMenu
-	INPUT: click event
-	OUTPUT: none
-//////////////////////////////////////////////////////////////////////////////////*/
-function menuInteraction(e){
-	var raycaster = new THREE.Raycaster();
-	var menu = openMenu();
-	//var r = window.getBoundingClientRect();
-	var x = e.clientX							// take in click coordinates
-	var y = e.clientY	// 
-
-	var a = 2 * x / window.innerWidth - 1; // convert canvas pixel coords to clip coords
-	var b = 1 - 2 * y / window.innerHeight;
-
-	raycaster.setFromCamera( new THREE.Vector2(a,b), mainCamera );		//COMMENT
-
-	var intersections = raycaster.intersectObjects( menu.buttons, true );
-	if(intersections.length >= 1){
-		if(intersections[0].object.name == "restart_button"){
-			console.log("restarting game");
-			exitMenu();
-			restartGame();
-		} else if(intersections[0].object.name == "start_button"){
-			console.log("starting game");
-			exitMenu();
-			animating = true;
-			requestAnimationFrame(doFrame);
-		} else if (intersections[0].object.name == "resume_button"){
-			console.log("resuming game");
-			exitMenu();
-			animating = true;
-			requestAnimationFrame(doFrame);
-		} else if(intersections[0].object.name == "exit_button"){
-			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
-		} else if(intersections[0].object.name == "controls_button"){
-			window.alert("P - Play/Pause\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe");
-		} else if(intersections[0].object.name == "credits_button"){
-			window.alert("This game was technically made by Avi Bank, Niambh Blundell, Or Hanoch but..\nIt was actually brought to life by the awesome Dr. Richard Klein, Phd, who taught us everything we know and inspired us to be better people. Everything we Do we owe to him.\nWE LOVE YOU RICHARD!");
-		}
-	}
-}
-
-/*////////////////////////////////////////////////////////////////////////////////
-	Display pause menu, sets position of menu skybox and buttons and places them in the scene, makes an event listener for mouseclicks
-	Called by keysPressed when the 'p' key is pressed
-	INPUT: none
-	OUTPUT: none
-/////////////////////////////////////////////////////////////////////////////////*/
-function displayMenu(menu){
-	menu.isOpen = true;
-	menu.skybox.position.x = player.position.x;
-	menu.skybox.position.y = player.position.y;
-	menu.skybox.position.z = player.position.z;
-	scene.add(menu.skybox);
-
-	for(var i = 0; i < menu.buttons.length; i++){
-		menu.buttons[i].position.x = player.position.x + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-		menu.buttons[i].position.y = player.position.y +  Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-		menu.buttons[i].position.z = player.position.z + Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * ((level.alphaCameraDistance * 2 - 5) / 2);
-
-		scene.add(menu.buttons[i]);
-	}
-	scene.remove(worldMap.floor);
-
-	console.log("displaying menu...");
-
-	document.addEventListener("mousedown", menuInteraction, false);
-}
-
-//END OF MENU FUNCTIONS
-
-
-
-
-
-/*///////////////////////////////////////////////////////////////////////////////////
-	Reinitialize global variables
-	Called by restartGame
-	INPUT: none
-	OUTPUT: none
-////////////////////////////////////////////////////////////////////////////////////*/
-function reinitializeGlobals(){
-	scene = null;
-	mainCamera = null;
-	frameNumber = 0;
-	animating = false;
-	player = new THREE.Object3D();
-	keys = []; 								// records current keys being pressed
-	resetCameraFlag = false 				// flag to reset the camera position to original position
-	jumping = false;						// whether player is jumping or not
-	alpha = null;							// player stats tracking + model  object
-	gameOver = false; 						// updates to true when lives == 0
-	worldMap = null;                        // make global so it can be accessed by collision function
-	powerups = [];							// items providing certain powerups or "boosts" to the player for a short time when picked up
-	activePowerup = null;
-	collectibles = [];						// the items that the player needs to collect in order to progress to the next level
-	//var collectiblesLeft = 0;				// the number of collectibles left to collect. when this reaches zero, go to next level
-	mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
-	minimapCamera = null; 
-	worldMap = null;
-	//joshSucks = null; 						// he does
-	Score = 0;
-	i=0;
-}
-
-
 
 /*///////////////////////////////////////////////////////////////////////////////////
 	Restart game - reset all alpha variables, reload all models, respawn alpha at origin
