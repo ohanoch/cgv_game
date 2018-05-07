@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<title>_alpha_</title>
+<script src="libs\three.js"></script>
+<script src="libs\OrbitControls.js"></script>
+<script src="libs\stats.min.js"></script>
+<script src="libs\OBJLoader.js"></script>
+<script src="libs\MTLLoader.js"></script>
+<script src="libs\threex.cubecamera.js"></script>
+<script src="libs\threex.atmospherematerial.js"></script>
+<script src="libs\threex.atmospherematerialdatgui.js"></script>
+<script src="libs\threex.dilategeometry.js"></script>
+<script src="libs\threex.geometricglowmesh.js"></script>
+<script src="libs\GeometryUtils.js"></script>
+<script src="libs\BendModifier.js"></script>
+<script src="libs\dat.gui.min.js"></script>
+
+<script src="src\classes\level.js"></script>
+<script src="src\classes\alpha.js"></script>
+<script src="src\classes\map.js"></script>
+<script src="src\classes\menu.js"></script>
+<script src="src\classes\powerup.js"></script>
+<script src="src\classes\collectible.js"></script>
+
+<script src="src\render.js"></script>
+<script src="src\mouseKeyboard.js"></script>
+<script src="src\createWorldFunctions.js"></script>
+<script src="src\death.js"></script>
+<script src="src\menuFunctions.js"></script>
+<script src="src\collisions.js"></script>
+<script src="src\fuckingText.js"></script>
+<script src="src\customSubroutines.js"></script>
+
+<script>
+
+"use strict";
+
+var currLevel = 0; //level variable mostly for display purposes at the moment
+var lore;
+if (currLevel == 0){
+	lore = "The Centaurians are an advanced microbiological race that inhabits the Alpha Centauri star system.\n In order to survive the harsh conditions they have evolved the ability to shapeshift.\n They posses advanced technologies beyond human comprehension, except for emacs, they love emacs! Proxima Centauri, aka PC, is a red dwarf star that serves as the prison for the Alpha Centauri system.\n Once a being arrives in PC its identity is lost, and is given the name __alpha__\n\n We play as _alpha_, a falsely imprisoned centorian.\n alpha was accused of killing Bambi’s mother. Previous to _alpha_’s imprisonment _alpha_ and Walt Disney were lovers.\n When Walt discovered _alpha_ killed Bambi’s mother it was too much for him, he swore to never talk to alpha again. (Walt Disney was reincarnated as a centaurian after he was cryogenically frozen, which can be a side-effect of cryogenics).\n _alpha_ is on a mission to escape PC and tell Walt the truth and win his love back."
+}
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+var canvas, renderer, scene, mainCamera; 	// Standard three.js requirements.
+var currLevel = 0; 							//level variable mostly for display purposes at the moment
+var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
+				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
+				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerupsTypes, 
+				1, -10, -2, -0.01,	// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
+				window.innerHeight/5,window.innerHeight/5,lore); //minimapWidth, minimapHeight, lore for level story
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+/* General mechanics variables */
+var canvas, renderer, scene, mainCamera; // Standard three.js requirements.
+var container, stats;
+var minimapCamera;  //minimap variables
+var controls;  											// An OrbitControls object that is used to implement
+              											// rotation of the scene using the mouse.  (It actually rotates
+               											// the camera around the scene.)
+
+/* flags for different instances */
+var fullscreen = false;
+var animating = false;  					// Set to true when an animation is in progress.
+var alpha_centered =true;							// used to recenter alpha avater after doing a rotation animation
+var keys = []; 								// records current keys being pressed
+var resetCameraFlag = false 				// flag to reset the camera position to original position
+var jumping = false;						// whether player is jumping or not
+var alphaDone = false;
+var mapDone = false;
+var Score = 0;
+var collectibleCount = 0;
+var activePowerup = null;
+var crot = Math.PI;									// iterator for doing object rotation animation
+var mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
+
+/* Global object variables */
+var player = new THREE.Object3D();
+var alpha;									// player stats tracking + model  object
+var worldMap; 								// make global so it can be accessed by collision function
+
+/* Global object arrays */
+var menusArr = {};
+var collideMeshArray = []; 					// array to store  all collidable mesh's (buildings + items)
+var powerups = [];							// items providing certain powerups or "boosts" to the player for a short time when picked up
+var collectibles = [];						// the items that the player needs to collect in order to progress to the next level
+
+
+/* text sculputure*/
+var discoBall;
+var joshSucks;								// he does
+// for the text; there is no better way, sorry.
+var textMesh1;
+var font;
+var text ;
+var text_height ;
+var text_size;
+var curveSegments;	
+var text_object_container;			
+
+
+// for menu class
+//var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
+
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+/* /////////////////////////////////////////////////////////////
+	Creates the world map, lights, cameras, player and collectibles and powerups.
+	Called by restartGame and init.
+	INPUT: none
+	OUTPUT: none
+ *//////////////////////////////////////////////////////////////
+function createWorld() {
+    renderer.setClearColor("black"); // Background color for scene.
+    scene = new THREE.Scene();
+    scene.add(player);
+  
+	createMenus();
+
+
+    // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
+    mainCamera = new THREE.PerspectiveCamera(
+		30, 
+		window.innerWidth/window.innerHeight, 
+		0.1, 
+		level.alphaCameraDistance * 20
+	);
+  	mainCamera.position.z = level.alphaCameraDistance;
+  	player.add(mainCamera);
+
+
+	//-------------------------------------------- LIGHTING ------------------------------------------------
+	createRandomLights();
+	var viewLight = new THREE.PointLight(0xff00ff, 1);
+	player.add(viewLight);
+	viewLight.position.z = level.alphaCameraDistance;
+    
+
+	//------------------------------------------ MINIMAP ----------------------------------------------
+	minimapCamera = new THREE.OrthographicCamera(		// Orthographic camera does not change according to distance, which is what we want
+	    window.innerHeight / -5,						// Left
+		window.innerHeight / 5,							// Right
+    	window.innerHeight / 5,							// Top
+    	window.innerHeight / -5,						// Bottom
+    	-3 * level.atmosphereHeight,					// Near 
+    	10000 );           								// Far 
+	minimapCamera.up = new THREE.Vector3(0,0,-1);		// COMMENT
+	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );	// COMMENT
+	scene.add(minimapCamera);							// Add minimap camera to scene
+
+
+
+    //---------------------------------- CREATE THE WORLD ------------------------------------------- 
+	worldMap = new Map(level.worldWidth, level.worldDepth, level.atmosphereHeight, level.floorTextureURL, level.backgroundURL, level.buildingModelURLs) //width, height, atmosphereHight, textureURL, skyboxDirectory
+
+	scene.add(worldMap.floor);
+	scene.background = worldMap.background;
+	scene.add(worldMap.atmosphere);	
+	//add buildings to scene
+	worldMap.createBuildings(level.mapBuildingRatio); 
+
+	for (var i = 0; i < worldMap.buildings.length; i++){
+		scene.add(worldMap.buildings[i]);
+	}
+
+
+	
+    //---------------------------------- Dynamic Sculpture -------------------------------------------
+    // TODO: try cubecamera on lab computers
+	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
+	
+	joshSucks = new THREE.Object3D();		// Sculpture object
+
+	// Make a reflective sphere (only reflects skybox, at the moment)
+	var geometry = new THREE.SphereGeometry(5, 32, 16);
+	var material = new THREE.MeshPhongMaterial({
+    color   : 'chrome',
+	envMap 	: scene.background
+	});
+	discoBall = new THREE.Mesh(geometry, material); 
+	discoBall.position.set(0,0,0);	// centre obj coords of sphere
+	joshSucks.add(discoBall);
+		
+
+//////////////////////////////////////////////////////////////////////////////////
+//		add  text	 														//
+///	///////////////////////////////////////////////////////////////////////////////
+	text = "JOSH  SUCKS";
+	text_height = 0.5;
+	text_size = 2;
+	curveSegments = 4;
+	font = undefined;
+		
+	text_object_container = new THREE.Group();	
+	text_object_container.position.set(-8,0,7);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely 
+	loadFont();
+
+	joshSucks.add(text_object_container);
+	joshSucks.rotateZ(0.2);
+	var temp_test = player.position.clone();
+	joshSucks.position.set(3,3,-2);
+	scene.add(joshSucks);
+
+
+
+	//----------------------------------- CREATE THE PLAYER --------------------------------------------
+
+	// alpha is created by modelLoader function and added to player
+	
+	var loader = new THREE.JSONLoader();					// create loader for .js models
+
+	loader.load(level.alphaModelURL, modelLoader);			// load model and call model_loader
+	
+//------------------------------------- CREATE POWERUPS -----------------------------------------------
+	createPowerups();
+//--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
+	createCollectibles();
+
+} // end function createWorld()
+
+
+
+/*//////////////////////////////////////////////////////////////////////////
+	Model Loader function for alpha object. Creates alpha, places it in the scene and sets up animation
+	Callback function for JSON loader in createWorld()
+	INPUT: THREE geometry and material objects
+	OUTPUT: none
+///////////////////////////////////////////////////////////////////////////*/
+function modelLoader(geometry, materials) {
+
+	var material = new THREE.MeshLambertMaterial( {
+        vertexColors: THREE.FaceColors,  			// use colors from the geometry
+        morphTargets: true							// for animation
+    });
+	alpha = new Alpha(geometry,material, 1);		// create alpha object
+	
+// TRANSFORMS
+	alpha.scale.set(0.05,0.05,0.05);
+	alpha.position.set(0,0,0);
+	alpha.rotateY(Math.PI);
+	alpha.castShadow = true;
+	player.add(alpha);								// add alpha to player
+	player.translateY(10);							// move player so that alpha doesn't crash on game start
+
+	alpha.geometry.computeBoundingBox();			// Get bounding box for model, for doing collisions
+	alphaDone = true;
+	alpha.startup();
+
+
+// ANIMATION STUFF
+	mixer = new THREE.AnimationMixer( alpha );
+	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
+    var animationAction = mixer.clipAction(clip);
+    animationAction.setDuration(1);
+    animationAction.play(); 
+	render();
+}
+
+// END OF INITIALISATION
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Updates frame by moving player, moving minimap camera, crashing player if they move above atmosphere or below floor, update animations, increment score and check for collisions
+	Called by doFrame
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function updateForFrame() {
+
+	//Move player backwards or forwards by their Z velocity
+    player.translateZ(alpha.getSpeedZ());	
+
+    //Move player up or down by their Y velocity
+	player.translateY(alpha.getSpeedY());
+
+	// move minimap camera on x,z axis according to player
+	// minimap height stays constant right and captures from right bellow the atmosphere
+	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);	
+
+	// t to stop gravity, for testing
+	if(keys[84]){
+		alpha.setMinSpeedY(0);
+	}
+
+	// Put player on floor if they aren't already on it.
+	if(!putOnFloor()){
+		return;
+	}
+
+	//check for death by atmosphere (lasers) (height) + some leeway
+	if(player.position.y > level.atmosphereHeight + 1){
+		Crash();
+		return;
+	}
+
+	// Slowly moving the camera back behind _alpha_
+	if (resetCameraFlag){
+		resetCameraPosition();
+	}
+	
+	// Animate the avatar model to rotate back to center in it's z-axis, after banking
+    reCenterAlpha();
+
+	// Animate power-ups
+	for(var i = 0; i < powerups.length; i++){
+		powerups[i].animate();
+	} 
+	
+//check if a power has been activated
+	if(activePowerup != null) {
+		if(activePowerup.getExpiration() < 0) {
+			activePowerup.deactivatePower();
+			activePowerup = null;
+		} else {
+			activePowerup.decrementExpiration();
+		}
+		
+	}
+	
+	// animate collectibles
+	for(var j = 0; j < collectibles.length; j++) {
+		collectibles[j].animate();
+	}
+
+	// update model animation
+	if(mixer) {
+		mixer.update(0.02);
+	}
+
+	// camera can't got below floor
+	if(new THREE.Vector3().setFromMatrixPosition(mainCamera.matrixWorld).y < worldMap.floorHeight + 0.1){
+		mainCamera.position.y = worldMap.floorHeight + 1.1;
+	}
+	
+	// Summon keyboard control lookups in one line.
+	keyCheck(); 		
+
+	//Collision
+	collisions();
+	if(alpha == null){
+		return;
+	}
+
+	//animate josh sucks
+	joshSucks.rotateY(Math.sin(Math.PI/6));
+
+	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
+	//cubeCamera.update(renderer, scene);
+	
+	// Score update: TODO: ut in function and tidy up
+	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
+		Score++;
+	} else {
+		Score = Score - 5;
+	}
+
+ 	document.getElementById("s1").innerHTML = "Score: " + Score;
+ 	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
+
+}
+
+
+
+/*///////////////////////////////////////////////////////////////////////////////// 
+	Drives the animation, called by system through requestAnimationFrame()
+	Called by itself, exitMenu and keysPressed
+	INPUT: none
+	OUTPUT: none
+//////////////////////////////////////////////////////////////////////////////////*/
+function doFrame() {
+    if (animating) {
+        updateForFrame();
+        render();
+		stats.update();
+        requestAnimationFrame(doFrame);
+    }
+}
+
+
+ /*/////////////////////////////////////////////////////////////////////////////////////
+	Creates the renderer, container for stats, scene object, calls createWorld and installOrbitControls. Renders initial view of the scene
+	Called by onload event
+	INPUT: none
+	OUTPUT: none
+ //////////////////////////////////////////////////////////////////////////////////////*/
+function init() {
+    try {
+		container = document.getElementById( 'container' );
+		document.getElementById("s0").innerHTML = "Level: " + level.levelNum;
+		renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		renderer.shadowMap.enabled = true;
+		renderer.setScissorTest( true ); //important for minimap not to take control of entire screen even though it only occupies a corner
+		//renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
+		container.appendChild( renderer.domElement );
+
+		stats = new Stats();
+		container.appendChild( stats.dom );
+    }
+    catch (e) {
+        document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
+                e + "</b>";
+        return;
+    }
+    createWorld();
+    installOrbitControls();
+
+	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
+	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
+    render();
+}
+
+</script>
+
+<!-- CSS -->
+<style>
+.container {
+    position: relative;
+    text-align: center;
+    color: black;
+}
+
+.bottom-left {
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+}
+
+.top-left {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+}
+
+.top-right {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+}
+
+.bottom-right {
+    position: absolute;
+    bottom: 8px;
+    right: 16px;
+}
+
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.text-block {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color:rgba(192,192,192,0.5);
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+</style>
+
+
+</head>
+<body onload="init()">
+
+
+	<noscript>
+   		<p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
+	</noscript>
+
+	<p style="color:#AA0000; font-weight: bold" id="message"> </p>
+ 	<div class="container">
+		<div id="container"></div>
+	  	<div class="text-block">
+	    	<h4>Stats</h4>
+	    	<p id="s0"></p>
+	    	<p id="s1">Score: NaN </p>
+	    	<p id="s2">Lives: - / - </p>
+	    </div>
+	</div>
+
+</body>
+</html>
