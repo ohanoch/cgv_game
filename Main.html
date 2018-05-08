@@ -61,6 +61,7 @@ var minimapCamera;  //minimap variables
 var controls;  											// An OrbitControls object that is used to implement
               											// rotation of the scene using the mouse.  (It actually rotates
                											// the camera around the scene.)
+var listener, crashSound, generalSound;  //sound variables
 
 /* flags for different instances */
 var fullscreen = false;
@@ -121,9 +122,8 @@ function createWorld() {
     scene = new THREE.Scene();
 	scene.fog = new THREE.Fog(0xffffff, level.alphaCameraDistance * 15, level.alphaCameraDistance * 20);
     scene.add(player);
-  
-	createMenus();
 
+	createMenus();
 
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     mainCamera = new THREE.PerspectiveCamera(
@@ -135,6 +135,26 @@ function createWorld() {
   	mainCamera.position.z = level.alphaCameraDistance;
   	player.add(mainCamera);
 
+    // -------------------------------------- MAKE SOUND -------------------------------------
+	// create an AudioListener and add it to the camera
+	listener = new THREE.AudioListener();
+	mainCamera.add( listener );
+
+	// create a global audio source
+	crashSound = new THREE.Audio( listener );
+	generalSound = new THREE.Audio( listener );
+	// load a sound and set it as the Audio object's buffer
+	var audioLoader = new THREE.AudioLoader();
+	audioLoader.load( 'sounds/haha.wav', function( buffer ) {
+		crashSound.setBuffer( buffer );
+		crashSound.setVolume( 0.5 );
+	});
+	audioLoader.load( 'sounds/rainforest_ambience.wav', function( buffer ) {
+		generalSound.setBuffer( buffer );
+		generalSound.setLoop( true );
+		generalSound.setVolume( 0.5 );
+		generalSound.play();
+	});
 
 	//-------------------------------------------- LIGHTING ------------------------------------------------
 	createRandomLights();
