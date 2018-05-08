@@ -44,7 +44,6 @@ if (currLevel == 0){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-var canvas, renderer, scene, mainCamera; 	// Standard three.js requirements.
 var currLevel = 0; 							//level variable mostly for display purposes at the moment
 var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
 				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
@@ -120,6 +119,7 @@ var text_object_container;
 function createWorld() {
     renderer.setClearColor("black"); // Background color for scene.
     scene = new THREE.Scene();
+	scene.fog = new THREE.Fog(0xffffff, level.alphaCameraDistance * 15, level.alphaCameraDistance * 20);
     scene.add(player);
   
 	createMenus();
