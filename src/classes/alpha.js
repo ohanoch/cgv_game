@@ -42,7 +42,8 @@ class Alpha extends THREE.Mesh{
 		this.maxSpeedZ = level.alphaMaxSpeedZ;
 		this.minSpeedZ = level.alphaMinSpeedZ;
 		this.jumping = false;
-		
+		this.rotation.set(Math.PI,0,Math.PI);	
+	
 		console.log("alpha reset");
 	}
 	
