@@ -90,6 +90,22 @@ function keysPressed(e) {
 		}
 		return;
 	}
+	
+	// "m" for mute and unmute ofo sound
+	if(e.keyCode == 77){
+		if(mute == true){
+			mute = false;
+			if (openMenu() != null){
+				pauseSound.play();
+			} else {
+				generalSound.play();
+			}
+		} else {
+			mute = true;
+			generalSound.pause();
+			pauseSound.pause();
+		}
+	}
 
 	// F11 to enter and exit fullscreen
 	if(e.keyCode == 122){
