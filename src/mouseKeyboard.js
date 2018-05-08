@@ -80,13 +80,18 @@ function keyCheck(){
 function keysPressed(e) {
 	// "p" for pause and play           
 	if(e.keyCode == 80){
-		if(!animating){
+		if(openMenu() != null){
 			exitMenu();
 			animating = true;
 			requestAnimationFrame(doFrame);
 		} else {
-			animating = false;
-			displayMenu(menusArr.pauseMenu);
+			if(animating == true){
+				animating = false;
+				displayMenu(menusArr.pauseMenu);
+			} else {
+				animating = true;
+				requestAnimationFrame(doFrame);
+			}
 		}
 		return;
 	}
