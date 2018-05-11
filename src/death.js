@@ -39,6 +39,9 @@ function putOnFloor() {
 	OUTPUT: none
 ///////////////////////////////////////////////////////////////////////////*/
 function Crash() {
+	//play crash sound
+	crashSound.play();
+
 	// Update Alpha stats
 	alpha.lives -= 1;
 	
@@ -55,4 +58,5 @@ function Crash() {
 		alpha.respawn();
 	}
 }
+
 

@@ -44,7 +44,6 @@ if (currLevel == 0){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-var canvas, renderer, scene, mainCamera; 	// Standard three.js requirements.
 var currLevel = 0; 							//level variable mostly for display purposes at the moment
 var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
 				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
@@ -62,6 +61,7 @@ var minimapCamera;  //minimap variables
 var controls;  											// An OrbitControls object that is used to implement
               											// rotation of the scene using the mouse.  (It actually rotates
                											// the camera around the scene.)
+var listener, crashSound, generalSound, pauseSound;  //sound variables
 
 /* flags for different instances */
 var fullscreen = false;
@@ -77,6 +77,7 @@ var collectibleCount = 0;
 var activePowerup = null;
 var crot = Math.PI;									// iterator for doing object rotation animation
 var mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
+var mute = false;
 
 /* Global object variables */
 var player = new THREE.Object3D();
@@ -96,8 +97,8 @@ var joshSucks;								// he does
 // for the text; there is no better way, sorry.
 var textMesh1;
 var font;
-var text ;
-var text_height ;
+var text;
+var text_height;
 var text_size;
 var curveSegments;	
 var text_object_container;			
@@ -120,10 +121,10 @@ var text_object_container;
 function createWorld() {
     renderer.setClearColor("black"); // Background color for scene.
     scene = new THREE.Scene();
+	scene.fog = new THREE.Fog(0xffffff, level.alphaCameraDistance * 15, level.alphaCameraDistance * 20);
     scene.add(player);
-  
-	createMenus();
 
+	createMenus();
 
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     mainCamera = new THREE.PerspectiveCamera(
@@ -135,7 +136,17 @@ function createWorld() {
   	mainCamera.position.z = level.alphaCameraDistance;
   	player.add(mainCamera);
 
+    // -------------------------------------- MAKE SOUND -------------------------------------
+	// create an AudioListener and add it to the camera
+	listener = new THREE.AudioListener();
+	mainCamera.add( listener );
 
+	// create a global audio source
+	crashSound = new THREE.Audio( listener );
+	generalSound = new THREE.Audio( listener );
+	pauseSound = new THREE.Audio( listener );
+	
+	addSounds();
 	//-------------------------------------------- LIGHTING ------------------------------------------------
 	createRandomLights();
 	var viewLight = new THREE.PointLight(0xff00ff, 1);

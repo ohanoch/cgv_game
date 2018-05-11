@@ -35,8 +35,10 @@ function openMenu(){
 	var menu;
 	if(menusArr.startMenu.isOpen){
 		menu = menusArr.startMenu;
-	} else {
+	} else if(menusArr.pauseMenu.isOpen){
 		menu = menusArr.pauseMenu;
+	} else {
+		menu = null;
 	}
 	return menu;
 }
@@ -63,6 +65,13 @@ function exitMenu(){
 
 	if(menu == menusArr.startMenu){
 		window.alert(level.lore);
+	}
+
+	//change sounds to game sounds
+	if(mute == false){
+		console.log("changing sounds to game sounds");
+		generalSound.play();
+		pauseSound.pause();
 	}
 }
 
@@ -105,7 +114,7 @@ function menuInteraction(e){
 		} else if(intersections[0].object.name == "exit_button"){
 			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
 		} else if(intersections[0].object.name == "controls_button"){
-			window.alert("P - Play/Pause\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe");
+			window.alert("P - Play/Pause\nM - mute/unmute\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe");
 		} else if(intersections[0].object.name == "credits_button"){
 			window.alert("This game was technically made by Avi Bank, Niambh Blundell, Or Hanoch but..\nIt was actually brought to life by the awesome Dr. Richard Klein, Phd, who taught us everything we know and inspired us to be better people. Everything we Do we owe to him.\nWE LOVE YOU RICHARD!");
 		}
@@ -133,6 +142,13 @@ function displayMenu(menu){
 		scene.add(menu.buttons[i]);
 	}
 	scene.remove(worldMap.floor);
+
+	//change sounds
+	if(mute == false){
+		console.log("changing sounds to pause sounds");
+		generalSound.pause();
+		pauseSound.play();
+	}
 
 	console.log("displaying menu...");
 

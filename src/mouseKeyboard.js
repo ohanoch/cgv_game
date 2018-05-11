@@ -80,15 +80,36 @@ function keyCheck(){
 function keysPressed(e) {
 	// "p" for pause and play           
 	if(e.keyCode == 80){
-		if(!animating){
+		if(openMenu() != null){
 			exitMenu();
 			animating = true;
 			requestAnimationFrame(doFrame);
 		} else {
-			animating = false;
-			displayMenu(menusArr.pauseMenu);
+			if(animating == true){
+				animating = false;
+				displayMenu(menusArr.pauseMenu);
+			} else {
+				animating = true;
+				requestAnimationFrame(doFrame);
+			}
 		}
 		return;
+	}
+	
+	// "m" for mute and unmute ofo sound
+	if(e.keyCode == 77){
+		if(mute == true){
+			mute = false;
+			if (openMenu() != null){
+				pauseSound.play();
+			} else {
+				generalSound.play();
+			}
+		} else {
+			mute = true;
+			generalSound.pause();
+			pauseSound.pause();
+		}
 	}
 
 	// F11 to enter and exit fullscreen

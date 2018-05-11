@@ -1,5 +1,29 @@
 "use strict";
 
+/* /////////////////////////////////////////////////////////////
+	loads the sounds into their respective variables
+	Called from createWorld
+	INPUT: none
+	OUTPUT: none - this function adds sounds directly to global variables
+ *//////////////////////////////////////////////////////////////
+function addSounds(){
+   // load a sound and set it as the Audio object's buffer
+    var audioLoader = new THREE.AudioLoader();
+    audioLoader.load( 'sounds/haha.wav', function( buffer ) { 
+        crashSound.setBuffer( buffer );
+        crashSound.setVolume( 0.5 );
+    }); 
+    audioLoader.load( 'sounds/barbie_girl_8bit.wav', function( buffer ) { 
+        pauseSound.setBuffer( buffer );
+        pauseSound.setLoop( true );
+        pauseSound.setVolume( 0.5 );
+    }); 
+    audioLoader.load( 'sounds/stayin_alive_8bit.wav', function( buffer ) { 
+        generalSound.setBuffer( buffer );
+        generalSound.setLoop( true );
+        generalSound.setVolume( 0.5 );
+    }); 
+}
 
 /* /////////////////////////////////////////////////////////////
 	Creates random lights, Amount is specified when creating level. Lights are Point lights with shadows enabled
