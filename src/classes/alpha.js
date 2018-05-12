@@ -27,6 +27,7 @@ class Alpha extends THREE.Mesh{
 		this.jumping = false;
 		
 		this.lives = level.startingLives; //TODO: make a cat that gives you 9 lives
+		this.points = 0;
 		this.radius = radius;
 		
 		this.geometry = geometry;	// save geometry of model so that it can be accessed later by collision fn.
@@ -49,6 +50,7 @@ class Alpha extends THREE.Mesh{
 	
 	respawn() {
 		var currLives = this.lives;
+		var currPoints = this.points;
 		while(true){
 			console.log("respawning alpha");
 			var randomX = Math.random();
@@ -145,4 +147,8 @@ class Alpha extends THREE.Mesh{
 			this.speedZ = this.minSpeedZ;
 		}
 	}
+
+	// increasePoints(){
+	// 	this.points += 1;
+	// }
 }
