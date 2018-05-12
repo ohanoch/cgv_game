@@ -9,20 +9,20 @@
 function addSounds(){
    // load a sound and set it as the Audio object's buffer
     var audioLoader = new THREE.AudioLoader();
-    // audioLoader.load( 'sounds/haha.wav', function( buffer ) { 
+    // audioLoader.load( 'sounds/haha.wav', function( buffer ) {
     //     crashSound.setBuffer( buffer );
     //     crashSound.setVolume( 0.5 );
     // }); 
-    audioLoader.load( 'sounds/barbie_girl_8bit.wav', function( buffer ) { 
+    audioLoader.load( 'sounds/barbie_girl_8bit.mp3', function( buffer ) {
         pauseSound.setBuffer( buffer );
         pauseSound.setLoop( true );
         pauseSound.setVolume( 0.5 );
-    }); 
-    audioLoader.load( 'sounds/stayin_alive_8bit.wav', function( buffer ) { 
+    });
+    audioLoader.load( 'sounds/stayin_alive_8bit.mp3', function( buffer ) {
         generalSound.setBuffer( buffer );
         generalSound.setLoop( true );
         generalSound.setVolume( 0.5 );
-    }); 
+    });
 }
 
 /* /////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ function createRandomLights(){
 		var light = new THREE.PointLight(0xffffff, 1, 1000000);
 		light.position.set(
 			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10),
-			level.atmosphereHeight * (1 + Math.random()), 
+			level.atmosphereHeight * (1 + Math.random()),
 			Math.pow(-1, Math.floor(Math.random() * 2) + 1) * level.worldWidth / (6 + Math.random() * 10)
 		);
 
@@ -44,8 +44,8 @@ function createRandomLights(){
 		light.castShadow = true;
 		light.shadowDarkness = 0.5;
 		//Set up shadow properties for the light
-		light.shadow.mapSize.width = level.worldWidth;  
-		light.shadow.mapSize.height = level.worldDepth; 
+		light.shadow.mapSize.width = level.worldWidth;
+		light.shadow.mapSize.height = level.worldDepth;
 		light.shadow.camera.near = 0.5;    // default
 		light.shadow.camera.far = Math.sqrt(Math.pow(level.atmosphereHeight,2) + Math.pow(Math.pow(level.worldWidth,2) + Math.pow(level.worldDepth,2),2));     // Pythagoras equation for edge to edge diagonal of livable map cube
 
@@ -65,7 +65,7 @@ function createPowerups(){
 	var powerupsSplit = splitNumToParts(level.numPowerups, powerupTypes.length);
 	console.log("Powerups Split: " + powerupsSplit);
 
-	
+
 	for(var i = 0; i < level.powerupTypes.length; i++){
 		for(var j = 0; j < powerupsSplit[i]; j++){
 			powerups.push(new Powerup(level.powerupTypes[i]));
@@ -76,7 +76,7 @@ function createPowerups(){
 
 	for(var i = 0; i < powerups.length; i++){
 		scene.add(powerups[i]);
-	} 
+	}
 }
 
 /* /////////////////////////////////////////////////////////////
@@ -100,4 +100,3 @@ function createCollectibles(){
 		scene.add(collectibles[i]);
 	}
 }
-
