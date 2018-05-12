@@ -13,12 +13,12 @@ function addSounds(){
         crashSound.setBuffer( buffer );
         crashSound.setVolume( 0.5 );
     }); 
-    audioLoader.load( 'sounds/barbie_girl_8bit.wav', function( buffer ) { 
+    audioLoader.load( 'sounds/barbie_girl_8bit.mp3', function( buffer ) { 
         pauseSound.setBuffer( buffer );
         pauseSound.setLoop( true );
         pauseSound.setVolume( 0.5 );
     }); 
-    audioLoader.load( 'sounds/stayin_alive_8bit.wav', function( buffer ) { 
+    audioLoader.load( 'sounds/stayin_alive_8bit.mp3', function( buffer ) { 
         generalSound.setBuffer( buffer );
         generalSound.setLoop( true );
         generalSound.setVolume( 0.5 );
