@@ -47,9 +47,9 @@ if (currLevel == 0){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 var currLevel = 0; 							//level variable mostly for display purposes at the moment
-var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
+var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives,
 				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
-				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerupsTypes, 
+				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerupsTypes,
 				1, -10, -2, -0.01,	// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
 				window.innerHeight/5,window.innerHeight/5,lore); //minimapWidth, minimapHeight, lore for level story
 
@@ -102,8 +102,8 @@ var font;
 var text;
 var text_height;
 var text_size;
-var curveSegments;	
-var text_object_container;			
+var curveSegments;
+var text_object_container;
 
 
 // for menu class
@@ -130,9 +130,9 @@ function createWorld() {
 
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     mainCamera = new THREE.PerspectiveCamera(
-		30, 
-		window.innerWidth/window.innerHeight, 
-		0.1, 
+		30,
+		window.innerWidth/window.innerHeight,
+		0.1,
 		level.alphaCameraDistance * 20
 	);
   	mainCamera.position.z = level.alphaCameraDistance;
@@ -147,14 +147,14 @@ function createWorld() {
 	//crashSound = new THREE.Audio( listener );
 	generalSound = new THREE.Audio( listener );
 	pauseSound = new THREE.Audio( listener );
-	
+
 	addSounds();
 	//-------------------------------------------- LIGHTING ------------------------------------------------
 	createRandomLights();
 	var viewLight = new THREE.PointLight(0xff00ff, 1);
 	player.add(viewLight);
 	viewLight.position.z = level.alphaCameraDistance;
-    
+
 
 	//------------------------------------------ MINIMAP ----------------------------------------------
 	minimapCamera = new THREE.OrthographicCamera(		// Orthographic camera does not change according to distance, which is what we want
@@ -162,46 +162,50 @@ function createWorld() {
 		window.innerHeight / 5,							// Right
     	window.innerHeight / 5,							// Top
     	window.innerHeight / -5,						// Bottom
-    	-3 * level.atmosphereHeight,					// Near 
-    	10000 );           								// Far 
+    	-3 * level.atmosphereHeight,					// Near
+    	10000 );           								// Far
 	minimapCamera.up = new THREE.Vector3(0,0,-1);		// COMMENT
 	minimapCamera.lookAt( new THREE.Vector3(0,-1,0) );	// COMMENT
 	scene.add(minimapCamera);							// Add minimap camera to scene
 
 
 
-    //---------------------------------- CREATE THE WORLD ------------------------------------------- 
+    //---------------------------------- CREATE THE WORLD -------------------------------------------
 	worldMap = new Map(level.worldWidth, level.worldDepth, level.atmosphereHeight, level.floorTextureURL, level.backgroundURL, level.buildingModelURLs) //width, height, atmosphereHight, textureURL, skyboxDirectory
 
 	scene.add(worldMap.floor);
 	scene.background = worldMap.background;
-	scene.add(worldMap.atmosphere);	
+	scene.add(worldMap.atmosphere);
 	//add buildings to scene
-	worldMap.createBuildings(level.mapBuildingRatio); 
+	worldMap.createBuildings(level.mapBuildingRatio);
 
 	for (var i = 0; i < worldMap.buildings.length; i++){
 		scene.add(worldMap.buildings[i]);
 	}
 
 
-	
+
     //---------------------------------- Dynamic Sculpture -------------------------------------------
     // TODO: try cubecamera on lab computers
 	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
-	
+
 	joshSucks = new THREE.Object3D();		// Sculpture object
 
 	// Make a reflective sphere (only reflects skybox, at the moment)
-	var geometry = new THREE.SphereGeometry(5, 32, 16);
+	var geometry = new THREE.SphereGeometry(50, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
     color   : 'chrome',
 	envMap 	: scene.background
 	});
-	discoBall = new THREE.Mesh(geometry, material); 
+	discoBall = new THREE.Mesh(geometry, material);
 	discoBall.position.set(0,0,0);	// centre obj coords of sphere
 	joshSucks.add(discoBall);
-		
 
+	var cubeCamera	= new THREEx.CubeCamera(discoBall);
+	scene.add(cubeCamera.object3d);
+	cubeCamera.update(renderer, scene);
+
+	material.envMap	= cubeCamera.textureCube;
 //////////////////////////////////////////////////////////////////////////////////
 //		add  text	 														//
 ///	///////////////////////////////////////////////////////////////////////////////
@@ -210,9 +214,9 @@ function createWorld() {
 	text_size = 2;
 	curveSegments = 4;
 	font = undefined;
-		
-	text_object_container = new THREE.Group();	
-	text_object_container.position.set(-8,0,7);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely 
+
+	text_object_container = new THREE.Group();
+	text_object_container.position.set(-8,0,7);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely
 	loadFont();
 
 	joshSucks.add(text_object_container);
@@ -226,11 +230,11 @@ function createWorld() {
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 
 	// alpha is created by modelLoader function and added to player
-	
+
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 
 	loader.load(level.alphaModelURL, modelLoader);			// load model and call model_loader
-	
+
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
 	createPowerups();
 //--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
@@ -253,7 +257,7 @@ function modelLoader(geometry, materials) {
         morphTargets: true							// for animation
     });
 	alpha = new Alpha(geometry,material, 1);		// create alpha object
-	
+
 // TRANSFORMS
 	alpha.scale.set(0.05,0.05,0.05);
 	alpha.position.set(0,0,0);
@@ -272,13 +276,13 @@ function modelLoader(geometry, materials) {
 	var clip = THREE.AnimationClip.CreateFromMorphTargetSequence( 'motion', geometry.morphTargets, 30 );
     var animationAction = mixer.clipAction(clip);
     animationAction.setDuration(1);
-    animationAction.play(); 
+    animationAction.play();
 	render();
 }
 
 // END OF INITIALISATION
 
-/*///////////////////////////////////////////////////////////////////////////////// 
+/*/////////////////////////////////////////////////////////////////////////////////
 	Updates frame by moving player, moving minimap camera, crashing player if they move above atmosphere or below floor, update animations, increment score and check for collisions
 	Called by doFrame
 	INPUT: none
@@ -287,14 +291,14 @@ function modelLoader(geometry, materials) {
 function updateForFrame() {
 
 	//Move player backwards or forwards by their Z velocity
-    player.translateZ(alpha.getSpeedZ());	
+    player.translateZ(alpha.getSpeedZ());
 
     //Move player up or down by their Y velocity
 	player.translateY(alpha.getSpeedY());
 
 	// move minimap camera on x,z axis according to player
 	// minimap height stays constant right and captures from right bellow the atmosphere
-	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);	
+	minimapCamera.position.set(player.position.x, minimapCamera.position.y, player.position.z);
 
 	// t to stop gravity, for testing
 	if(keys[84]){
@@ -316,15 +320,15 @@ function updateForFrame() {
 	if (resetCameraFlag){
 		resetCameraPosition();
 	}
-	
+
 	// Animate the avatar model to rotate back to center in it's z-axis, after banking
     reCenterAlpha();
 
 	// Animate power-ups
 	for(var i = 0; i < powerups.length; i++){
 		powerups[i].animate();
-	} 
-	
+	}
+
 //check if a power has been activated
 	if(activePowerup != null) {
 		if(activePowerup.getExpiration() < 0) {
@@ -333,9 +337,9 @@ function updateForFrame() {
 		} else {
 			activePowerup.decrementExpiration();
 		}
-		
+
 	}
-	
+
 	// animate collectibles
 	for(var j = 0; j < collectibles.length; j++) {
 		collectibles[j].animate();
@@ -350,9 +354,9 @@ function updateForFrame() {
 	if(new THREE.Vector3().setFromMatrixPosition(mainCamera.matrixWorld).y < worldMap.floorHeight + 0.1){
 		mainCamera.position.y = worldMap.floorHeight + 1.1;
 	}
-	
+
 	// Summon keyboard control lookups in one line.
-	keyCheck(); 		
+	keyCheck();
 
 	//Collision
 	collisions();
@@ -365,7 +369,7 @@ function updateForFrame() {
 
 	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
 	//cubeCamera.update(renderer, scene);
-	
+
 	// Score update: TODO: ut in function and tidy up
 	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
 		Score++;
@@ -380,7 +384,7 @@ function updateForFrame() {
 
 
 
-/*///////////////////////////////////////////////////////////////////////////////// 
+/*/////////////////////////////////////////////////////////////////////////////////
 	Drives the animation, called by system through requestAnimationFrame()
 	Called by itself, exitMenu and keysPressed
 	INPUT: none
@@ -427,7 +431,7 @@ function init() {
     installOrbitControls();
 
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
-	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);	
+	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);
     render();
 }
 
