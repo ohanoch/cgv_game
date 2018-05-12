@@ -95,7 +95,7 @@ function  collisions() {
 			score = score + 1000000
 			collectibleCount++;
 			
-			if(collectibleCount == 1/*collectibles.length == 0*/) {
+			if(collectibleCount == level.collectiblesToWin) {
 				window.alert( "You won the level!");
 				currLevel++;
 				restartGame();

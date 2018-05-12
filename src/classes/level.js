@@ -26,6 +26,7 @@ class Level {
 				backgroundURL,
 				numPowerups,
 				numCollectibles,
+				collectiblesToWin,
 				powerupTypes,
 				alphaMaxSpeedY,
 				alphaMinSpeedY,
@@ -52,6 +53,7 @@ class Level {
 		this.backgroundURL = backgroundURL;
 		this.numPowerups = numPowerups;
 		this.numCollectibles = numCollectibles;
+		this.collectiblesToWin = collectiblesToWin;
 		this.powerupTypes = powerupTypes;
 		this.alphaMaxSpeedY = alphaMaxSpeedY;
 		this.alphaMinSpeedY = alphaMinSpeedY;

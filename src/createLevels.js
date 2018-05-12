@@ -27,6 +27,7 @@ function createLevel(levelNum){
 			"textures/skyboxes/dawnmountain/", 			//backgroundURL
 			30, 										//numPowerups
 			30, 										//numCollectibles
+			1,											//collectiblesToWin
 			[0,1,2], 									//powerupsTypes
 			1,											//alphaMaxSpeedY
 			-10,										//alphaMinSpeedY
@@ -56,6 +57,7 @@ function createLevel(levelNum){
 			"textures/skyboxes/dawnmountain/", 			//backgroundURL
 			30, 										//numPowerups
 			30, 										//numCollectibles
+			1,                                          //collectiblesToWin
 			[0,1,2], 									//powerupsTypes
 			1,											//alphaMaxSpeedY
 			-10,										//alphaMinSpeedY
