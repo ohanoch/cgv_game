@@ -18,6 +18,7 @@ function createMenus(){
 	menusArr.startMenu = startMenu;
 	var pauseMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
+			level.pauseMenuTextureURL,
 			"textures/skyboxes/tantolunden5_words/", 
 			"sprites/buttons/", 
 			["exit_button", "restart_button", "resume_button"]
@@ -70,7 +71,7 @@ function exitMenu(){
 	//change sounds to game sounds
 	if(mute == false){
 		console.log("changing sounds to game sounds");
-		generalSound.play();
+		playingSound.play();
 		pauseSound.pause();
 	}
 }
@@ -146,7 +147,7 @@ function displayMenu(menu){
 	//change sounds
 	if(mute == false){
 		console.log("changing sounds to pause sounds");
-		generalSound.pause();
+		playingSound.pause();
 		pauseSound.play();
 	}
 

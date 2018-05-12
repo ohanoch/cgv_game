@@ -9,19 +9,19 @@
 function addSounds(){
    // load a sound and set it as the Audio object's buffer
     var audioLoader = new THREE.AudioLoader();
-    audioLoader.load( 'sounds/haha.wav', function( buffer ) { 
+    audioLoader.load( level.crashSoundURL, function( buffer ) { 
         crashSound.setBuffer( buffer );
         crashSound.setVolume( 0.5 );
     }); 
-    audioLoader.load( 'sounds/barbie_girl_8bit.mp3', function( buffer ) { 
+    audioLoader.load( level.pauseSoundURL, function( buffer ) { 
         pauseSound.setBuffer( buffer );
         pauseSound.setLoop( true );
         pauseSound.setVolume( 0.5 );
     }); 
-    audioLoader.load( 'sounds/stayin_alive_8bit.mp3', function( buffer ) { 
-        generalSound.setBuffer( buffer );
-        generalSound.setLoop( true );
-        generalSound.setVolume( 0.5 );
+    audioLoader.load( level.playingSoundURL, function( buffer ) { 
+        playingSound.setBuffer( buffer );
+        playingSound.setLoop( true );
+        playingSound.setVolume( 0.5 );
     }); 
 }
 
