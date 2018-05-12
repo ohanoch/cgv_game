@@ -65,7 +65,7 @@ class Alpha extends THREE.Mesh{
 		this.resetMovement();
 		keys = []
 
-		if(this.lives == level.startingLives){
+		if(this.lives == STARTING_LIVES){
 			displayMenu( menusArr.startMenu );
 		}
 	}
