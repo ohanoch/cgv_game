@@ -22,6 +22,7 @@
 <script src="src\classes\level.js"></script>
 <script src="src\classes\alpha.js"></script>
 <script src="src\classes\map.js"></script>
+<script src="src\classes\map2.js"></script>
 <script src="src\classes\menu.js"></script>
 <script src="src\classes\powerup.js"></script>
 <script src="src\classes\collectible.js"></script>
@@ -292,7 +293,7 @@ function updateForFrame() {
 
 
 	//Move player backwards or forwards by their Z velocity
-    player.translateZ(alpha.getSpeedZ());
+  player.translateZ(alpha.getSpeedZ());
 
     //Move player up or down by their Y velocity
 	player.translateY(alpha.getSpeedY());

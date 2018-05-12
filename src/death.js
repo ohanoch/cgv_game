@@ -17,7 +17,7 @@ function restartGame(){
 	}
 	createWorld();
 	installOrbitControls();
-	console.log("game restarted");	
+	console.log("game restarted");
 }
 
 
@@ -35,7 +35,7 @@ function putOnFloor() {
 	} else {																		//if they have, the player crashes
 		Crash();
 		return false;
-	}	
+	}
 }
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -50,16 +50,11 @@ function Crash() {
 
 	// Update Alpha stats
 	lives -= 1;
-	
+
 	// if no more lives, game over
 	if (lives == 0){
 		animating = false;
-<<<<<<< HEAD
-		window.alert("G A M E    O V E R\nYour final score: " + Score + "\nClick OK to start a new game");
-		document.getElementById('xyz').play();
-=======
 		window.alert("G A M E    O V E R\nYour final score: " + score + "\nClick OK to start a new game");
->>>>>>> 7b0129fba9f337960d4a01e41fed046c6e0ca00f
 		restartGame();
 	}else{
 	// TODO : Crash animation, respawn
@@ -69,5 +64,3 @@ function Crash() {
 		alpha.respawn();
 	}
 }
-
-
