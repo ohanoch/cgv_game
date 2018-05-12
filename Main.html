@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <head>
+<link rel="stylesheet" type="text/css" href="stylesheet.css">	<!-- CSS -->
 <meta charset="UTF-8">
 <title>_alpha_</title>
 <audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>
@@ -74,7 +75,6 @@ var resetCameraFlag = false 				// flag to reset the camera position to original
 var jumping = false;						// whether player is jumping or not
 var alphaDone = false;
 var mapDone = false;
-var Score = 0;
 var collectibleCount = 0;
 var activePowerup = null;
 var crot = Math.PI;									// iterator for doing object rotation animation
@@ -372,12 +372,12 @@ function updateForFrame() {
 
 	// Score update: TODO: ut in function and tidy up
 	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
-		Score++;
+		alpha.increasePoints();
 	} else {
-		Score = Score - 5;
+		alpha.points = alpha.points - 5;
 	}
 
- 	document.getElementById("s1").innerHTML = "Score: " + Score;
+ 	document.getElementById("s1").innerHTML = "Score: " + alpha.points;
  	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
 
 }
@@ -436,58 +436,6 @@ function init() {
 }
 
 </script>
-
-<!-- CSS -->
-<style>
-.container {
-    position: relative;
-    text-align: center;
-    color: black;
-}
-
-.bottom-left {
-    position: absolute;
-    bottom: 8px;
-    left: 16px;
-}
-
-.top-left {
-    position: absolute;
-    top: 8px;
-    left: 16px;
-}
-
-.top-right {
-    position: absolute;
-    top: 8px;
-    right: 16px;
-}
-
-.bottom-right {
-    position: absolute;
-    bottom: 8px;
-    right: 16px;
-}
-
-.centered {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.text-block {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color:rgba(192,192,192,0.5);
-    color: white;
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-</style>
-
 
 </head>
 <body onload="init()">
