@@ -103,11 +103,11 @@ function keysPressed(e) {
 			if (openMenu() != null){
 				pauseSound.play();
 			} else {
-				generalSound.play();
+				playingSound.play();
 			}
 		} else {
 			mute = true;
-			generalSound.pause();
+			playingSound.pause();
 			pauseSound.pause();
 		}
 	}

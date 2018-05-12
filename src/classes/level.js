@@ -13,14 +13,39 @@
 
 class Level {
 
-	constructor(levelNum, worldWidth, worldDepth, atmosphereHeight, alphaCameraDistance, startingLives, numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL, backgroundURL, numPowerups, numCollectibles, powerupTypes, alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ, minimapWidth, minimapHeight,lore) {
+	constructor(levelNum,
+				worldWidth,
+				worldDepth,
+				atmosphereHeight,
+				alphaCameraDistance,
+				numRandomLights,
+				mapBuildingRatio,
+				buildingModelURLs,
+				alphaModelURL,
+				floorTextureURL,
+				backgroundURL,
+				numPowerups,
+				numCollectibles,
+				collectiblesToWin,
+				powerupTypes,
+				alphaMaxSpeedY,
+				alphaMinSpeedY,
+				alphaMaxSpeedZ,
+				alphaMinSpeedZ,
+				minimapWidth,
+				minimapHeight,
+				pauseMenuTextureURL,
+				crashSoundURL,
+				pauseSoundURL,
+				playingSoundURL,
+				lore
+	) {
 		
 		this.levelNum = levelNum;
 		this.worldWidth = worldWidth;
 		this.worldDepth = worldDepth;
 		this.atmosphereHeight = atmosphereHeight;
 		this.alphaCameraDistance = alphaCameraDistance;
-		this.startingLives = startingLives;
 		this.numRandomLights = numRandomLights;
 		this.buildingModelURLs = buildingModelURLs;
 		this.alphaModelURL = alphaModelURL;
@@ -28,6 +53,7 @@ class Level {
 		this.backgroundURL = backgroundURL;
 		this.numPowerups = numPowerups;
 		this.numCollectibles = numCollectibles;
+		this.collectiblesToWin = collectiblesToWin;
 		this.powerupTypes = powerupTypes;
 		this.alphaMaxSpeedY = alphaMaxSpeedY;
 		this.alphaMinSpeedY = alphaMinSpeedY;
@@ -36,6 +62,10 @@ class Level {
 		this.mapBuildingRatio = mapBuildingRatio;
 		this.minimapWidth = minimapWidth;
 		this.minimapHeight = minimapHeight;
+		this.pauseMenuTextureURL = pauseMenuTextureURL;
+		this.crashSoundURL = crashSoundURL;
+		this.pauseSoundURL = pauseSoundURL;
+		this.playingSoundURL = playingSoundURL;
 		this.lore = lore;
 	}
 
@@ -55,6 +85,5 @@ class Level {
 		minimapCamera = null; 
 		worldMap = null;
 		joshSucks = null; // he does
-		Score = 0;
 	}
 }

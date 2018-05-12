@@ -57,14 +57,21 @@ class Powerup extends THREE.Mesh{
 	
 	activatePower( ) {
 	// test powerup. make your own!
-	
-		if (this.type == 2 ) {
+		if (this.type == 1){
+			alpha.scale.set(0.01,0.01,0.01);
+		} else if (this.type == 2 ) {
 			alpha.setMinSpeedY(0);
 		}
 	}
 	
 	deactivatePower() {
-		if(this.type == 2) {
+		if(this.type == 1) {
+			alpha.scale.set(
+				500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+				500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+				500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+			);
+		} else if(this.type == 2) {
 			alpha.setMinSpeedY(-1000);
 		}
 	}
