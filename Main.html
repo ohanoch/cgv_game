@@ -289,6 +289,12 @@ function modelLoader(geometry, materials) {
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function updateForFrame() {
+	var cubeCamera	= new THREEx.CubeCamera(discoBall);
+	scene.add(cubeCamera.object3d);
+	cubeCamera.update(renderer, scene);
+
+	discoBall.material.envMap	= cubeCamera.textureCube;
+
 
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());
