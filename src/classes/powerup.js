@@ -66,7 +66,11 @@ class Powerup extends THREE.Mesh{
 	
 	deactivatePower() {
 		if(this.type == 1) {
-			alpha.scale.set(0.05,0.05,0.05);
+			alpha.scale.set(
+				500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+				500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+				500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+			);
 		} else if(this.type == 2) {
 			alpha.setMinSpeedY(-1000);
 		}
