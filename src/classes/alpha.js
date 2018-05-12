@@ -148,7 +148,7 @@ class Alpha extends THREE.Mesh{
 		}
 	}
 
-	// increasePoints(){
-	// 	this.points += 1;
-	// }
+	increasePoints(){
+		this.points += 1;
+	}
 }
