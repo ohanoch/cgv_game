@@ -12,14 +12,14 @@ function createMenus(){
 	var startMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
 			"textures/skyboxes/ulam_words/", 
-			"sprites/buttons/", 
+			"textures/buttons/", 
 			["exit_button", "start_button","controls_button","credits_button"]
 		);
 	menusArr.startMenu = startMenu;
 	var pauseMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
 			level.pauseMenuTextureURL,
-			"sprites/buttons/", 
+			"textures/buttons/", 
 			["exit_button", "restart_button", "resume_button"]
 		);
 		menusArr.pauseMenu = pauseMenu;
@@ -128,7 +128,6 @@ function menuInteraction(e){
 	OUTPUT: none
 /////////////////////////////////////////////////////////////////////////////////*/
 function displayMenu(menu){
-	console.log(menu.buttons)
 	menu.isOpen = true;
 	menu.skybox.position.x = player.position.x;
 	menu.skybox.position.y = player.position.y;
