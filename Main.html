@@ -365,6 +365,7 @@ function updateForFrame() {
 		score = score - 5;
 	}
 
+	document.getElementById("s0").innerHTML = "Level: " + level.levelNum;
  	document.getElementById("s1").innerHTML = "Score: " + score;
  	document.getElementById("s2").innerHTML = "Lives: " + lives; // this will need to go in Crash function maybe
 
@@ -398,7 +399,6 @@ function init() {
 	createLevel(0);
     try {
 		container = document.getElementById( 'container' );
-		document.getElementById("s0").innerHTML = "Level: " + level.levelNum;
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
