@@ -19,7 +19,6 @@ function createMenus(){
 	var pauseMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
 			level.pauseMenuTextureURL,
-			"textures/skyboxes/tantolunden5_words/", 
 			"sprites/buttons/", 
 			["exit_button", "restart_button", "resume_button"]
 		);
@@ -129,6 +128,7 @@ function menuInteraction(e){
 	OUTPUT: none
 /////////////////////////////////////////////////////////////////////////////////*/
 function displayMenu(menu){
+	console.log(menu.buttons)
 	menu.isOpen = true;
 	menu.skybox.position.x = player.position.x;
 	menu.skybox.position.y = player.position.y;
