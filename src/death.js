@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////////////*/
 function restartGame(){
 	console.log("restarting game");
+	playingSound.pause();
 	createLevel(currLevel);
 	level.reinitializeGlobals();
 	if(currLevel == 0){
@@ -54,7 +55,6 @@ function Crash() {
 	if (lives == 0){
 		animating = false;
 		window.alert("G A M E    O V E R\nYour final score: " + score + "\nClick OK to start a new game");
-		playingSound.pause();
 		restartGame();
 	}else{
 	// TODO : Crash animation, respawn
