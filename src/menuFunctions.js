@@ -12,14 +12,14 @@ function createMenus(){
 	var startMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
 			"textures/skyboxes/ulam_words/", 
-			"sprites/buttons/", 
+			"textures/buttons/", 
 			["exit_button", "start_button","controls_button","credits_button"]
 		);
 	menusArr.startMenu = startMenu;
 	var pauseMenu = new Menu(
 			level.alphaCameraDistance * 2 * 2, 
-			"textures/skyboxes/tantolunden5_words/", 
-			"sprites/buttons/", 
+			level.pauseMenuTextureURL,
+			"textures/buttons/", 
 			["exit_button", "restart_button", "resume_button"]
 		);
 		menusArr.pauseMenu = pauseMenu;
@@ -70,7 +70,7 @@ function exitMenu(){
 	//change sounds to game sounds
 	if(mute == false){
 		console.log("changing sounds to game sounds");
-		generalSound.play();
+		playingSound.play();
 		pauseSound.pause();
 	}
 }
@@ -146,7 +146,7 @@ function displayMenu(menu){
 	//change sounds
 	if(mute == false){
 		console.log("changing sounds to pause sounds");
-		generalSound.pause();
+		playingSound.pause();
 		pauseSound.play();
 	}
 

@@ -24,6 +24,7 @@
 <script src="src\classes\collectible.js"></script>
 
 <script src="src\render.js"></script>
+<script src="src\createLevels.js"></script>
 <script src="src\mouseKeyboard.js"></script>
 <script src="src\createWorldFunctions.js"></script>
 <script src="src\death.js"></script>
@@ -36,21 +37,9 @@
 
 "use strict";
 
+var STARTING_LIVES = 3;
 var currLevel = 0; //level variable mostly for display purposes at the moment
-var lore;
-if (currLevel == 0){
-	lore = "The Centaurians are an advanced microbiological race that inhabits the Alpha Centauri star system.\n In order to survive the harsh conditions they have evolved the ability to shapeshift.\n They posses advanced technologies beyond human comprehension, except for emacs, they love emacs! Proxima Centauri, aka PC, is a red dwarf star that serves as the prison for the Alpha Centauri system.\n Once a being arrives in PC its identity is lost, and is given the name __alpha__\n\n We play as _alpha_, a falsely imprisoned centorian.\n alpha was accused of killing Bambi’s mother. Previous to _alpha_’s imprisonment _alpha_ and Walt Disney were lovers.\n When Walt discovered _alpha_ killed Bambi’s mother it was too much for him, he swore to never talk to alpha again. (Walt Disney was reincarnated as a centaurian after he was cryogenically frozen, which can be a side-effect of cryogenics).\n _alpha_ is on a mission to escape PC and tell Walt the truth and win his love back."
-}
-
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-var currLevel = 0; 							//level variable mostly for display purposes at the moment
-var level = new Level(currLevel, 1500, 1500, 300, 20, 3, 																		// levelNum, width, depth, atmosphereHeight, alphaCameraDistance, startingLives, 
-				2, 0.5,['models/tree/tree', 'models/mill/mill'],  "models/stork.js", "textures/floor.jpg",					// numRandomLights, mapBuildingRatio, buildingModelURLs, alphaModelURL, floorTextureURL,
-				"textures/skyboxes/dawnmountain/", 30, 30, [0,1,2], 																// backgroundURL, numPowerups, numCollectibles, powerupsTypes, 
-				1, -10, -2, -0.01,	// alphaMaxSpeedY, alphaMinSpeedY, alphaMaxSpeedZ, alphaMinSpeedZ
-				window.innerHeight/5,window.innerHeight/5,lore); //minimapWidth, minimapHeight, lore for level story
-
+var level;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -61,7 +50,7 @@ var minimapCamera;  //minimap variables
 var controls;  											// An OrbitControls object that is used to implement
               											// rotation of the scene using the mouse.  (It actually rotates
                											// the camera around the scene.)
-var listener, crashSound, generalSound, pauseSound;  //sound variables
+var listener, crashSound, playingSound, pauseSound;  //sound variables
 
 /* flags for different instances */
 var fullscreen = false;
@@ -72,7 +61,8 @@ var resetCameraFlag = false 				// flag to reset the camera position to original
 var jumping = false;						// whether player is jumping or not
 var alphaDone = false;
 var mapDone = false;
-var Score = 0;
+var score = 0;
+var lives = STARTING_LIVES;
 var collectibleCount = 0;
 var activePowerup = null;
 var crot = Math.PI;									// iterator for doing object rotation animation
@@ -102,7 +92,6 @@ var text_height;
 var text_size;
 var curveSegments;	
 var text_object_container;			
-
 
 // for menu class
 //var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
@@ -143,7 +132,7 @@ function createWorld() {
 
 	// create a global audio source
 	crashSound = new THREE.Audio( listener );
-	generalSound = new THREE.Audio( listener );
+	playingSound = new THREE.Audio( listener );
 	pauseSound = new THREE.Audio( listener );
 	
 	addSounds();
@@ -366,13 +355,13 @@ function updateForFrame() {
 	
 	// Score update: TODO: ut in function and tidy up
 	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
-		Score++;
+		score++;
 	} else {
-		Score = Score - 5;
+		score = score - 5;
 	}
 
- 	document.getElementById("s1").innerHTML = "Score: " + Score;
- 	document.getElementById("s2").innerHTML = "Lives: " + alpha.lives; // this will need to go in Crash function maybe
+ 	document.getElementById("s1").innerHTML = "Score: " + score;
+ 	document.getElementById("s2").innerHTML = "Lives: " + lives; // this will need to go in Crash function maybe
 
 }
 
@@ -401,6 +390,7 @@ function doFrame() {
 	OUTPUT: none
  //////////////////////////////////////////////////////////////////////////////////////*/
 function init() {
+	createLevel(0);
     try {
 		container = document.getElementById( 'container' );
 		document.getElementById("s0").innerHTML = "Level: " + level.levelNum;
@@ -421,7 +411,8 @@ function init() {
                 e + "</b>";
         return;
     }
-    createWorld();
+
+	createWorld();
     installOrbitControls();
 
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
