@@ -62,8 +62,8 @@ function createRandomLights(){
 	OUTPUT: none - this function adds powerups directly to the scene
  *//////////////////////////////////////////////////////////////
 function createPowerups(){
-	var powerupsSplit = splitNumToParts(level.numPowerups, powerupTypes.length);
-	console.log("Powerups Split: " + powerupsSplit);
+	var powerupsSplit = splitNumToParts(level.numPowerups, level.powerupTypes.length);
+	console.log("Splitting " + level.numPowerups + " Powerups into " + level.powerupTypes.length +" groups. result is split: " + powerupsSplit);
 
 	
 	for(var i = 0; i < level.powerupTypes.length; i++){

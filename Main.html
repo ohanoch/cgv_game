@@ -242,7 +242,12 @@ function modelLoader(geometry, materials) {
 	alpha = new Alpha(geometry,material, 1);		// create alpha object
 	
 // TRANSFORMS
-	alpha.scale.set(0.05,0.05,0.05);
+	alpha.geometry.computeBoundingSphere();
+	alpha.scale.set(
+		500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+		500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+		500/Math.pow(alpha.geometry.boundingSphere.radius,2),
+	);
 	alpha.position.set(0,0,0);
 	alpha.rotateY(Math.PI);
 	alpha.castShadow = true;

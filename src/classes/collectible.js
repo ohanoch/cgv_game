@@ -5,8 +5,8 @@ class Collectible extends THREE.Mesh {
 	constructor(geometry, material) {
 	
 		super(
-			new THREE.SphereGeometry( 8, 32, 32 ),
-			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0xaa00bb, transparent: true} )
+			new THREE.BoxGeometry( 4, 4, 4 ),
+			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0x112233, transparent: true} )
 		);
 		
 		this.add( new THREE.Mesh(geometry, material) );
