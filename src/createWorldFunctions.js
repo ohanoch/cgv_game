@@ -9,10 +9,10 @@
 function addSounds(){
    // load a sound and set it as the Audio object's buffer
     var audioLoader = new THREE.AudioLoader();
-    audioLoader.load( 'sounds/haha.wav', function( buffer ) { 
-        crashSound.setBuffer( buffer );
-        crashSound.setVolume( 0.5 );
-    }); 
+    // audioLoader.load( 'sounds/haha.wav', function( buffer ) { 
+    //     crashSound.setBuffer( buffer );
+    //     crashSound.setVolume( 0.5 );
+    // }); 
     audioLoader.load( 'sounds/barbie_girl_8bit.wav', function( buffer ) { 
         pauseSound.setBuffer( buffer );
         pauseSound.setLoop( true );

@@ -40,7 +40,7 @@ function putOnFloor() {
 ///////////////////////////////////////////////////////////////////////////*/
 function Crash() {
 	//play crash sound
-	crashSound.play();
+	//crashSound.play();
 
 	// Update Alpha stats
 	alpha.lives -= 1;
@@ -49,6 +49,7 @@ function Crash() {
 	if (alpha.lives == 0){
 		animating = false;
 		window.alert("G A M E    O V E R\nYour final score: " + Score + "\nClick OK to start a new game");
+		document.getElementById('xyz').play();
 		restartGame();
 	}else{
 	// TODO : Crash animation, respawn

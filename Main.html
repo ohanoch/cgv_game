@@ -2,6 +2,8 @@
 <head>
 <meta charset="UTF-8">
 <title>_alpha_</title>
+<audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>
+
 <script src="libs\three.js"></script>
 <script src="libs\OrbitControls.js"></script>
 <script src="libs\stats.min.js"></script>
@@ -142,7 +144,7 @@ function createWorld() {
 	mainCamera.add( listener );
 
 	// create a global audio source
-	crashSound = new THREE.Audio( listener );
+	//crashSound = new THREE.Audio( listener );
 	generalSound = new THREE.Audio( listener );
 	pauseSound = new THREE.Audio( listener );
 	
