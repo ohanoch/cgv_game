@@ -25,8 +25,6 @@ class Alpha extends THREE.Mesh{
 		this.minSpeedZ = level.alphaMinSpeedZ;
 		
 		this.jumping = false;
-		
-		this.lives = level.startingLives; //TODO: make a cat that gives you 9 lives
 		this.radius = radius;
 		
 		this.geometry = geometry;	// save geometry of model so that it can be accessed later by collision fn.

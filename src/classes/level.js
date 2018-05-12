@@ -18,7 +18,6 @@ class Level {
 				worldDepth,
 				atmosphereHeight,
 				alphaCameraDistance,
-				startingLives,
 				numRandomLights,
 				mapBuildingRatio,
 				buildingModelURLs,
@@ -46,7 +45,6 @@ class Level {
 		this.worldDepth = worldDepth;
 		this.atmosphereHeight = atmosphereHeight;
 		this.alphaCameraDistance = alphaCameraDistance;
-		this.startingLives = startingLives;
 		this.numRandomLights = numRandomLights;
 		this.buildingModelURLs = buildingModelURLs;
 		this.alphaModelURL = alphaModelURL;
@@ -85,6 +83,5 @@ class Level {
 		minimapCamera = null; 
 		worldMap = null;
 		joshSucks = null; // he does
-		Score = 0;
 	}
 }

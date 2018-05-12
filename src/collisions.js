@@ -92,7 +92,7 @@ function  collisions() {
 			console.log(collectibles.indexOf (CollectibleCollisionResults[0].object) );
 			collectibles.splice(collectibles.indexOf (CollectibleCollisionResults[0].object), 1 );
 			scene.remove(CollectibleCollisionResults[0].object);
-			Score = Score + 1000000
+			score = score + 1000000
 			collectibleCount++;
 			
 			if(collectibleCount == 3/*collectibles.length == 0*/) {

@@ -19,7 +19,6 @@ function createLevel(levelNum){
 			1500,										//depth
 			300,										//atmosphereHeight
 			20,											//alphaCameraDistance
-			3, 											//startingLives
 			2,											//numRandomLights 
 			0.5,										//mapBuildingRatio
 			['models/tree/tree', 'models/mill/mill'], 	//buildingModelURLs
