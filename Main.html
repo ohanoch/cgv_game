@@ -64,7 +64,7 @@ var mapDone = false;
 var score = 0;
 var lives = STARTING_LIVES;
 var collectibleCount = 0;
-var activePowerup = null;
+var activePowerups = [];
 var crot = Math.PI;									// iterator for doing object rotation animation
 var mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
 var mute = false;
@@ -320,12 +320,14 @@ function updateForFrame() {
 	} 
 	
 //check if a power has been activated
-	if(activePowerup != null) {
-		if(activePowerup.getExpiration() < 0) {
-			activePowerup.deactivatePower();
-			activePowerup = null;
-		} else {
-			activePowerup.decrementExpiration();
+	if(activePowerups.length > 0) {
+		for (var k = 0; k < activePowerups.length; k++) {
+			if(activePowerups[k].getExpiration() < 0) {
+				activePowerups[k].deactivatePower();
+				activePowerups.splice(k, 1);
+			} else {
+				activePowerups[k].decrementExpiration();
+			}
 		}
 		
 	}

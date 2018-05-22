@@ -82,7 +82,7 @@ function  collisions() {
 			}
 			
 			PowerupsCollisionResults[0].object.activatePower();
-			activePowerup = PowerupsCollisionResults[0].object;
+			activePowerups.push(PowerupsCollisionResults[0].object);
 			powerups.splice(powerups.indexOf (PowerupsCollisionResults[0].object), 1 );
 			scene.remove(PowerupsCollisionResults[0].object);
 		}
