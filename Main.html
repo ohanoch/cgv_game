@@ -93,7 +93,8 @@ var text_height;
 var text_size;
 var curveSegments;	
 var text_object_container;			
-
+var cubeCamera;			// for dynamic reflections
+var reflection_on_off; //turn cubeCam on or off
 // for menu class
 //var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
@@ -183,13 +184,14 @@ function createWorld() {
 	// Make a reflective sphere (only reflects skybox, at the moment)
 	var geometry = new THREE.SphereGeometry(5, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
-    color   : 'chrome',
+    color   : 0xffffff,
 	envMap 	: scene.background
 	});
 	discoBall = new THREE.Mesh(geometry, material); 
 	discoBall.position.set(0,0,0);	// centre obj coords of sphere
 	joshSucks.add(discoBall);
-		
+	
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //		add  text	 														//
@@ -208,6 +210,14 @@ function createWorld() {
 	joshSucks.rotateZ(0.2);
 	var temp_test = player.position.clone();
 	joshSucks.position.set(3,3,-2);
+	
+///// cube cam for reflections
+	cubeCamera	= new THREEx.CubeCamera(discoBall);
+	scene.add(cubeCamera.object3d);
+	cubeCamera.update(renderer, scene);
+	material.envMap	= cubeCamera.textureCube;
+////////////////////////////////////////
+
 	scene.add(joshSucks);
 
 
