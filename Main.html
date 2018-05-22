@@ -84,6 +84,7 @@ var collectibles = [];						// the items that the player needs to collect in ord
 
 /* text sculputure*/
 var discoBall;
+var sculpt;
 var joshSucks;								// he does
 // for the text; there is no better way, sorry.
 var textMesh1;
@@ -178,8 +179,8 @@ function createWorld() {
     //---------------------------------- Dynamic Sculpture -------------------------------------------
     // TODO: try cubecamera on lab computers
 	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
-	
-	joshSucks = new THREE.Object3D();		// Sculpture object
+	sculpt = new THREE.Object3D(); 		// Sculpture container
+	joshSucks = new THREE.Object3D();		// Sphere Sculpture object
 
 	// Make a reflective sphere (only reflects skybox, at the moment)
 	var geometry = new THREE.SphereGeometry(5, 32, 16);
@@ -192,6 +193,30 @@ function createWorld() {
 	joshSucks.add(discoBall);
 	
 
+//diffuse stick
+	var length = 120, width = 8;
+
+	var shape = new THREE.Shape();
+	shape.moveTo( 0,0 );
+	shape.lineTo( 0, width );
+	shape.lineTo( length, width );
+	shape.lineTo( length, 0 );
+	shape.lineTo( 0, 0 );
+
+	var extrudeSettings = {
+		steps: 2,
+		amount: 16,
+		bevelEnabled: true,
+		bevelThickness: 1,
+		bevelSize: 1,
+		bevelSegments: 1
+	};
+
+	var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+	var stick = new THREE.Mesh( geometry, material ) ;
+	stick.position.set(0,0,0);
+///////////
 
 //////////////////////////////////////////////////////////////////////////////////
 //		add  text	 														//
@@ -201,15 +226,14 @@ function createWorld() {
 	text_size = 2;
 	curveSegments = 4;
 	font = undefined;
-		
 	text_object_container = new THREE.Group();	
-	text_object_container.position.set(-8,0,7);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely 
+	text_object_container.position.set(-8,0,7);	// -8,0,7 is the magic tuple to get the text to rotate around the sphere.
 	loadFont();
-
 	joshSucks.add(text_object_container);
-	joshSucks.rotateZ(0.2);
-	var temp_test = player.position.clone();
-	joshSucks.position.set(3,3,-2);
+	joshSucks.children[1].rotateZ(0.2);	
+	// joshSucks.add( stick );
+	// var temp_test = player.position.clone();
+	// joshSucks.position.set(3,3,-2);
 	
 ///// cube cam for reflections
 	cubeCamera	= new THREEx.CubeCamera(discoBall);
@@ -217,8 +241,9 @@ function createWorld() {
 	cubeCamera.update(renderer, scene);
 	material.envMap	= cubeCamera.textureCube;
 ////////////////////////////////////////
-
-	scene.add(joshSucks);
+	sculpt.add(joshSucks);
+	sculpt.add(stick);
+	scene.add(sculpt);
 
 
 
@@ -296,6 +321,10 @@ function updateForFrame() {
 		cubeCamera.update(renderer, scene);
 		discoBall.material.envMap = cubeCamera.textureCube;
 	}
+
+	//animate josh sucks (text) WOOHOO I CAN ACCESS CHILD NODES!
+	// joshSucks.rotateY(0.1*Math.sin(Math.PI/6));
+	sculpt.children[0].rotateY(0.1*Math.sin(Math.PI/6));
 
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
@@ -379,12 +408,6 @@ function updateForFrame() {
 	if(alpha == null){
 		return;
 	}
-
-	//animate josh sucks
-	joshSucks.rotateY(Math.sin(Math.PI/6));
-
-	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
-	//cubeCamera.update(renderer, scene);
 	
 	// Score update: TODO: ut in function and tidy up
 	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
