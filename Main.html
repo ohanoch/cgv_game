@@ -281,6 +281,12 @@ function modelLoader(geometry, materials) {
 function updateForFrame() {
 	frameNumber++;
 
+	// make dynamic reflections
+	if(reflection_on_off == true){
+		cubeCamera.update(renderer, scene);
+		discoBall.material.envMap = cubeCamera.textureCube;
+	}
+
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
 

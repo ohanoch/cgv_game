@@ -129,6 +129,16 @@ function keysPressed(e) {
 		window.location.reload(false); 
 		return
 	}
+
+
+	// "j" for Josh sucks cubeCamera on/off
+	if(e.keyCode == 74){
+		if(reflection_on_off == true){
+			reflection_on_off = false;
+		}else {
+			reflection_on_off = true;
+		}
+	}
 	
     // store an entry for every key pressed
     keys[e.keyCode] = true;
