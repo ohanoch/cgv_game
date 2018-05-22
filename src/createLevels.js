@@ -68,13 +68,13 @@ function createLevel(levelNum){
 			[1,2],	 									//powerupsTypes
 			0.8,											//alphaMaxSpeedY
 			-3,										//alphaMinSpeedY
-			-10,											//alphaMaxSpeedZ
-			-0.01,										//alphaMinSpeedZ
-			1,											//changeSpeedY
-			0.05,										//changeSpeedZ
-			1,											//rotateSpeed
+			-7,											//alphaMaxSpeedZ
+			-3.5,										//alphaMinSpeedZ
+			0.9,											//changeSpeedY
+			0.007,										//changeSpeedZ
+			1.2,											//rotateSpeed
 			0.5,										//strafeSpeed
-			-0.01,										//gravity
+			-0.02,										//gravity
 			window.innerHeight/5,						//minimapWidth
 			window.innerHeight/5,						//minimapHeight
 			"textures/skyboxes/tantolunden5_words/",	//pauseMenuTextureURL
