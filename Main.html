@@ -42,7 +42,7 @@
 "use strict";
 
 var STARTING_LIVES = 3;
-var currLevel = 0; //level variable mostly for display purposes at the moment
+var currLevel = 1; //level variable mostly for display purposes at the moment
 var level;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -68,7 +68,7 @@ var mapDone = false;
 var score = 0;
 var lives = STARTING_LIVES;
 var collectibleCount = 0;
-var activePowerup = null;
+var activePowerups = [];
 var crot = Math.PI;									// iterator for doing object rotation animation
 var mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
 var mute = false;
@@ -364,12 +364,14 @@ function updateForFrame() {
 	}
 
 //check if a power has been activated
-	if(activePowerup != null) {
-		if(activePowerup.getExpiration() < 0) {
-			activePowerup.deactivatePower();
-			activePowerup = null;
-		} else {
-			activePowerup.decrementExpiration();
+	if(activePowerups.length > 0) {
+		for (var k = 0; k < activePowerups.length; k++) {
+			if(activePowerups[k].getExpiration() < 0) {
+				activePowerups[k].deactivatePower();
+				activePowerups.splice(k, 1);
+			} else {
+				activePowerups[k].decrementExpiration();
+			}
 		}
 
 	}
@@ -442,7 +444,7 @@ function doFrame() {
 	OUTPUT: none
  //////////////////////////////////////////////////////////////////////////////////////*/
 function init() {
-	createLevel(0);
+	createLevel(currLevel);
     try {
 		container = document.getElementById( 'container' );
 		renderer = new THREE.WebGLRenderer( { antialias: true } );

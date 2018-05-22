@@ -30,7 +30,7 @@ function restartGame(){
 ///////////////////////////////////////////////////////////////////////////*/
 function putOnFloor() {
 	if(player.position.y > worldMap.floorHeight + alpha.getRadius() - 2) {			//check if player has reached the "floor" + some leeway
-		alpha.incSpeedY(-0.01);																		//if they have not, reduce speed (gravity)
+		alpha.incSpeedY(level.gravity);																		//if they have not, reduce speed (gravity)
 		return true;
 	} else {																		//if they have, the player crashes
 		Crash();
