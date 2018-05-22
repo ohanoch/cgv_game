@@ -42,7 +42,6 @@ function createRandomLights(){
 
 		//shadows for light 1
 		light.castShadow = true;
-		light.shadowDarkness = 0.5;
 		//Set up shadow properties for the light
 		light.shadow.mapSize.width = level.worldWidth;  
 		light.shadow.mapSize.height = level.worldDepth; 
