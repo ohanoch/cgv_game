@@ -52,8 +52,8 @@ function putOnFloor() {
 function Crash() {
 
 	//play crash sound
-	crashSound.play();
-
+	// crashSound.play();
+	document.getElementById('xyz').play();		// the right way
 	// Update Alpha stats
 	lives -= 1;
 	
