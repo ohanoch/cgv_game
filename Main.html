@@ -195,28 +195,28 @@ function createWorld() {
 	joshSucks.add(discoBall);
 
 //stick
-	// var length = 120, width = 8;
+	var length = 120, width = 8;
 
-	// var shape = new THREE.Shape();
-	// shape.moveTo( 0,0 );
-	// shape.lineTo( 0, width );
-	// shape.lineTo( length, width );
-	// shape.lineTo( length, 0 );
-	// shape.lineTo( 0, 0 );
+	var shape = new THREE.Shape();
+	shape.moveTo( 0,0 );
+	shape.lineTo( 0, width );
+	shape.lineTo( length, width );
+	shape.lineTo( length, 0 );
+	shape.lineTo( 0, 0 );
 
-	// var extrudeSettings = {
-	// 	steps: 2,
-	// 	amount: 16,
-	// 	bevelEnabled: true,
-	// 	bevelThickness: 1,
-	// 	bevelSize: 1,
-	// 	bevelSegments: 1
-	// };
+	var extrudeSettings = {
+		steps: 2,
+		amount: 16,
+		bevelEnabled: true,
+		bevelThickness: 1,
+		bevelSize: 1,
+		bevelSegments: 1
+	};
 
-	// var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-	// var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-	// var mesh = new THREE.Mesh( geometry, material ) ;
-	// mesh.position.set(0,0,0);
+	var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+	var mesh = new THREE.Mesh( geometry, material ) ;
+	mesh.position.set(0,0,0);
 	// joshSucks.add( mesh );
 ///////////
 
