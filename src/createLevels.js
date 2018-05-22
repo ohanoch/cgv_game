@@ -24,7 +24,7 @@ function createLevel(levelNum){
 			'models/oil_drum/oil_drum',							//collectibleURL
 			['models/tree/tree', 'models/mill/mill'], 	//buildingModelURLs
 			"models/stork.js",							//alphaModelURL
-			"textures/floor.jpg",						//floorTextureURL
+			"textures/floors/floor.jpg",						//floorTextureURL
 			"textures/skyboxes/dawnmountain/", 			//backgroundURL
 			30, 										//numPowerups
 			30, 										//numCollectibles
@@ -55,7 +55,7 @@ function createLevel(levelNum){
 			'models/oil_drum/oil_drum',							//collectibleURL
 			['models/ship/ship', 'models/car/car'], 	//buildingModelURLs
 			"models/horse.js",							//alphaModelURL
-			"textures/floor.jpg",						//floorTextureURL
+			"textures/floors/lava_floor.png",						//floorTextureURL
 			"textures/skyboxes/dawnmountain/", 			//backgroundURL
 			30, 										//numPowerups
 			30, 										//numCollectibles
