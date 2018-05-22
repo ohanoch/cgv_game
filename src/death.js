@@ -17,7 +17,7 @@ function restartGame(){
 	}
 	createWorld();
 	installOrbitControls();
-	console.log("game restarted");	
+	console.log("game restarted");
 }
 
 
@@ -35,7 +35,7 @@ function putOnFloor() {
 	} else {																		//if they have, the player crashes
 		Crash();
 		return false;
-	}	
+	}
 }
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -46,11 +46,11 @@ function putOnFloor() {
 ///////////////////////////////////////////////////////////////////////////*/
 function Crash() {
 	//play crash sound
-	crashSound.play();
+	//crashSound.play();
 
 	// Update Alpha stats
 	lives -= 1;
-	
+
 	// if no more lives, game over
 	if (lives == 0){
 		animating = false;
@@ -64,5 +64,3 @@ function Crash() {
 		alpha.respawn();
 	}
 }
-
-
