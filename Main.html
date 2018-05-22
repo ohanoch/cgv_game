@@ -68,6 +68,7 @@ var activePowerup = null;
 var crot = Math.PI;									// iterator for doing object rotation animation
 var mixer = null;  							// The object that animates the model, of type THREE.AnimationMixer
 var mute = false;
+var frameNumber = 0;
 
 /* Global object variables */
 var player = new THREE.Object3D();
@@ -221,7 +222,7 @@ function createWorld() {
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
 	createPowerups();
 //--------------------------------------- CREATE COLLECTIBLES ------------------------------------------------
-	createCollectibles();
+	createCollectibles(level.collectibleURL);
 
 } // end function createWorld()
 
@@ -277,6 +278,7 @@ function modelLoader(geometry, materials) {
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function updateForFrame() {
+	frameNumber++;
 
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());	
