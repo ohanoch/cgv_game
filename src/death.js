@@ -1,5 +1,10 @@
 "use strict";
 
+//create nelson sprite
+var spriteMap = new THREE.TextureLoader().load( "sprites/nelson.png" );
+var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap } );
+var sprite = new THREE.Sprite( spriteMaterial );
+
 /*///////////////////////////////////////////////////////////////////////////////////
 	Restart game - reset all alpha variables, reload all models, respawn alpha at origin
 	Called by Crash when the player crashes and has no more lives, menuInteraction when the restart game option is chosen and collisions when all collectibles are found
@@ -45,6 +50,7 @@ function putOnFloor() {
 	OUTPUT: none
 ///////////////////////////////////////////////////////////////////////////*/
 function Crash() {
+
 	//play crash sound
 	crashSound.play();
 
@@ -60,8 +66,13 @@ function Crash() {
 	// TODO : Crash animation, respawn
 		console.log("alpha crashed...");
 		animating = false;
-		window.alert("C R A S H E D!\n Lives left: " + lives);
+		setTimeout(function() { alert("C R A S H E D!\n Lives left: " + lives); }, 3);
+	//	window.alert("C R A S H E D!\n Lives left: " + lives);
+	//	scene.remove( sprite );
 		alpha.respawn();
+		sprite.position.set( player.position.x, player.position.y, player.position.z);
+		sprite.scale.set( 16, 16, 1.0 ); // imageWidth, imageHeight
+		scene.add( sprite );
 	}
 }
 
