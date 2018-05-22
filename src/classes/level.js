@@ -48,7 +48,7 @@ class Level {
 				playingSoundURL,
 				lore
 	) {
-		
+
 		this.levelNum = levelNum;
 		this.worldWidth = worldWidth;
 		this.worldDepth = worldDepth;
@@ -71,7 +71,7 @@ class Level {
 		this.alphaMaxSpeedZ = alphaMaxSpeedZ;
 		this.alphaMinSpeedZ  = alphaMinSpeedZ;
 		this.changeSpeedY =	changeSpeedY;
-		this.changeSpeedZ = changeSpeedY;
+		this.changeSpeedZ = changeSpeedZ;
 		this.rotateSpeed = rotateSpeed;
 		this.strafeSpeed = strafeSpeed;
 		this.gravity = gravity;
@@ -98,7 +98,7 @@ class Level {
 		activePowerups = [];
 		collectibles = [];			// the items that the player needs to collect in order to progress to the next level
 		mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
-		minimapCamera = null; 
+		minimapCamera = null;
 		worldMap = null;
 		joshSucks = null; // he does
 	}
