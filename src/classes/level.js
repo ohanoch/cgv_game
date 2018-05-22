@@ -81,7 +81,7 @@ class Level {
 		alpha = null;	// player stats tracking + model  object
 		collideMeshArray = []; // array to store  all collidable mesh's (buildings + items)
 		powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
-		activePowerup = null;
+		activePowerups = [];
 		collectibles = [];			// the items that the player needs to collect in order to progress to the next level
 		mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 		minimapCamera = null; 
