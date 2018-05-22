@@ -38,7 +38,7 @@
 "use strict";
 
 var STARTING_LIVES = 3;
-var currLevel = 1; //level variable mostly for display purposes at the moment
+var currLevel = 2; //level variable mostly for display purposes at the moment
 var level;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -111,7 +111,8 @@ var text_object_container;
 function createWorld() {
     renderer.setClearColor("black"); // Background color for scene.
     scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(0xffffff, level.alphaCameraDistance * 15, level.alphaCameraDistance * 20);
+    var fogColour = new THREE.Color(level.fogColour);
+	scene.fog = new THREE.Fog(fogColour, level.alphaCameraDistance * 15, level.alphaCameraDistance * 20);
     scene.add(player);
 
 	createMenus();
@@ -139,7 +140,7 @@ function createWorld() {
 	addSounds();
 	//-------------------------------------------- LIGHTING ------------------------------------------------
 	createRandomLights();
-	var viewLight = new THREE.PointLight(0xff00ff, 1);
+	var viewLight = new THREE.PointLight(level.alphaLightColour, 1);
 	player.add(viewLight);
 	viewLight.position.z = level.alphaCameraDistance;
     
@@ -339,7 +340,14 @@ function updateForFrame() {
 
 	// update model animation
 	if(mixer) {
-		mixer.update(0.02);
+		var updateSpeed = 0.02*(-1)*alpha.speedZ;
+		if(updateSpeed > 0.05) {
+			mixer.update(0.05);
+		} else if(updateSpeed < 0.005) {
+			mixer.update(0.005)
+		} else {
+			mixer.update(0.02*(-1)*alpha.speedZ);
+		}
 	}
 
 	// camera can't got below floor

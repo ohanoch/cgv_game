@@ -20,12 +20,14 @@ function createLevel(levelNum){
 			300,										//atmosphereHeight
 			20,											//alphaCameraDistance
 			2,											//numRandomLights 
+			0xffffff,									//alphaLightColour
 			0.5,										//mapBuildingRatio
 			'models/oil_drum/oil_drum',							//collectibleURL
 			['models/tree/tree', 'models/mill/mill'], 	//buildingModelURLs
 			"models/stork.js",							//alphaModelURL
 			"textures/floors/floor.jpg",						//floorTextureURL
 			"textures/skyboxes/dawnmountain/", 			//backgroundURL
+			0xffffff,									//fog colour
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,											//collectiblesToWin
@@ -56,12 +58,14 @@ function createLevel(levelNum){
 			400,										//atmosphereHeight
 			20,											//alphaCameraDistance
 			4,											//numRandomLights 
+			0xffffff,									//alphaLightColour
 			0.5,										//mapBuildingRatio
 			'models/oil_drum/oil_drum',							//collectibleURL
 			['models/ship/ship', 'models/car/car'], 	//buildingModelURLs
 			"models/horse.js",							//alphaModelURL
 			"textures/floors/lava_floor.png",						//floorTextureURL
 			"textures/skyboxes/dawnmountain/", 			//backgroundURL
+			0xffffff,									//fog colour
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,                                          //collectiblesToWin
@@ -84,5 +88,43 @@ function createLevel(levelNum){
 			lore										//lore for level story
 		);
 
+	} else if (levelNum == 2) {
+		lore = "level 2";
+		level = new Level(
+			levelNum,									//levelNum
+			1000,										//width
+			1000,										//depth
+			300,										//atmosphereHeight
+			20,											//alphaCameraDistance
+			0,											//numRandomLights 
+			0x00ffff,									//alphaLightColour
+			0.5,										//mapBuildingRatio
+			'models/oil_drum/oil_drum',							//collectibleURL
+			['models/tree/tree', 'models/mill/mill'], 	//buildingModelURLs
+			"models/stork.js",							//alphaModelURL
+			"textures/skyboxes/mp_whirlpool/yneg.png",						//floorTextureURL
+			"textures/skyboxes/mp_whirlpool/", 			//backgroundURL
+			0x0000ff,									//fog colour
+			30, 										//numPowerups
+			30, 										//numCollectibles
+			1,											//collectiblesToWin
+			[1,2],	 									//powerupsTypes
+			1,											//alphaMaxSpeedY
+			-10,										//alphaMinSpeedY
+			-2,											//alphaMaxSpeedZ
+			-0.01,										//alphaMinSpeedZ
+			1,											//changeSpeedY
+			0.05,										//changeSpeedZ
+			1,											//rotateSpeed
+			0.5,										//strafeSpeed
+			-0.01,										//gravity
+			window.innerHeight/5,						//minimapWidth
+			window.innerHeight/5,						//minimapHeight
+			"textures/skyboxes/tantolunden5_words/",	//pauseMenuTextureURL
+			"sounds/haha.wav",							//crashSoundURL
+			"sounds/barbie_girl_8bit.mp3",				//pauseSoundURL
+			"sounds/stayin_alive_8bit.mp3",				//playingSoundURL
+			lore										//lore for level story
+		);
 	}
 }

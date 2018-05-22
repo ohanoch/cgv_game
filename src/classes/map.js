@@ -120,12 +120,10 @@ class Map {
 								var currObjectBox = objectGeo.boundingBox;
 
 								//resize loaded object with relation to its size (should apply to any object)
-								var resizeNum = (1/objectGeo.boundingSphere.radius) * Math.random();
-								currObject.scale.set(
-									resizeNum * Math.pow(worldMap.width, ratio), //width
-									resizeNum * Math.pow(worldMap.atmosphereHeight, ratio), //width
-									resizeNum * Math.pow(worldMap.depth, ratio) //depth
-								);
+								var resizeNum = Math.pow(worldMap.atmosphereHeight, ratio) * (1/objectGeo.boundingSphere.radius) * Math.random();
+								currObject.scale.set(resizeNum, resizeNum, resizeNum);
+
+								currObject.rotateY(Math.random()*2*Math.PI);
 
 								//put building on surface of world (may be a elevated)
 								currObject.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2); 

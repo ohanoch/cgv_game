@@ -19,12 +19,14 @@ class Level {
 				atmosphereHeight,
 				alphaCameraDistance,
 				numRandomLights,
+				alphaLightColour,
 				mapBuildingRatio,
 				collectibleURL,
 				buildingModelURLs,
 				alphaModelURL,
 				floorTextureURL,
 				backgroundURL,
+				fogColour,
 				numPowerups,
 				numCollectibles,
 				collectiblesToWin,
@@ -53,11 +55,13 @@ class Level {
 		this.atmosphereHeight = atmosphereHeight;
 		this.alphaCameraDistance = alphaCameraDistance;
 		this.numRandomLights = numRandomLights;
+		this.alphaLightColour = alphaLightColour;
 		this.buildingModelURLs = buildingModelURLs;
 		this.collectibleURL = collectibleURL;
 		this.alphaModelURL = alphaModelURL;
 		this.floorTextureURL = floorTextureURL;
 		this.backgroundURL = backgroundURL;
+		this.fogColour = fogColour;
 		this.numPowerups = numPowerups;
 		this.numCollectibles = numCollectibles;
 		this.collectiblesToWin = collectiblesToWin;
