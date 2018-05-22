@@ -194,7 +194,7 @@ function createWorld() {
 	
 
 //diffuse stick
-	var length = 120, width = 8;
+	var length = 8, width = 8;
 
 	var shape = new THREE.Shape();
 	shape.moveTo( 0,0 );
@@ -205,17 +205,18 @@ function createWorld() {
 
 	var extrudeSettings = {
 		steps: 2,
-		amount: 16,
+		amount: 100,
 		bevelEnabled: true,
 		bevelThickness: 1,
 		bevelSize: 1,
 		bevelSegments: 1
 	};
-
 	var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+	var material = new THREE.MeshStandardMaterial({color: 0x517a, roughness: 0.6, })
 	var stick = new THREE.Mesh( geometry, material ) ;
-	stick.position.set(0,0,0);
+	stick.rotation.x=Math.PI/2;
+	stick.position.set(-1.5,10,0);
+
 ///////////
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -233,17 +234,19 @@ function createWorld() {
 	joshSucks.children[1].rotateZ(0.2);	
 	// joshSucks.add( stick );
 	// var temp_test = player.position.clone();
-	// joshSucks.position.set(3,3,-2);
+	joshSucks.position.set(1,12,3.8);	//center the sphere
 	
 ///// cube cam for reflections
 	cubeCamera	= new THREEx.CubeCamera(discoBall);
-	scene.add(cubeCamera.object3d);
 	cubeCamera.update(renderer, scene);
 	material.envMap	= cubeCamera.textureCube;
 ////////////////////////////////////////
 	sculpt.add(joshSucks);
 	sculpt.add(stick);
+	sculpt.scale.set(5,5,5);
+	sculpt.position.set(0,5,0);
 	scene.add(sculpt);
+	scene.add(cubeCamera.object3d);		// good enough
 
 
 
