@@ -21,6 +21,7 @@ function createLevel(levelNum){
 			20,											//alphaCameraDistance
 			2,											//numRandomLights 
 			0.5,										//mapBuildingRatio
+			'models/oil_drum/oil_drum',							//collectibleURL
 			['models/tree/tree', 'models/mill/mill'], 	//buildingModelURLs
 			"models/stork.js",							//alphaModelURL
 			"textures/floor.jpg",						//floorTextureURL
@@ -51,6 +52,7 @@ function createLevel(levelNum){
 			20,											//alphaCameraDistance
 			2,											//numRandomLights 
 			0.5,										//mapBuildingRatio
+			'models/oil_drum/oil_drum',							//collectibleURL
 			['models/ship/ship', 'models/car/car'], 	//buildingModelURLs
 			"models/horse.js",							//alphaModelURL
 			"textures/floor.jpg",						//floorTextureURL

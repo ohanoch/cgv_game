@@ -85,19 +85,62 @@ function createPowerups(){
 	INPUT: none
 	OUTPUT: none - this function adds collectibles directly to the scene
  *//////////////////////////////////////////////////////////////
-function createCollectibles(){
-	for(var i = 0; i < level.numCollectibles; i++){
-		collectibles.push(new Collectible(
-				new THREE.CylinderGeometry(1,0.5,1,32),
-				new THREE.MeshPhongMaterial({color: 0xff00ff})
-			)
+function createCollectibles(collectibleURL){
+	var postLoading = function(){
+		console.log("distributing collectibles")
+		// move collectibles to random place on map
+		randomMoveArray(collectibles);
+
+		console.log("adding collectibles to scene")
+		// add collectibles to class
+		for(var i = 0; i < collectibles.length; i++){
+			scene.add(collectibles[i]);
+		}
+		console.log("collectibles distributed and added to scene")
+	}
+
+	//load models
+	var modelLoader = function(modelURL, numModels){
+		var materialLoader = new THREE.MTLLoader();
+		materialLoader.load(
+			collectibleURL + '.mtl' ,
+			function(materials){
+				materials.preload();
+				var objLoader = new THREE.OBJLoader();
+				objLoader.setMaterials(materials);
+				objLoader.load(
+					collectibleURL + '.obj',
+					function ( object ) {
+						// get model geometry.
+						// Note modules from .obj files are of type GeometryBuffer
+						var objectGeo;
+						object.traverse( function ( child ) {
+							if ( child instanceof THREE.Mesh ) {
+								objectGeo = child.geometry;
+							}
+						} );
+						objectGeo.computeBoundingSphere();
+
+						object.position.set(0, -2*objectGeo.boundingSphere.radius, 0);
+						//resize loaded object with relation to its size (should apply to any object)
+						var resizeNum = (1/objectGeo.boundingSphere.radius);
+						object.scale.set(
+							resizeNum * Math.pow(worldMap.width, 0.075), //width
+							resizeNum * Math.pow(worldMap.atmosphereHeight, 0.075), //width
+							resizeNum * Math.pow(worldMap.depth, 0.075) //depth
+						);
+						for(var i = 0; i < level.numCollectibles; i++){
+							var currObject = object.clone();
+							collectibles.push(new Collectible(currObject))
+						}
+						console.log("all collectibles loaded")
+						postLoading();
+					}
+				);
+			}
 		);
 	}
-	// move collectibles to random place on map
-	randomMoveArray(collectibles);
 
-	for(var i = 0; i < collectibles.length; i++){
-		scene.add(collectibles[i]);
-	}
+	modelLoader(collectibleURL, level.numCollectibles);
 }
 

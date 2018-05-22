@@ -20,6 +20,7 @@ class Level {
 				alphaCameraDistance,
 				numRandomLights,
 				mapBuildingRatio,
+				collectibleURL,
 				buildingModelURLs,
 				alphaModelURL,
 				floorTextureURL,
@@ -48,6 +49,7 @@ class Level {
 		this.alphaCameraDistance = alphaCameraDistance;
 		this.numRandomLights = numRandomLights;
 		this.buildingModelURLs = buildingModelURLs;
+		this.collectibleURL = collectibleURL;
 		this.alphaModelURL = alphaModelURL;
 		this.floorTextureURL = floorTextureURL;
 		this.backgroundURL = backgroundURL;
