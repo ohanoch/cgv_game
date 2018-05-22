@@ -33,6 +33,11 @@ class Level {
 				alphaMinSpeedY,
 				alphaMaxSpeedZ,
 				alphaMinSpeedZ,
+				changeSpeedY,
+				changeSpeedZ,
+				rotateSpeed,
+				strafeSpeed,
+				gravity,
 				minimapWidth,
 				minimapHeight,
 				pauseMenuTextureURL,
@@ -61,6 +66,11 @@ class Level {
 		this.alphaMinSpeedY = alphaMinSpeedY;
 		this.alphaMaxSpeedZ = alphaMaxSpeedZ;
 		this.alphaMinSpeedZ  = alphaMinSpeedZ;
+		this.changeSpeedY =	changeSpeedY;
+		this.changeSpeedZ = changeSpeedY;
+		this.rotateSpeed = rotateSpeed;
+		this.strafeSpeed = strafeSpeed;
+		this.gravity = gravity;
 		this.mapBuildingRatio = mapBuildingRatio;
 		this.minimapWidth = minimapWidth;
 		this.minimapHeight = minimapHeight;

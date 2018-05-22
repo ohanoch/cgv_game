@@ -20,26 +20,26 @@ function keyCheck(){
 
 	// Up Arrow or "w" - camera moves forwad = speed up
 	if(keys[38] || keys[87]){ 
-		alpha.incSpeedZ(-0.05);
+		alpha.incSpeedZ(-1 * level.changeSpeedZ);
 	}
     // Down Arrow or "s" - camera moves back = speed down
     if(keys[40] || keys[83]){  
-		alpha.incSpeedZ(0.05);
+		alpha.incSpeedZ(level.changeSpeedZ);
 	}
 
     // a key: strafe left
     if (keys[65]) {     
-        player.translateX(-0.5);
+        player.translateX(-1 * level.strafeSpeed);
     }
 
     // d key: strafe right
     if (keys[68]) {     
-        player.translateX(0.5);
+        player.translateX(level.strafeSpeed);
     }
 
     // right arrow: turn right
     if (keys[39]) {     
-        player.rotateY(-1 * Math.PI/180);
+        player.rotateY(-1 * level.rotateSpeed * Math.PI/180);
         //animate avatar anti-clockwise in z
         if(crot < Math.PI + 0.4){
         	alpha.rotation.z = crot;
@@ -51,7 +51,7 @@ function keyCheck(){
 
     // left arrow: turn left
     if (keys[37]) {     
-        player.rotateY(Math.PI/180);
+        player.rotateY(level.rotateSpeed * Math.PI/180);
         // animate avatar clockwise in z
         if(crot < Math.PI + 0.4){
         	alpha.rotation.z = -crot;
@@ -64,7 +64,7 @@ function keyCheck(){
    // z key: fight gravity
    if (keys[90]) {
 		if (!alpha.jumping) {			// Set limit on jumping
-			alpha.incSpeedY(1);
+			alpha.incSpeedY(level.changeSpeedY);
 		}
 		alpha.jumping = true;
     }

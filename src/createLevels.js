@@ -34,6 +34,11 @@ function createLevel(levelNum){
 			-10,										//alphaMinSpeedY
 			-2,											//alphaMaxSpeedZ
 			-0.01,										//alphaMinSpeedZ
+			1,											//changeSpeedY
+			0.05,										//changeSpeedZ
+			1,											//rotateSpeed
+			0.5,										//strafeSpeed
+			-0.01,										//gravity
 			window.innerHeight/5,						//minimapWidth
 			window.innerHeight/5,						//minimapHeight
 			"textures/skyboxes/tantolunden5_words/",	//pauseMenuTextureURL
@@ -46,11 +51,11 @@ function createLevel(levelNum){
 		lore = "level 1";
 		level = new Level(
 			levelNum,									//levelNum
-			1500,										//width
-			1500,										//depth
-			300,										//atmosphereHeight
+			1000,										//width
+			1000,										//depth
+			400,										//atmosphereHeight
 			20,											//alphaCameraDistance
-			2,											//numRandomLights 
+			4,											//numRandomLights 
 			0.5,										//mapBuildingRatio
 			'models/oil_drum/oil_drum',							//collectibleURL
 			['models/ship/ship', 'models/car/car'], 	//buildingModelURLs
@@ -61,10 +66,15 @@ function createLevel(levelNum){
 			30, 										//numCollectibles
 			1,                                          //collectiblesToWin
 			[1,2],	 									//powerupsTypes
-			1,											//alphaMaxSpeedY
-			-10,										//alphaMinSpeedY
-			-2,											//alphaMaxSpeedZ
+			0.8,											//alphaMaxSpeedY
+			-3,										//alphaMinSpeedY
+			-10,											//alphaMaxSpeedZ
 			-0.01,										//alphaMinSpeedZ
+			1,											//changeSpeedY
+			0.05,										//changeSpeedZ
+			1,											//rotateSpeed
+			0.5,										//strafeSpeed
+			-0.01,										//gravity
 			window.innerHeight/5,						//minimapWidth
 			window.innerHeight/5,						//minimapHeight
 			"textures/skyboxes/tantolunden5_words/",	//pauseMenuTextureURL
