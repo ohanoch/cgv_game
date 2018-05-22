@@ -97,7 +97,8 @@ var text_height;
 var text_size;
 var curveSegments;
 var text_object_container;
-
+var cubeCamera;
+var reflection_on_off; //turn cubeCam on or off
 // for menu class
 //var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
 
@@ -184,16 +185,43 @@ function createWorld() {
 	joshSucks = new THREE.Object3D();		// Sculpture object
 
 	// Make a reflective sphere (only reflects skybox, at the moment)
-	var geometry = new THREE.SphereGeometry(50, 32, 16);
+	var geometry = new THREE.SphereGeometry(10, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
-    color   : 'chrome',
+    color   : 0xffffff,
 	envMap 	: scene.background
 	});
 	discoBall = new THREE.Mesh(geometry, material);
 	discoBall.position.set(0,0,0);	// centre obj coords of sphere
 	joshSucks.add(discoBall);
 
-	var cubeCamera	= new THREEx.CubeCamera(discoBall);
+//stick
+	// var length = 120, width = 8;
+
+	// var shape = new THREE.Shape();
+	// shape.moveTo( 0,0 );
+	// shape.lineTo( 0, width );
+	// shape.lineTo( length, width );
+	// shape.lineTo( length, 0 );
+	// shape.lineTo( 0, 0 );
+
+	// var extrudeSettings = {
+	// 	steps: 2,
+	// 	amount: 16,
+	// 	bevelEnabled: true,
+	// 	bevelThickness: 1,
+	// 	bevelSize: 1,
+	// 	bevelSegments: 1
+	// };
+
+	// var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+	// var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+	// var mesh = new THREE.Mesh( geometry, material ) ;
+	// mesh.position.set(0,0,0);
+	// joshSucks.add( mesh );
+///////////
+
+
+	cubeCamera	= new THREEx.CubeCamera(discoBall);
 	scene.add(cubeCamera.object3d);
 	cubeCamera.update(renderer, scene);
 
@@ -203,18 +231,21 @@ function createWorld() {
 ///	///////////////////////////////////////////////////////////////////////////////
 	text = "JOSH  SUCKS";
 	text_height = 0.5;
-	text_size = 2;
+	text_size = 10;
 	curveSegments = 4;
 	font = undefined;
 
 	text_object_container = new THREE.Group();
 	text_object_container.position.set(-8,0,7);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely
 	loadFont();
-
 	joshSucks.add(text_object_container);
+	console.log("uid",joshSucks.children[1])
+
 	joshSucks.rotateZ(0.2);
-	var temp_test = player.position.clone();
-	joshSucks.position.set(3,3,-2);
+	joshSucks.add( mesh );
+
+	//var temp_test = player.position.clone();
+	joshSucks.position.set(3,10,-2);
 	scene.add(joshSucks);
 
 
@@ -286,15 +317,15 @@ function modelLoader(geometry, materials) {
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function updateForFrame() {
-	var cubeCamera	= new THREEx.CubeCamera(discoBall);
-	scene.add(cubeCamera.object3d);
-	cubeCamera.update(renderer, scene);
 
-	discoBall.material.envMap	= cubeCamera.textureCube;
-
+	// make dynamic reflections
+	if(reflection_on_off == true){
+		cubeCamera.update(renderer, scene);
+		discoBall.material.envMap = cubeCamera.textureCube;
+	}
 
 	//Move player backwards or forwards by their Z velocity
-  player.translateZ(alpha.getSpeedZ());
+  	player.translateZ(alpha.getSpeedZ());
 
     //Move player up or down by their Y velocity
 	player.translateY(alpha.getSpeedY());
@@ -368,7 +399,7 @@ function updateForFrame() {
 	}
 
 	//animate josh sucks
-	joshSucks.rotateY(Math.sin(Math.PI/6));
+	joshSucks.children[1].rotateY(Math.sin(Math.PI/6));
 
 	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
 	//cubeCamera.update(renderer, scene);

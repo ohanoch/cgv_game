@@ -73,7 +73,7 @@ function createLevel(levelNum){
 	// 	);
 
 	// }else if(levelNum == 1){
-	if(levelNum == 0)
+	if(levelNum == 0){
 		lore = "level 3";
 		level = new Level(
 			levelNum,									//levelNum
@@ -104,7 +104,7 @@ function createLevel(levelNum){
 			"sounds/stayin_alive_8bit.mp3",				//playingSoundURL
 			lore										//lore for level story
 		);
-	} else if(levelNum == 1){
+	}else if(levelNum == 1){
 		lore = "level 1";
 		level = new Level(
 			levelNum,									//levelNum

@@ -112,6 +112,15 @@ function keysPressed(e) {
 		}
 	}
 
+	// "j" for Josh sucks cubeCamera on/off
+	if(e.keyCode == 74){
+		if(reflection_on_off == true){
+			reflection_on_off = false;
+		}else {
+			reflection_on_off = true;
+		}
+	}
+
 	// F11 to enter and exit fullscreen
 	if(e.keyCode == 122){
 		if(!fullscreen){
