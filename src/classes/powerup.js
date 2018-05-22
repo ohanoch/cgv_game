@@ -7,54 +7,33 @@
 // animation
 // type
 
-var powerupTypes = ["gun", "invisible", "gravity"];  //dictionary to make powerup types readable
+var powerupTypes = ["gun", "small", "gravity"];  //dictionary to make powerup types readable
+var powerupColours = [0xff0000,0xeeff00,0x00ff11];
 
 class Powerup extends THREE.Mesh{
 
 	constructor(type) {
 		super(
 			new THREE.SphereGeometry( 8, 32, 32 ),
-			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0xaa00bb, transparent: true} )
+			new THREE.MeshBasicMaterial( { wireframe: false, opacity: 0.5, color: 0xffffff, transparent: true} )
 		);
 
 		this.expiration = 600;
 		this.type = type;
 
-		if(this.type == 0){	//gun type
-		//load model here	
-			this.add(
+		this.add(
 				new THREE.Mesh(
-					new THREE.TorusKnotGeometry( 2, 0.1, 100, 16, 4, 13 ),
-					new THREE.MeshBasicMaterial( { color: 0xff0000 } )
+					new THREE.TorusKnotGeometry( 3.5, 0.1, 100, 16, 13, 8 ),
+					new THREE.MeshBasicMaterial( { color: powerupColours[this.type] } )
 				)
-			);
-			
-		} else if (this.type == 1){
-		//load model here
-			this.add(
-				new THREE.Mesh(
-					new THREE.TorusKnotGeometry( 2, 0.1, 100, 16, 4, 13 ),
-					new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
-				)
-			);
-		} else if (this.type == 2){
-		//load model
-			this.add(
-					new THREE.Mesh(
-						new THREE.TorusKnotGeometry( 2, 0.1, 100, 16, 4, 13 ),
-						new THREE.MeshBasicMaterial( { color: 0x0000ff } )
-					)
-			);
-		}
+		);
 
-		console.log("");
-		
 	}
-	
+
 	getExpiration() {
 		return this.expiration;
 	}
-	
+
 	activatePower( ) {
 	// test powerup. make your own!
 		if (this.type == 1){
@@ -63,7 +42,7 @@ class Powerup extends THREE.Mesh{
 			alpha.setMinSpeedY(0);
 		}
 	}
-	
+
 	deactivatePower() {
 		if(this.type == 1) {
 			alpha.scale.set(
@@ -75,11 +54,11 @@ class Powerup extends THREE.Mesh{
 			alpha.setMinSpeedY(-1000);
 		}
 	}
-	
+
 	decrementExpiration() {
 		this.expiration--;
 	}
-	
+
 	animate() {
 		this.children[0].rotateX(0.1);
 	}
