@@ -98,13 +98,13 @@ function createLevel(levelNum){
 			20,											//alphaCameraDistance
 			0,											//numRandomLights 
 			0x00ffff,									//alphaLightColour
-			0.5,										//mapBuildingRatio
-			'models/oil_drum/oil_drum',							//collectibleURL
-			['models/tree/tree', 'models/mill/mill'], 	//buildingModelURLs
+			0.55,										//mapBuildingRatio
+			'models/carrot/Carrot',							//collectibleURL
+			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
 			"models/stork.js",							//alphaModelURL
 			"textures/skyboxes/mp_whirlpool/yneg.png",						//floorTextureURL
 			"textures/skyboxes/mp_whirlpool/", 			//backgroundURL
-			0x0000ff,									//fog colour
+			0x028ea8,									//fog colour
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,											//collectiblesToWin
@@ -114,7 +114,7 @@ function createLevel(levelNum){
 			-2,											//alphaMaxSpeedZ
 			-0.01,										//alphaMinSpeedZ
 			1,											//changeSpeedY
-			0.05,										//changeSpeedZ
+			0.001,										//changeSpeedZ
 			1,											//rotateSpeed
 			0.5,										//strafeSpeed
 			-0.01,										//gravity

@@ -124,6 +124,7 @@ class Map {
 								currObject.scale.set(resizeNum, resizeNum, resizeNum);
 
 								currObject.rotateY(Math.random()*2*Math.PI);
+								currObject.rotateZ(Math.random());
 
 								//put building on surface of world (may be a elevated)
 								currObject.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2); 
