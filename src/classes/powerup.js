@@ -38,6 +38,7 @@ class Powerup extends THREE.Mesh{
 	// test powerup. make your own!
 		if (this.type == 1){
 			alpha.scale.set(0.01,0.01,0.01);
+			alpha.collisionLeeway *= 0.01;
 		} else if (this.type == 2 ) {
 			alpha.setMinSpeedY(0);
 		}

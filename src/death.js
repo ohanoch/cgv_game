@@ -74,6 +74,9 @@ function Crash() {
 		sprite.scale.set( 16, 16, 1.0 ); // imageWidth, imageHeight
 		scene.add( sprite );
 	}
+	for(var i = 0; i < activePowerups.length; i++){
+		activePowerups[i].deactivatePower();
+	}
 }
 
 
