@@ -91,7 +91,13 @@ function render() {
 
     if(cutscenePlaying) {
         cameraRender(cutsceneCamera, cutscene, 0, 0, window.innerWidth, window.innerHeight);
-            rendererCSS.render( cssScene, cutsceneCamera );
+            // rendererCSS.render( cssScene, cutsceneCamera );
+        if ( video.readyState === video.HAVE_ENOUGH_DATA ) 
+    {
+        videoImageContext.drawImage( video, 0, 0 );
+        if ( videoTexture ) 
+            videoTexture.needsUpdate = true;
+    }   
         return;
     }
 

@@ -137,7 +137,7 @@ function createLevel(levelNum){
 			0,											//numRandomLights
 			0x00ffff,									//alphaLightColour
 			0.55,										//mapBuildingRatio
-			'models/carrot/Carrot',						//collectibleURL
+			'models/asdf2/Lightsaber_Scene',		//collectibleURL
 			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
 			"models/stork.js",							//alphaModelURL
 			"textures/skyboxes/mp_whirlpool/yneg.png",	//floorTextureURL
