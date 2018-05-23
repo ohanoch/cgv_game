@@ -143,3 +143,13 @@ function createCollectibles(collectibleURL){
 
 	modelLoader(collectibleURL, level.numCollectibles);
 }
+
+function waltLoader(geometry, materials){
+    var material = new THREE.MeshLambertMaterial( {
+		vertexColors: THREE.FaceColors,             // use colors from the geometry
+	});
+	var walt = new THREE.Mesh(geometry,material);
+	walt.position.set(0,0,-5);
+	walt.scale.set(0.05, 0.05, 0.05);
+	player.add(walt);
+}

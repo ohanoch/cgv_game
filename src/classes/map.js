@@ -119,17 +119,18 @@ class Map {
 								var currObject = object.clone();
 								var currObjectBox = objectGeo.boundingBox;
 
+
+								//put building on surface of world (may be a elevated)
+								currObject.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2);
+								currObject.translateY(Math.random() * (worldMap.atmosphereHeight - objectGeo.boundingSphere.radius + objectGeo.boundingSphere.radius / 2));
+								currObject.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2);
+
 								//resize loaded object with relation to its size (should apply to any object)
 								var resizeNum = Math.pow(worldMap.atmosphereHeight, ratio) * (1/objectGeo.boundingSphere.radius) * Math.random();
 								currObject.scale.set(resizeNum, resizeNum, resizeNum);
 
 								currObject.rotateY(Math.random()*2*Math.PI);
 								currObject.rotateZ(Math.random());
-
-								//put building on surface of world (may be a elevated)
-								currObject.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2);
-								currObject.translateY(Math.random() * (worldMap.atmosphereHeight - objectGeo.boundingSphere.radius + objectGeo.boundingSphere.radius / 2));
-								currObject.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2);
 
 								worldMap.buildings.push( currObject );
 								scene.add( currObject );
