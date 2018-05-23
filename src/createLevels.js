@@ -108,7 +108,7 @@ function createLevel(levelNum){
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,											//collectiblesToWin
-			[1],	 									//powerupsTypes
+			[1,2],	 									//powerupsTypes
 			1,											//alphaMaxSpeedY
 			-10,										//alphaMinSpeedY
 			-2,											//alphaMaxSpeedZ
