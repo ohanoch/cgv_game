@@ -75,6 +75,7 @@ class Alpha extends THREE.Mesh{
 
 		if(lives == STARTING_LIVES && currLevel == 1){
 			displayMenu( menusArr.startMenu );
+			window.alert(lore0);
 		}
 	}
 	
