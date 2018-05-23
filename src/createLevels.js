@@ -45,7 +45,7 @@ function createLevel(levelNum){
 			window.innerHeight/5,						//minimapHeight
 			"textures/skyboxes/tantolunden5_words/",	//pauseMenuTextureURL
 			"sounds/haha.wav",							//crashSoundURL
-			"sounds/barbie_girl_8bit.mp3",				//pauseSoundURL
+			"sounds/highway_to_hell_8bit.mp3",				//pauseSoundURL
 			"sounds/stayin_alive_8bit.mp3",				//playingSoundURL
 			lore										//lore for level story
 		);
@@ -64,8 +64,8 @@ function createLevel(levelNum){
 			['models/ship/ship', 'models/car/car'], 	//buildingModelURLs
 			"models/horse.js",							//alphaModelURL
 			"textures/floors/lava_floor.png",						//floorTextureURL
-			"textures/skyboxes/dawnmountain/", 			//backgroundURL
-			0xffffff,									//fog colour
+			"textures/skyboxes/mp_mercury/", 			//backgroundURL
+			0x900036,									//fog colour
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,                                          //collectiblesToWin
@@ -81,9 +81,9 @@ function createLevel(levelNum){
 			-0.02,										//gravity
 			window.innerHeight/5,						//minimapWidth
 			window.innerHeight/5,						//minimapHeight
-			"textures/skyboxes/tantolunden5_words/",	//pauseMenuTextureURL
+			"textures/skyboxes/nec_hell/",	//pauseMenuTextureURL
 			"sounds/haha.wav",							//crashSoundURL
-			"sounds/barbie_girl_8bit.mp3",				//pauseSoundURL
+			"sounds/highway_to_hell_8bit.mp3",				//pauseSoundURL
 			"sounds/stayin_alive_8bit.mp3",				//playingSoundURL
 			lore										//lore for level story
 		);
