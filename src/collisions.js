@@ -29,12 +29,16 @@ function buildingBoxCollision( object ){
 	var suspectObjects = [];
 	var objectBox = new THREE.Box3();
     objectBox.setFromObject( object );		//Computes the world-axis-aligned bounding box of an Object3D (including its children), accounting for the object's, and children's, world transforms
+	console.log("gggggggggggggggggggggggggggggggggggggggggggggggggggggggg")
+	console.log(objectBox);
 
 	for(var i = 0; i < worldMap.buildingBoxes.length; i++){
 		if(twoBoxCollision(worldMap.buildingBoxes[i], objectBox)){
 			suspectObjects.push(worldMap.buildings[i]);
 		}
 	}
+	console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+	console.log(suspectObjects)
 	return suspectObjects;
 }
 
@@ -61,7 +65,7 @@ function  collisions() {
 		// Check building collisions
 		if ( 
 			BuildingCollisionResults.length > 0 &&
-			BuildingCollisionResults[0].distance < directionVector.length() - 1 &&
+			BuildingCollisionResults[0].distance < directionVector.length() - alpha.collisionLeeway  &&
 			!BuildingCollisionResults[0].point.equals(new THREE.Vector3(0,0,0))
 		){ // TODO: adjust this offset (-1 currently)
 			console.log("hit");

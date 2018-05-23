@@ -26,6 +26,7 @@ class Alpha extends THREE.Mesh{
 		
 		this.jumping = false;
 		this.radius = radius;
+		this.collisionLeeway = 1;
 		
 		this.geometry = geometry;	// save geometry of model so that it can be accessed later by collision fn.
 		console.log("Alpha created");
