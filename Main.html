@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <head>
+<link rel="stylesheet" type="text/css" href="stylesheet.css">	<!-- CSS -->
 <meta charset="UTF-8">
 <title>_alpha_</title>
+<style> body { margin: 0px 0px 0px 0px; } canvas { width: 100%; height: 100% } </style>
+<!-- <iframe src="starwars-gh-pages/index.html" class="frame" ></iframe>  -->
+</head>
 <audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>	
-<audio id="song1" src="sounds/stayin_alive_8bit.mp3" preload="auto"></audio>	
-
 <script src="libs\three.js"></script>
 <script src="libs\OrbitControls.js"></script>
 <script src="libs\stats.min.js"></script>
@@ -35,6 +37,8 @@
 <script src="src\collisions.js"></script>
 <script src="src\fuckingText.js"></script>
 <script src="src\customSubroutines.js"></script>
+
+
 
 <script>
 
@@ -461,6 +465,7 @@ function doFrame() {
 function init() {
 	createLevel(currLevel);
     try {
+    	document.getElementById( 'container' ).style.margin = "0px 0px 0px 0px";
 		container = document.getElementById( 'container' );
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
@@ -489,68 +494,8 @@ function init() {
 }
 
 </script>
-
-<!-- CSS -->
-<style>
-.container {
-    position: relative;
-    text-align: center;
-    color: black;
-}
-
-.bottom-left {
-    position: absolute;
-    bottom: 8px;
-    left: 16px;
-}
-
-.top-left {
-    position: absolute;
-    top: 8px;
-    left: 16px;
-}
-
-.top-right {
-    position: absolute;
-    top: 8px;
-    right: 16px;
-}
-
-.bottom-right {
-    position: absolute;
-    bottom: 8px;
-    right: 16px;
-}
-
-.centered {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.text-block {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color:rgba(192,192,192,0.5);
-    color: white;
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-</style>
-
-
-</head>
 <body onload="init()">
 
-
-	<noscript>
-   		<p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
-	</noscript>
-
-	<p style="color:#AA0000; font-weight: bold" id="message"> </p>
  	<div class="container">
 		<div id="container"></div>
 	  	<div class="text-block">
@@ -560,6 +505,7 @@ function init() {
 	    	<p id="s2">Lives: - / - </p>
 	    </div>
 	</div>
-
 </body>
 </html>
+
+
