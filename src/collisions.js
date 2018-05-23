@@ -29,15 +29,12 @@ function buildingBoxCollision( object ){
 	var suspectObjects = [];
 	var objectBox = new THREE.Box3();
     objectBox.setFromObject( object );		//Computes the world-axis-aligned bounding box of an Object3D (including its children), accounting for the object's, and children's, world transforms
-	console.log("gggggggggggggggggggggggggggggggggggggggggggggggggggggggg")
-	console.log(objectBox);
 
 	for(var i = 0; i < worldMap.buildingBoxes.length; i++){
 		if(twoBoxCollision(worldMap.buildingBoxes[i], objectBox)){
 			suspectObjects.push(worldMap.buildings[i]);
 		}
 	}
-	console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
 	console.log(suspectObjects)
 	return suspectObjects;
 }
