@@ -23,7 +23,7 @@ class Powerup extends THREE.Mesh{
 
 		this.add(
 				new THREE.Mesh(
-					new THREE.TorusKnotGeometry( 3.5, 0.1, 100, 16, 13, 8 ),
+					new THREE.TorusKnotGeometry( 3.5, 0.1, 100, 16, 13 / this.type, 8 / this.type ),
 					new THREE.MeshBasicMaterial( { color: powerupColours[this.type] } )
 				)
 		);
