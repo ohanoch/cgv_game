@@ -108,7 +108,7 @@ function createLevel(levelNum){
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,											//collectiblesToWin
-			[1,2],	 									//powerupsTypes
+			[1],	 									//powerupsTypes
 			1,											//alphaMaxSpeedY
 			-10,										//alphaMinSpeedY
 			-2,											//alphaMaxSpeedZ
@@ -122,7 +122,7 @@ function createLevel(levelNum){
 			window.innerHeight/5,						//minimapHeight
 			"textures/skyboxes/mp_midnight/",	//pauseMenuTextureURL
 			"sounds/haha.wav",							//crashSoundURL
-			"sounds/doctor.mp3",				//pauseSoundURL
+			"sounds/under_the_sea_8bit.mp3",				//pauseSoundURL
 			"sounds/blue_8bit.mp3",				//playingSoundURL
 			lore										//lore for level story
 		);

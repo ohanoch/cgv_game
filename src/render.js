@@ -6,12 +6,12 @@
     INPUT: camera to render, left and top are top left corner to start rendering from, width and height are size arguments of renderer
     OUTPUT: none
  *//////////////////////////////////////////////////////////////
-function cameraRender( camera, left, top, width, height ){
+function cameraRender( camera, inScene, left, top, width, height ){
 
     renderer.setViewport( left, top, width, height );
     renderer.setScissor( left, top, width, height );
     camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
+    renderer.render(inScene, camera);
 }
 
 /* /////////////////////////////////////////////////////////////
@@ -89,16 +89,20 @@ function removeMinimapObjects( removeObjects ){
  *//////////////////////////////////////////////////////////////
 function render() {
 
-    // Render main camera on entire screen
-    cameraRender (mainCamera, 0, 0, window.innerWidth, window.innerHeight)
+    if(cutscenePlaying) {
+        cameraRender(cutsceneCamera, cutscene, 0, 0, window.innerWidth, window.innerHeight);
+        return;
+    }
 
+    // Render main camera on entire screen
+    cameraRender (mainCamera, scene, 0, 0, window.innerWidth, window.innerHeight)
     //if paused don't show minimap
     if(animating){
         scene.remove(worldMap.atmosphere);
         //add objects to minimap so it will be easier to see
         var removeObjects = addMinimapObjects();
         // Render minimap camera in top right corner
-        cameraRender(minimapCamera, window.innerWidth - level.minimapWidth - 50, 20, level.minimapWidth, level.minimapHeight);
+        cameraRender(minimapCamera, scene, window.innerWidth - level.minimapWidth - 50, 20, level.minimapWidth, level.minimapHeight);
 
         // remove objects from minimap
         removeMinimapObjects(removeObjects);

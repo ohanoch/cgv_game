@@ -93,6 +93,7 @@ function keysPressed(e) {
 				requestAnimationFrame(doFrame);
 			}
 		}
+		render();
 		return;
 	}
 	
