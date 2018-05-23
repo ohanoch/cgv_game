@@ -162,9 +162,9 @@ function createLevel(levelNum){
 	} else if (levelNum == 4) {
 		level = new Level(
 			levelNum,									//levelNum
-			100,										//width
-			100,										//depth
-			100,										//atmosphereHeight
+			1000,										//width
+			1000,										//depth
+			1000,										//atmosphereHeight
 			20,											//alphaCameraDistance
 			0,											//numRandomLights
 			0xffffff,									//alphaLightColour

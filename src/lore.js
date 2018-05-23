@@ -7,3 +7,5 @@ var lore1 = "level1";
 var lore2 = "level2";
 
 var lore3 = "level3";
+
+var lore4 = "catch walt"

@@ -46,7 +46,7 @@
 "use strict";
 
 var STARTING_LIVES = 3;
-var currLevel = 1; //level variable mostly for display purposes at the moment
+var currLevel = 4; //level variable mostly for display purposes at the moment
 var level;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -294,6 +294,9 @@ function createWorld() {
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 
 	loader.load(level.alphaModelURL, modelLoader);			// load model and call model_loader
+	if(currLevel == 4){
+		loader.load("models/WaltHeadLo.js", waltLoader);
+	}
 
 
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
@@ -357,6 +360,11 @@ function modelLoader(geometry, materials) {
 function updateForFrame() {
 	frameNumber++;
 
+	if(currLevel == 4){
+		player.children[3].translateZ(-0.1);
+		player.children[3].translateX(Math.sin(frameNumber/10));
+		player.children[3].translateY(Math.cos(frameNumber/15));
+	}
 	// This block runs while resources are loading.
 	// if( loading === true ){
 	// // 	//console.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
@@ -462,11 +470,13 @@ function updateForFrame() {
 		return;
 	}
 
-	// Score update: TODO: ut in function and tidy up
-	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
-		score++;
-	} else {
-		score = score - 5;
+	if(currLevel != 4){
+			// Score update: TODO: ut in function and tidy up
+			if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
+				score++;
+			} else {
+				score = score - 5;
+			}
 	}
 
 	document.getElementById("s0").innerHTML = "Level: " + level.levelNum;
