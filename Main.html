@@ -6,7 +6,7 @@
 <style> body { margin: 0px 0px 0px 0px; } canvas { width: 100%; height: 100% } </style>
 <!-- <iframe src="starwars-gh-pages/index.html" class="frame" ></iframe>  -->
 </head>
-<audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>	
+<audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>
 <script src="libs\three.js"></script>
 <script src="libs\OrbitControls.js"></script>
 <script src="libs\stats.min.js"></script>
@@ -46,7 +46,7 @@
 "use strict";
 
 var STARTING_LIVES = 3;
-var currLevel = 4; //level variable mostly for display purposes at the moment
+var currLevel = 1; //level variable
 var level;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -101,8 +101,8 @@ var text;
 var text_height;
 var text_size;
 
-var curveSegments;	
-var text_object_container;			
+var curveSegments;
+var text_object_container;
 var cubeCamera;			// for dynamic reflections
 var reflection_on_off; //turn cubeCam on or off
 
@@ -263,16 +263,16 @@ function createWorld() {
 	curveSegments = 4;
 	font = undefined;
 
-	text_object_container = new THREE.Group();	
+	text_object_container = new THREE.Group();
 	text_object_container.position.set(-8,0,7);	// -8,0,7 is the magic tuple to get the text to rotate around the sphere.
 
 	loadFont();
 	joshSucks.add(text_object_container);
-	joshSucks.children[1].rotateZ(0.2);	
+	joshSucks.children[1].rotateZ(0.2);
 	// joshSucks.add( stick );
 	// var temp_test = player.position.clone();
 	joshSucks.position.set(1,12,3.8);	//center the sphere
-	
+
 ///// cube cam for reflections
 	cubeCamera	= new THREEx.CubeCamera(discoBall);
 	cubeCamera.update(renderer, scene);
@@ -365,17 +365,6 @@ function updateForFrame() {
 		player.children[3].translateX(Math.sin(frameNumber/10));
 		player.children[3].translateY(Math.cos(frameNumber/15));
 	}
-	// This block runs while resources are loading.
-	// if( loading === true ){
-	// // 	//console.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
-	// 	renderer.setClearColor("black");
-	// 	box.position.x -= 0.05;
-	// 	if( box.position.x < -10 ){
-	// 		box.position.x = 10;
-	// 	} 
-	// 	box.position.y = Math.sin(box.position.x);
-	// 	return; // Stop the function here.
-	// }
 
 	// make dynamic reflections
 	if(reflection_on_off == true){
@@ -499,7 +488,7 @@ function doFrame() {
 		box.position.x -= 0.05;
 		if( box.position.x < -10 ){
 			box.position.x = 10;
-		} 
+		}
 		box.position.y = Math.sin(box.position.x);
         render();
 		stats.update();
@@ -511,7 +500,7 @@ function doFrame() {
 			cutscenePlaying = false;
 			finishInit();
 		}
-        
+
 	}
 
     if (animating) {
@@ -596,5 +585,3 @@ function init() {
 	</div>
 </body>
 </html>
-
-

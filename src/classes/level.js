@@ -97,6 +97,7 @@ class Level {
 		powerups = [];			// items providing certain powerups or "boosts" to the player for a short time when picked up
 		activePowerups = [];
 		collectibles = [];			// the items that the player needs to collect in order to progress to the next level
+		collectibleCount = 0;		//number of collectibles the player has collected so far
 		mixer = null;  // The object that animates the model, of type THREE.AnimationMixer
 		minimapCamera = null;
 		worldMap = null;

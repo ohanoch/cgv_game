@@ -11,10 +11,10 @@ var sprite = new THREE.Sprite( spriteMaterial );
 	INPUT: none
 	OUTPUT: none
 ////////////////////////////////////////////////////////////////////////////////////*/
-function restartGame(){
+function restartGame(levelToRestart){
 	console.log("restarting game");
 	playingSound.pause();
-	currLevel = 1;
+	currLevel = levelToRestart;
 	createLevel(currLevel);
 	level.reinitializeGlobals();
 	if(currLevel == 1){
@@ -23,7 +23,7 @@ function restartGame(){
 	}
 	createWorld();
 	installOrbitControls();
-	console.log("game restarted");	
+	console.log("game restarted");
 }
 
 
@@ -41,7 +41,7 @@ function putOnFloor() {
 	} else {																		//if they have, the player crashes
 		Crash();
 		return false;
-	}	
+	}
 }
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -57,12 +57,12 @@ function Crash() {
 	document.getElementById('xyz').play();		// the right way
 	// Update Alpha stats
 	lives -= 1;
-	
+
 	// if no more lives, game over
 	if (lives == 0){
 		animating = false;
 		window.alert("G A M E    O V E R\nYour final score: " + score + "\nClick OK to start a new game");
-		restartGame();
+		restartGame(1);
 	}else{
 	// TODO : Crash animation, respawn
 		console.log("alpha crashed...");
@@ -79,5 +79,3 @@ function Crash() {
 		activePowerups[i].deactivatePower();
 	}
 }
-
-

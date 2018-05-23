@@ -46,7 +46,7 @@ function createLevel(levelNum){
 			"sounds/stayin_alive_8bit.mp3",				//playingSoundURL
 			lore0										//lore for level story
 		);
-	} else if(levelNum == 1){
+	} else if(levelNum == 1){		//or
 		level = new Level(
 			levelNum,									//levelNum
 			1000,										//width
@@ -84,7 +84,7 @@ function createLevel(levelNum){
 			lore1										//lore for level story
 		);
 
-	} else if (levelNum == 2) {
+	} else if (levelNum == 2) {		//avi
 		level = new Level(
 			levelNum,									//levelNum
 			1000,										//width
@@ -94,7 +94,7 @@ function createLevel(levelNum){
 			0,											//numRandomLights
 			0x00ffff,									//alphaLightColour
 			0.55,										//mapBuildingRatio
-			'models/carrot/Carrot',							//collectibleURL
+			'models/wine/Wine_Bottle_White',							//collectibleURL
 			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
 			"models/stork.js",							//alphaModelURL
 			"textures/skyboxes/mp_whirlpool/yneg.png",						//floorTextureURL
@@ -121,7 +121,7 @@ function createLevel(levelNum){
 			"sounds/blue_8bit.mp3",				//playingSoundURL
 			lore2										//lore for level story
 		);
-	} else if (levelNum == 3) {
+	} else if (levelNum == 3) {		//niambh
 		level = new Level(
 			levelNum,									//levelNum
 			1000,										//width
@@ -140,7 +140,7 @@ function createLevel(levelNum){
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,											//collectiblesToWin
-			[1],	 									//powerupsTypes
+			[2],	 									//powerupsTypes
 			1,											//alphaMaxSpeedY
 			-10,										//alphaMinSpeedY
 			-2,											//alphaMaxSpeedZ
@@ -158,7 +158,7 @@ function createLevel(levelNum){
 			"sounds/blue_8bit.mp3",				//playingSoundURL
 			lore3									//lore for level story
 		);
-	
+
 	} else if (levelNum == 4) {
 		level = new Level(
 			levelNum,									//levelNum
