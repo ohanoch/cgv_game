@@ -3,9 +3,9 @@
 var modelList;
 
 class Map {
-	
+
 	constructor(width, depth, atmosphereHeight, floorTextureURL, backgroundDirectoryURL, inputModelList) {		//create and initialize map
-		
+
 		this.width = width; // x axis
 		this.atmosphereHeight = atmosphereHeight; // y axis
 		this.depth = depth; // z axis
@@ -16,12 +16,12 @@ class Map {
 		//------------------------------------- Atmosphere --------------------------------------------
 		this.atmosphere = new THREE.Mesh(
 				new THREE.PlaneGeometry(this.width, this.depth,100,100),
-				new THREE.MeshBasicMaterial({ 
-					side: THREE.DoubleSide, 
-					wireframe: true, 
+				new THREE.MeshBasicMaterial({
+					side: THREE.DoubleSide,
+					wireframe: true,
 					wireframeLinewidth: 2,
-					opacity: 0.4, 
-					color: 0xcc0000, 
+					opacity: 0.4,
+					color: 0xcc0000,
 					transparent: true,
 				})
 			);
@@ -29,8 +29,8 @@ class Map {
 		this.atmosphere.rotation.x = -Math.PI / 2;
 
 		var textureLoader = new THREE.TextureLoader();
-		
-		
+
+
 		//-------------------------------------- FLOOR -------------------------------------------------
 		if(floorTextureURL != ""){
 			var floorTexture = textureLoader.load( floorTextureURL );    //load floor texture
@@ -43,13 +43,13 @@ class Map {
 			this.floorHeight = -4;
 			this.floor.position.set(0,this.floorHeight,0);
 			this.floor.rotation.x = -Math.PI / 2;
-			this.floor.receiveShadow = true;			
+			this.floor.receiveShadow = true;
 
 			console.log("Floor texture added to map");
 		}
-	
+
 		if(backgroundDirectoryURL != ""){
-			
+
 			this.background = new THREE.CubeTextureLoader()
 				.setPath(backgroundDirectoryURL)
 				.load([
@@ -65,7 +65,7 @@ class Map {
 		}
 
 		console.log("Map Created");
-	
+
 	}
 
 	/**
@@ -77,8 +77,8 @@ class Map {
 		var numBuildings = Math.floor(Math.pow(worldMap.width * worldMap.depth, ratio/1.3));
 		console.log("adding " + numBuildings + " buildings to map")
 
-		var materialLoader = new THREE.MTLLoader();		
-		
+		var materialLoader = new THREE.MTLLoader();
+
 		//split numBuildings between different models
 		var numPerModel = splitNumToParts(numBuildings, modelList.length);
 		console.log("split of building types " + numPerModel);
@@ -102,7 +102,7 @@ class Map {
 					objLoader.load(
 						modelURL + '.obj',
 						function ( object ) {
-							
+
 							// get model geometry.
 							// Note modules from .obj files are of type GeometryBuffer
 							var objectGeo;
@@ -124,12 +124,13 @@ class Map {
 								currObject.scale.set(resizeNum, resizeNum, resizeNum);
 
 								currObject.rotateY(Math.random()*2*Math.PI);
+								currObject.rotateZ(Math.random());
 
 								//put building on surface of world (may be a elevated)
-								currObject.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2); 
+								currObject.translateX(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.width / 2);
 								currObject.translateY(Math.random() * (worldMap.atmosphereHeight - objectGeo.boundingSphere.radius + objectGeo.boundingSphere.radius / 2));
 								currObject.translateZ(Math.pow(-1, Math.round(2 * Math.random())) * Math.random() * worldMap.depth / 2);
-								
+
 								worldMap.buildings.push( currObject );
 								scene.add( currObject );
 
@@ -143,7 +144,7 @@ class Map {
 					);
 				}
 			);
-		
+
 		}
 
 		// Calls loader for each object
