@@ -3,23 +3,6 @@
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< C O L L I S I O N S ! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 /*///////////////////////////////////////////////////////////////////////////////// 
-	Check for collision between two bounding boxes. Note bounding boxes have min: x,y,z, and max: x,y,z values
-	Called by buildingBoxCollision
-	INPUT: two objects
-	OUTPUT: returns true if their is a collision, false otherwise
-//////////////////////////////////////////////////////////////////////////////////*/
-function twoBoxCollision(box1, box2){
-	if(
-		(box1.max.x < box2.min.x || box1.min.x > box2.max.x) ||
-		(box1.max.y < box2.min.y || box1.min.y > box2.max.y) ||
-		(box1.max.z < box2.min.z || box1.min.z > box2.max.z) 
-	){
-		return false;
-	}
-	return true;
-}
-
-/*///////////////////////////////////////////////////////////////////////////////// 
 	This function checks for collision of bounding boxes of alpha and the map buildings
 	Called by collisions and randomMoveArray
 	INPUT: object to check collision with
@@ -31,11 +14,10 @@ function buildingBoxCollision( object ){
     objectBox.setFromObject( object );		//Computes the world-axis-aligned bounding box of an Object3D (including its children), accounting for the object's, and children's, world transforms
 
 	for(var i = 0; i < worldMap.buildingBoxes.length; i++){
-		if(twoBoxCollision(worldMap.buildingBoxes[i], objectBox)){
+		if(objectBox.intersectsBox(worldMap.buildingBoxes[i])){
 			suspectObjects.push(worldMap.buildings[i]);
 		}
 	}
-	console.log(suspectObjects)
 	return suspectObjects;
 }
 
