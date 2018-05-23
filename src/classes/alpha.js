@@ -26,6 +26,7 @@ class Alpha extends THREE.Mesh{
 		
 		this.jumping = false;
 		this.radius = radius;
+		this.collisionLeeway = 1;
 		
 		this.geometry = geometry;	// save geometry of model so that it can be accessed later by collision fn.
 		console.log("Alpha created");
@@ -51,6 +52,13 @@ class Alpha extends THREE.Mesh{
 			console.log("respawning alpha");
 			var randomX = Math.random();
 			var randomZ = Math.random();
+			while(
+				Math.abs(randomX * (worldMap.width / 2)) < 10 &&
+				Math.abs(randomZ * (worldMap.depth / 2)) < 10
+			){
+				randomX = Math.random();
+				randomZ = Math.random();
+			}
 			player.position.set(randomX * (worldMap.width / 2), 10, randomZ * (worldMap.depth / 2));
 			// player.position.set(0,0,0);	// Leave this here for testing purposes
 			minimapCamera.position.set(randomX * (worldMap.width / 2), 0, randomZ * (worldMap.depth / 2));
