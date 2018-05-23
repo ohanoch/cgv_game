@@ -14,6 +14,13 @@ class Collectible extends THREE.Mesh {
 
 	animate() {
 		//this.children[0].rotateX(0.1);
-		this.children[0].scale.set(4*Math.abs(Math.sin(frameNumber/50)), 4*Math.abs(Math.sin(frameNumber/50)), 4*Math.abs(Math.sin(frameNumber/50)));
+		var scaleNumber;
+		if (level.levelNum == 2) {		//avi level
+			scaleNumber = 20;
+		}
+		else {
+			scaleNumber = 4;
+		}
+		this.children[0].scale.set(scaleNumber*Math.abs(Math.sin(frameNumber/50)), scaleNumber*Math.abs(Math.sin(frameNumber/50)), scaleNumber*Math.abs(Math.sin(frameNumber/50)));
 	}
 }
