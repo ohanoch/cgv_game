@@ -2,6 +2,9 @@
 <head>
 <meta charset="UTF-8">
 <title>_alpha_</title>
+<audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>	
+<audio id="song1" src="sounds/stayin_alive_8bit.mp3" preload="auto"></audio>	
+
 <script src="libs\three.js"></script>
 <script src="libs\OrbitControls.js"></script>
 <script src="libs\stats.min.js"></script>
@@ -84,6 +87,7 @@ var collectibles = [];						// the items that the player needs to collect in ord
 
 /* text sculputure*/
 var discoBall;
+var sculpt;
 var joshSucks;								// he does
 // for the text; there is no better way, sorry.
 var textMesh1;
@@ -91,8 +95,11 @@ var font;
 var text;
 var text_height;
 var text_size;
-var curveSegments;
-var text_object_container;
+
+var curveSegments;	
+var text_object_container;			
+var cubeCamera;			// for dynamic reflections
+var reflection_on_off; //turn cubeCam on or off
 
 // for menu class
 //var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
@@ -178,17 +185,44 @@ function createWorld() {
     // TODO: try cubecamera on lab computers
 	// resources: http://learningthreejs.com/blog/2014/05/12/live-cube-maps-reflections-in-your-three-dot-js-game-with-threex-dot-cubecamera/
 
-	joshSucks = new THREE.Object3D();		// Sculpture object
+	sculpt = new THREE.Object3D(); 		// Sculpture container
+	joshSucks = new THREE.Object3D();		// Sphere Sculpture object
 
 	// Make a reflective sphere (only reflects skybox, at the moment)
 	var geometry = new THREE.SphereGeometry(5, 32, 16);
 	var material = new THREE.MeshPhongMaterial({
-    color   : 'chrome',
+    color   : 0xffffff,
 	envMap 	: scene.background
 	});
 	discoBall = new THREE.Mesh(geometry, material);
 	discoBall.position.set(0,0,0);	// centre obj coords of sphere
 	joshSucks.add(discoBall);
+
+//diffuse stick
+	var length = 8, width = 8;
+
+	var shape = new THREE.Shape();
+	shape.moveTo( 0,0 );
+	shape.lineTo( 0, width );
+	shape.lineTo( length, width );
+	shape.lineTo( length, 0 );
+	shape.lineTo( 0, 0 );
+
+	var extrudeSettings = {
+		steps: 2,
+		amount: 100,
+		bevelEnabled: true,
+		bevelThickness: 1,
+		bevelSize: 1,
+		bevelSegments: 1
+	};
+	var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+	var material = new THREE.MeshStandardMaterial({color: 0x517a, roughness: 0.6, })
+	var stick = new THREE.Mesh( geometry, material ) ;
+	stick.rotation.x=Math.PI/2;
+	stick.position.set(-1.5,10,0);
+
+///////////
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -200,15 +234,27 @@ function createWorld() {
 	curveSegments = 4;
 	font = undefined;
 
-	text_object_container = new THREE.Group();
-	text_object_container.position.set(-8,0,7);	// textObject translation onto sphere. Currently doesn't reflect close objects nicely
-	loadFont();
+	text_object_container = new THREE.Group();	
+	text_object_container.position.set(-8,0,7);	// -8,0,7 is the magic tuple to get the text to rotate around the sphere.
 
+	loadFont();
 	joshSucks.add(text_object_container);
-	joshSucks.rotateZ(0.2);
-	var temp_test = player.position.clone();
-	joshSucks.position.set(3,3,-2);
-	scene.add(joshSucks);
+	joshSucks.children[1].rotateZ(0.2);	
+	// joshSucks.add( stick );
+	// var temp_test = player.position.clone();
+	joshSucks.position.set(1,12,3.8);	//center the sphere
+	
+///// cube cam for reflections
+	cubeCamera	= new THREEx.CubeCamera(discoBall);
+	cubeCamera.update(renderer, scene);
+	material.envMap	= cubeCamera.textureCube;
+////////////////////////////////////////
+	sculpt.add(joshSucks);
+	sculpt.add(stick);
+	sculpt.scale.set(5,5,5);
+	sculpt.position.set(0,5,0);
+	scene.add(sculpt);
+	scene.add(cubeCamera.object3d);		// good enough
 
 
 
@@ -281,6 +327,16 @@ function modelLoader(geometry, materials) {
 //////////////////////////////////////////////////////////////////////////////////*/
 function updateForFrame() {
 	frameNumber++;
+
+	// make dynamic reflections
+	if(reflection_on_off == true){
+		cubeCamera.update(renderer, scene);
+		discoBall.material.envMap = cubeCamera.textureCube;
+	}
+
+	//animate josh sucks (text) WOOHOO I CAN ACCESS CHILD NODES!
+	// joshSucks.rotateY(0.1*Math.sin(Math.PI/6));
+	sculpt.children[0].rotateY(0.1*Math.sin(Math.PI/6));
 
 	//Move player backwards or forwards by their Z velocity
     player.translateZ(alpha.getSpeedZ());
@@ -364,12 +420,6 @@ function updateForFrame() {
 	if(alpha == null){
 		return;
 	}
-
-	//animate josh sucks
-	joshSucks.rotateY(Math.sin(Math.PI/6));
-
-	// update cube map reflections. TODO: Only do this if the object is visible/ in 'range'
-	//cubeCamera.update(renderer, scene);
 
 	// Score update: TODO: ut in function and tidy up
 	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
