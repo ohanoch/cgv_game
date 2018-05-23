@@ -91,6 +91,7 @@ function render() {
 
     if(cutscenePlaying) {
         cameraRender(cutsceneCamera, cutscene, 0, 0, window.innerWidth, window.innerHeight);
+            rendererCSS.render( cssScene, cutsceneCamera );
         return;
     }
 
