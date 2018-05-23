@@ -8,7 +8,7 @@
 // type
 
 var powerupTypes = ["gun", "small", "gravity"];  //dictionary to make powerup types readable
-var powerupColours = [0xff0000,0xeeff00,0x00ff11];
+var powerupColours = [0xff0000,0x0000ff,0x00ff00];
 
 class Powerup extends THREE.Mesh{
 
