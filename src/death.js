@@ -14,9 +14,10 @@ var sprite = new THREE.Sprite( spriteMaterial );
 function restartGame(){
 	console.log("restarting game");
 	playingSound.pause();
+	currLevel = 1;
 	createLevel(currLevel);
 	level.reinitializeGlobals();
-	if(currLevel == 0){
+	if(currLevel == 1){
 		score = 0;
 		lives = STARTING_LIVES;
 	}
