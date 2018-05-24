@@ -61,6 +61,9 @@ var text_object_container;
 var cubeCamera;			// for dynamic reflections
 var reflection_on_off; //turn cubeCam on or off
 
+//shooting: https://github.com/saucecode/threejs-demos/blob/master/09_Shooting/demo.js
+var bullets = []
+
 // explosion stuff
 var exploding = false;
 var clock = new THREE.Clock();
@@ -88,7 +91,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	// video.type = ' video/ogg; codecs="theora, vorbis" ';
 	video.src = "videos/sw2.ogv";
 	video.load(); // must call after setting/changing source
-	video.play();
+	// video.play();
 
 	videoImage = document.createElement( 'canvas' );
 	videoImage.width = 	480;
@@ -342,6 +345,19 @@ function modelLoader(geometry, materials) {
 function updateForFrame() {
 	frameNumber++;
 
+
+	// go through bullets array and update position
+	// remove bullets when appropriate
+	for(var index=0; index<bullets.length; index+=1){
+		if( bullets[index] === undefined ) continue;
+		if( bullets[index].alive == false ){
+			bullets.splice(index,1);
+			continue;
+		}
+		
+		bullets[index].position.add(bullets[index].velocity);
+	}
+
 // if an explosion is happening, update the particle effects for 2 seconds, then call crash
 	if (exploding){
 		group.tick();
@@ -488,11 +504,12 @@ function updateForFrame() {
 //////////////////////////////////////////////////////////////////////////////////*/
 function doFrame() {
 	if (cutscenePlaying) {
-    renderer.setClearColor("black");
-    render();
+    	renderer.setClearColor("black");
+    	render();
 		stats.update();
 		cutsceneFrames++;
 		// console.log(cutsceneFrames);
+
 		if(cutsceneFrames < videoLength ){
 			requestAnimationFrame(doFrame);
 		} else {
@@ -500,7 +517,6 @@ function doFrame() {
 			video.pause();
 			render();
 		}
-
 	}
 
     if (animating) {
