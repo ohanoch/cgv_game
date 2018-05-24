@@ -55,9 +55,9 @@ function createLevel(levelNum){
 			20,											//alphaCameraDistance
 			4,											//numRandomLights
 			0x900036,									//alphaLightColour
-			0.55,										//mapBuildingRatio
+			0.5,										//mapBuildingRatio
 			'models/oil_drum/oil_drum',							//collectibleURL
-			['models/ship/ship', 'models/car/car'], 	//buildingModelURLs
+			['models/ship/ship', 'models/car/car', 'models/dead_tree/dead_tree'], 	//buildingModelURLs
 			"models/horse.js",							//alphaModelURL
 			"textures/floors/lava_floor.png",						//floorTextureURL
 			"textures/skyboxes/mp_mercury/", 			//backgroundURL

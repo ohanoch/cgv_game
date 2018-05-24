@@ -1,5 +1,27 @@
 "use strict";
 
+//create paused sprite
+var pausedSpriteMap = new THREE.TextureLoader().load( "sprites/menu_sprites/paused.png" );
+var pausedSpriteMaterial = new THREE.SpriteMaterial( { map: pausedSpriteMap } );
+var pausedSprite = new THREE.Sprite( pausedSpriteMaterial );
+//create level 1 sprite
+var level1SpriteMap = new THREE.TextureLoader().load( "sprites/menu_sprites/level1.png" );
+var level1SpriteMaterial = new THREE.SpriteMaterial( { map: level1SpriteMap } );
+var level1Sprite = new THREE.Sprite( level1SpriteMaterial );
+//create level 2 sprite
+var level2SpriteMap = new THREE.TextureLoader().load( "sprites/menu_sprites/level2.png" );
+var level2SpriteMaterial = new THREE.SpriteMaterial( { map: level2SpriteMap } );
+var level2Sprite = new THREE.Sprite( level2SpriteMaterial );
+//create level 3 sprite
+var level3SpriteMap = new THREE.TextureLoader().load( "sprites/menu_sprites/level3.png" );
+var level3SpriteMaterial = new THREE.SpriteMaterial( { map: level3SpriteMap } );
+var level3Sprite = new THREE.Sprite( level3SpriteMaterial );
+//create level 4 sprite
+var level4SpriteMap = new THREE.TextureLoader().load( "sprites/menu_sprites/level4.png" );
+var level4SpriteMaterial = new THREE.SpriteMaterial( { map: level4SpriteMap } );
+var level4Sprite = new THREE.Sprite( level4SpriteMaterial );
+
+
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< M E N U   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 /*///////////////////////////////////////////////////////////////////////////////// 
 	Creates  menu variables and inserts them into menus array
@@ -65,6 +87,23 @@ function exitMenu(){
 
 	if(menu == menusArr.startMenu){
 		window.alert(level.lore);
+		var currLevelSprite;
+		switch(currLevel){
+			case 2:
+				currLevelSprite = level2Sprite;
+				break;
+			case 3:
+				currLevelSprite = level3Sprite;
+				break;
+			case 4:
+				currLevelSprite = level4Sprite;
+				break;
+			default:
+				currLevelSprite = level1Sprite;
+		}
+		scene.remove(currLevelSprite)
+	} else if( menu == menusArr.pauseMenu ){
+		scene.remove(pausedSprite);
 	}
 
 	//change sounds to game sounds
@@ -80,7 +119,7 @@ function exitMenu(){
 /*y///////////////////////////////////////////////////////////////////////////////// 
 	Uses raycasting to check which menu box the user clicks
 	Callback function for mouseclick event listener in displayMenu
-	INPUT: click event
+	INPUT: click eventscene.add( pausedSprite );
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function menuInteraction(e){
@@ -114,7 +153,7 @@ function menuInteraction(e){
 		} else if(intersections[0].object.name == "exit_button"){
 			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
 		} else if(intersections[0].object.name == "controls_button"){
-			window.alert("P - Play/Pause\nM - mute/unmute\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe\n\n\Powerups:\nGreen - gravity off\nBlue - minimize __alpha__\nRed - shooting, cause its pretty");
+			window.alert("P - Play/Pause\nM - mute/unmute\nJ - turn cube camera on and off\n\nMovement:\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe\n\n\Powerups:\nGreen - gravity off\nBlue - minimize __alpha__\nRed - shooting, cause its pretty");
 		} else if(intersections[0].object.name == "credits_button"){
 			window.alert("This game was technically made by Avi Bank, Niambh Blundell, Or Hanoch but..\nIt was actually brought to life by the awesome Dr. Richard Klein, Phd, who taught us everything we know and inspired us to be better people. Everything we Do we owe to him.\nWE LOVE YOU RICHARD!");
 		}
@@ -150,6 +189,29 @@ function displayMenu(menu){
 		pauseSound.play();
 	}
 
+	if(menu == menusArr.pauseMenu){
+		pausedSprite.position.set( player.position.x, player.position.y, player.position.z);
+		pausedSprite.scale.set( 12, 6, 1.0 );
+		scene.add( pausedSprite );
+	} else if(menu == menusArr.startMenu){
+		var currLevelSprite;
+		switch(currLevel){
+			case 2:
+				currLevelSprite = level2Sprite;
+				break;
+			case 3:
+				currLevelSprite = level3Sprite;
+				break;
+			case 4:
+				currLevelSprite = level4Sprite;
+				break;
+			default:
+				currLevelSprite = level1Sprite;
+		}
+		currLevelSprite.position.set( player.position.x, player.position.y, player.position.z - 20);
+		currLevelSprite.scale.set( 12, 6, 1.0 );
+		scene.add( currLevelSprite  )
+	}
 	console.log("displaying menu...");
 
 	document.addEventListener("mousedown", menuInteraction, false);
