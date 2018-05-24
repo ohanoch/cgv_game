@@ -139,7 +139,7 @@ function menuInteraction(e){
 		if(intersections[0].object.name == "restart_button"){
 			console.log("restarting game");
 			exitMenu();
-			restartGame();
+			restartGame(1);
 		} else if(intersections[0].object.name == "start_button"){
 			console.log("starting game");
 			exitMenu();

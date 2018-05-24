@@ -68,6 +68,7 @@ var clock = new THREE.Clock();
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CUTSCENE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 var cutscenePlaying = true;
 var cutscene = new THREE.Scene();
+var videoLength = 500;
 // var cutsceneCamera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 100);
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
@@ -487,11 +488,11 @@ function doFrame() {
 		stats.update();
 		cutsceneFrames++;
 		// console.log(cutsceneFrames);
-		if(cutsceneFrames < 6000 ){
+		if(cutsceneFrames < videoLength ){
 			requestAnimationFrame(doFrame);
 		} else {
 			cutscenePlaying = false;
-			finishInit();
+			render();
 		}
 
 	}
@@ -502,22 +503,6 @@ function doFrame() {
 		stats.update();
         requestAnimationFrame(doFrame);
     }
-}
-
- /*/////////////////////////////////////////////////////////////////////////////////////
-	Finishes initialisation of the world after cutscene is done.
-	Called by doFrame
-	INPUT: none
-	OUTPUT: none
- //////////////////////////////////////////////////////////////////////////////////////*/
-function finishInit() {
-
-	createWorld();
-    installOrbitControls();
-
-	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
-	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);
-    render();
 }
 
 
@@ -554,4 +539,11 @@ function init() {
 
 	cutscene.add(cutsceneCamera);		//starwars
 	requestAnimationFrame(doFrame);
+		
+	createWorld();
+    installOrbitControls();
+
+	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
+	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);
+    render();
 }
