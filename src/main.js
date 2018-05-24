@@ -61,6 +61,10 @@ var text_object_container;
 var cubeCamera;			// for dynamic reflections
 var reflection_on_off; //turn cubeCam on or off
 
+//shooting: https://github.com/saucecode/threejs-demos/blob/master/09_Shooting/demo.js
+var bullets = []
+
+
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CUTSCENE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 var cutscenePlaying = true;
 var cutscene = new THREE.Scene();
@@ -334,18 +338,6 @@ function modelLoader(geometry, materials) {
 function updateForFrame() {
 	frameNumber++;
 
-	// This block runs while resources are loading.
-	// if( loading === true ){
-	// // 	//console.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
-	// 	renderer.setClearColor("black");
-	// 	box.position.x -= 0.05;
-	// 	if( box.position.x < -10 ){
-	// 		box.position.x = 10;
-	// 	} 
-	// 	box.position.y = Math.sin(box.position.x);
-	// 	return; // Stop the function here.
-	// }
-
 	// make dynamic reflections
 	if(reflection_on_off == true){
 		cubeCamera.update(renderer, scene);
@@ -463,16 +455,11 @@ function updateForFrame() {
 function doFrame() {
 	if (cutscenePlaying) {
       	renderer.setClearColor("black");
-		// box.position.x -= 0.05;
-		// if( box.position.x < -10 ){
-		// 	box.position.x = 10;
-		// } 
-		// box.position.y = Math.sin(box.position.x);
         render();
 		stats.update();
 		cutsceneFrames++;
 		// console.log(cutsceneFrames);
-		if(cutsceneFrames < 3000 ){
+		if(cutsceneFrames < 300 ){
 			requestAnimationFrame(doFrame);
 		} else {
 			cutscenePlaying = false;

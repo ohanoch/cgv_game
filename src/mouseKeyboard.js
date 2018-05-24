@@ -68,6 +68,23 @@ function keyCheck(){
 		}
 		alpha.jumping = true;
     }
+
+    if(keys[32]){ // spacebar key
+		// creates a bullet as a Mesh object
+		var bullet = new THREE.Mesh(
+			new THREE.SphereGeometry(0.05,8,8),
+			new THREE.MeshBasicMaterial({color:0xffffff})
+		);
+		bullet.alive = true;
+		setTimeout(function(){
+			bullet.alive = false;
+			scene.remove(bullet);
+		},1000);
+
+		scene.add(bullet);
+
+	}
+
 }
 
 
