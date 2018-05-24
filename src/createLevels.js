@@ -133,7 +133,7 @@ function createLevel(levelNum){
 			0.55,										//mapBuildingRatio
 			'models/carrot/Carrot',							//collectibleURL
 			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
-			"models/stork.js",							//alphaModelURL
+			"models/tief.js",							//alphaModelURL
 			"textures/skyboxes/mp_whirlpool/yneg.png",						//floorTextureURL
 			"textures/skyboxes/mp_whirlpool/", 			//backgroundURL
 			0x028ea8,									//fog colour
