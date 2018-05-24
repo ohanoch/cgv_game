@@ -9,12 +9,12 @@
   <body>
     <div id="info">Star Wars opening crawl recreated in HTML, CSS & JS by <a href="http://github.com/charliegerard">Charlie Gerard</a></div>
 
-    <section id="title"><p>A long time ago in a galaxy far, </br> far away...</p></section>
+    <section id="title"><p>A long time ago in an Omelette far, </br> far away...</p></section>
 
     <section class="content">
       <div id='text'>
         <p>
-          It is a period of civil war.
+          It is period time for Omelette.
           Rebel spaceships, striking
           from a hidden base, have won
           their first victory against
@@ -44,6 +44,19 @@
     <audio autoplay id="sound" preload="auto">
       <source src="starwars.mp3" type="audio/mpeg">
     </audio>
+
+<script> 
+  var sound = document.getElementById('sound');
+  sound.pause();
+  setTimeout(function(){
+  playVid();
+  }, 5000);
+
+function playVid() { 
+    sound.play(); 
+} 
+ 
+</script> 
 
   </body>
 </html>

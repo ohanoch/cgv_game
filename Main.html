@@ -150,8 +150,8 @@ var video, videoImage, videoImageContext, videoTexture;
 	// video = document.getElementById( 'myVideo' );
 	
 	videoImage = document.createElement( 'canvas' );
-	videoImage.width = 480;
-	videoImage.height = 204;
+	videoImage.width = 500;
+	videoImage.height = 500;
 
 	videoImageContext = videoImage.getContext( '2d' );
 	// background color if no video present
@@ -601,7 +601,7 @@ function doFrame() {
         render();
 		stats.update();
 		cutsceneFrames++;
-		console.log(cutsceneFrames);
+		// console.log(cutsceneFrames);
 		if(cutsceneFrames < 3000 ){
 			requestAnimationFrame(doFrame);
 		} else {
