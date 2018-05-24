@@ -115,7 +115,7 @@ function createLevel(levelNum){
 			-0.01,										//gravity
 			window.innerHeight/5,						//minimapWidth
 			window.innerHeight/5,						//minimapHeight
-			"textures/skyboxes/mp_midnight/",	//pauseMenuTextureURL
+			"textures/skyboxes/mp_orbital/",	//pauseMenuTextureURL
 			"sounds/haha.wav",							//crashSoundURL
 			"sounds/wii_8bit.mp3",				//pauseSoundURL
 			"sounds/imperial_march_8bit.mp3",				//playingSoundURL
