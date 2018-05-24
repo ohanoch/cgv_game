@@ -1,21 +1,8 @@
-// Converted from: tief.obj
-//  vertices: 6773
-//  faces: 6550
-//  normals: 2409
-//  colors: 0
-//  uvs: 15847
-//  materials: 3
-//  edges: 0
-//
-//  Generated with OBJ -> Three.js converter
-//  http://github.com/alteredq/three.js/blob/master/utils/exporters/convert_obj_three.py
-
-
-var model = {
+{
 
     "version" : 2,
     
-    "scale" : 1.000000,
+    "scale" : 0.010000,
 
     "materials": [	{
 	"DbgColor" : 15658734,
@@ -72,7 +59,4 @@ var model = {
 
     "edges" : []
 
-};
-
-postMessage( model );
-close();
+}
