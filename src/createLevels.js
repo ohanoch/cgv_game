@@ -117,8 +117,8 @@ function createLevel(levelNum){
 			window.innerHeight/5,						//minimapHeight
 			"textures/skyboxes/mp_midnight/",	//pauseMenuTextureURL
 			"sounds/haha.wav",							//crashSoundURL
-			"sounds/under_the_sea_8bit.mp3",				//pauseSoundURL
-			"sounds/blue_8bit.mp3",				//playingSoundURL
+			"sounds/wii_8bit.mp3",				//pauseSoundURL
+			"sounds/imperial_march_8bit.mp3",				//playingSoundURL
 			lore2										//lore for level story
 		);
 	} else if (levelNum == 3) {		//niambh

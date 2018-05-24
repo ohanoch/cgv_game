@@ -23,6 +23,11 @@ function addSounds(){
         playingSound.setLoop( true );
         playingSound.setVolume( 0.5 );
     });
+    audioLoader.load( 'sounds/everything_is_awesome_8bit.mp3', function( buffer ) {
+        startMusic.setBuffer( buffer );
+        startMusic.setLoop( true );
+        startMusic.setVolume( 0.5 );
+    });
 }
 
 /* /////////////////////////////////////////////////////////////

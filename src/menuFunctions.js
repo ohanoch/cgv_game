@@ -86,6 +86,8 @@ function exitMenu(){
 	document.removeEventListener("mousedown", menuInteraction);
 
 	if(menu == menusArr.startMenu){
+		startMusic.pause();
+		//playingSound.play();
 		window.alert(level.lore);
 		var currLevelSprite;
 		switch(currLevel){
@@ -185,8 +187,14 @@ function displayMenu(menu){
 	//change sounds
 	if(mute == false){
 		console.log("changing sounds to pause sounds");
-		playingSound.pause();
-		pauseSound.play();
+		
+		if (menu = menusArr.startMenu) {
+			startMusic.play();
+		} else {
+			console.log("pause bbbbbbbbbbbbbb")
+			playingSound.pause();
+			pauseSound.play();
+		}
 	}
 
 	if(menu == menusArr.pauseMenu){
