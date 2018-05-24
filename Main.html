@@ -118,18 +118,7 @@ var cutsceneCamera =new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 // custom global variables
 var video, videoImage, videoImageContext, videoTexture;
 
-
-// // Plane for text
-// var planeMaterial   = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide });
-// var planeWidth = 360;
-// var planeHeight = 120;
-// var planeGeometry = new THREE.PlaneGeometry( planeWidth, planeHeight );
-// var planeMesh= new THREE.Mesh( planeGeometry, planeMaterial );
-// planeMesh.position.y += planeHeight/2;
-// // add it to the standard (WebGL) scene
-// cutscene.add(planeMesh);
-
-///////////
+	///////////
 	// VIDEO //
 	///////////
 	
@@ -140,14 +129,6 @@ var video, videoImage, videoImageContext, videoTexture;
 	video.src = "videos/sw2.ogv";
 	video.load(); // must call after setting/changing source
 	video.play();
-	
-	// alternative method -- 
-	// create DIV in HTML:
-	// <video id="myVideo" autoplay style="display:none">
-	//		<source src="videos/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
-	// </video>
-	// and set JS variable:
-	// video = document.getElementById( 'myVideo' );
 	
 	videoImage = document.createElement( 'canvas' );
 	videoImage.width = 	480;
@@ -174,73 +155,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	cutsceneCamera.position.set(0,50,200);
 	cutsceneCamera.lookAt(movieScreen.position);
 
-
-
-var cutsceneFrames = 0;
-// var rendererCSS;
-
-// // create a new scene to hold CSS
-// var cssScene = new THREE.Scene();
-// // create the iframe to contain webpage
-// var element	= document.createElement('iframe')
-// // webpage to be loaded into iframe
-// element.src	= "starwars-gh-pages/index.html";
-// // width of iframe in pixels
-// var elementWidth = 1024;
-// // force iframe to have same relative dimensions as planeGeometry
-// var aspectRatio = planeHeight / planeWidth;
-// var elementHeight = elementWidth * aspectRatio;
-// element.style.width  = elementWidth + "px";
-// element.style.height = elementHeight + "px";
-
-// // create a CSS3DObject to display element
-// var cssObject = new THREE.CSS3DObject( element );
-// // synchronize cssObject position/rotation with planeMesh position/rotation 
-// cssObject.position.set(planeMesh.position);
-// cssObject.rotation.set(planeMesh.rotation);
-// // resize cssObject to same size as planeMesh (plus a border)
-// var percentBorder = 0.05;
-// cssObject.scale.x /= (1 + percentBorder) * (elementWidth / planeWidth);
-// cssObject.scale.y /= (1 + percentBorder) * (elementWidth / planeWidth);
-// cssScene.add(cssObject);	
-
-// // create a renderer for CSS
-// rendererCSS	= new THREE.CSS3DRenderer();
-// rendererCSS.setSize( window.innerWidth, window.innerHeight );
-// rendererCSS.domElement.style.position = 'absolute';
-// rendererCSS.domElement.style.top	  = 0;
-// rendererCSS.domElement.style.margin	  = 0;
-// rendererCSS.domElement.style.padding  = 0;
-// document.body.appendChild( rendererCSS.domElement );
-// // when window resizes, also resize this renderer
-// THREEx.WindowResize(rendererCSS, cutsceneCamera);
-
-// renderer.domElement.style.position = 'absolute';
-// renderer.domElement.style.top      = 0;
-// // make sure original renderer appears on top of CSS renderer
-// renderer.domElement.style.zIndex   = 1;
-// rendererCSS.domElement.appendChild( renderer.domElement );							
-
-
-
-
-// var loadingScreen = {
-// 	scene: new THREE.Scene(),
-// 	camera: new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 100),
-// 	box: new THREE.Mesh(
-// 		new THREE.BoxGeometry(0.5,0.5,0.5),
-// 		new THREE.MeshBasicMaterial({ color:0x4444ff })
-// 	)
-// };
-// var RESOURCES_LOADED = false;
-/////////////////////////////////////////////
-/////////////////////////////////////////////
-
-
-// for menu class
-//var menu = new Menu(ALPHA_CAMERA_DISTANCE * 2, "textures/skyboxes/tantolunden5/", "sprites/buttons/");
-
-
+	var cutsceneFrames = 0;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< I N I T I A L I S A T I O N   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
