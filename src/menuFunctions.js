@@ -1,5 +1,11 @@
 "use strict";
 
+//create paused sprite
+var pausedSpriteMap = new THREE.TextureLoader().load( "sprites/paused.png" );
+var pausedSpriteMaterial = new THREE.SpriteMaterial( { map: pausedSpriteMap } );
+var pausedSprite = new THREE.Sprite( pausedSpriteMaterial );
+
+
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< M E N U   F U N C T I O N S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 /*///////////////////////////////////////////////////////////////////////////////// 
 	Creates  menu variables and inserts them into menus array
@@ -150,6 +156,11 @@ function displayMenu(menu){
 		pauseSound.play();
 	}
 
+	if(menu == menusArr.pauseMenu){
+		pausedSprite.position.set( player.position.x, player.position.y, player.position.z);
+		pausedSprite.scale.set( 12, 6, 1.0 );
+		scene.add( pausedSprite );
+	}
 	console.log("displaying menu...");
 
 	document.addEventListener("mousedown", menuInteraction, false);
