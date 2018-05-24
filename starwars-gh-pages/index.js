@@ -2,7 +2,7 @@ window.onload = function(){
   var sound = document.getElementById('sound');
   var title = document.getElementById('title');
   title.style.opacity = 1;
-  var content = document.getElementById('text')
+  var content = document.getElementById('text');
 
   var audioState = setInterval(function(){
     if(sound.readyState === 4){

@@ -196,5 +196,43 @@ function createLevel(levelNum){
 			"sounds/blue_8bit.mp3",				//playingSoundURL
 			lore4									//lore for level story
 		);
+	}else if (levelNum == 3) {
+		lore = "level 3";
+		level = new Level(
+			levelNum,									//levelNum
+			1000,										//width
+			1000,										//depth
+			300,										//atmosphereHeight
+			20,											//alphaCameraDistance
+			0,											//numRandomLights
+			0x00ffff,									//alphaLightColour
+			0.55,										//mapBuildingRatio
+			'models/asdf2/Lightsaber_Scene',		//collectibleURL
+			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
+			"models/stork.js",							//alphaModelURL
+			"textures/skyboxes/mp_whirlpool/yneg.png",	//floorTextureURL
+			"textures/skyboxes/mp_whirlpool/", 			//backgroundURL
+			0x028ea8,									//fog colour
+			30, 										//numPowerups
+			30, 										//numCollectibles
+			1,											//collectiblesToWin
+			[1],	 									//powerupsTypes
+			1,											//alphaMaxSpeedY
+			-10,										//alphaMinSpeedY
+			-2,											//alphaMaxSpeedZ
+			-0.01,										//alphaMinSpeedZ
+			1,											//changeSpeedY
+			0.01,										//changeSpeedZ
+			1,											//rotateSpeed
+			0.5,										//strafeSpeed
+			-0.01,										//gravity
+			window.innerHeight/5,						//minimapWidth
+			window.innerHeight/5,						//minimapHeight
+			"textures/skyboxes/mp_midnight/",			//pauseMenuTextureURL
+			"sounds/haha.wav",							//crashSoundURL
+			"sounds/under_the_sea_8bit.mp3",			//pauseSoundURL
+			"sounds/blue_8bit.mp3",						//playingSoundURL
+			lore										//lore for level story
+		);
 	}
 }
