@@ -75,13 +75,33 @@ function keyCheck(){
 			new THREE.SphereGeometry(0.05,8,8),
 			new THREE.MeshBasicMaterial({color:0xffffff})
 		);
+		
+		// initial position of bullet
+		bullet.position.set(
+			player.position.x,
+			player.position.y,
+			player.position.z
+		);
+
+		// set the velocity of the bullet
+		bullet.velocity = new THREE.Vector3(
+			0,
+			0,
+			-3
+		);
+		bullet.rotation.set(mainCamera.rotation.x,mainCamera.rotation.y,mainCamera.rotation.z);
+		// remove bullets once they are too far
 		bullet.alive = true;
 		setTimeout(function(){
 			bullet.alive = false;
 			scene.remove(bullet);
 		},1000);
 
+		// add bullet to bullet array
+		bullets.push(bullet);
+		// add bullet to scene
 		scene.add(bullet);
+
 
 	}
 

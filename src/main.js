@@ -90,7 +90,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	// video.type = ' video/ogg; codecs="theora, vorbis" ';
 	video.src = "videos/sw2.ogv";
 	video.load(); // must call after setting/changing source
-	video.play();
+	// video.play();
 
 	videoImage = document.createElement( 'canvas' );
 	videoImage.width = 	480;
@@ -343,6 +343,19 @@ function modelLoader(geometry, materials) {
 function updateForFrame() {
 	frameNumber++;
 
+
+	// go through bullets array and update position
+	// remove bullets when appropriate
+	for(var index=0; index<bullets.length; index+=1){
+		if( bullets[index] === undefined ) continue;
+		if( bullets[index].alive == false ){
+			bullets.splice(index,1);
+			continue;
+		}
+		
+		bullets[index].position.add(bullets[index].velocity);
+	}
+
 // if an explosion is happening, update the particle effects for 2 seconds, then call crash
 	if (exploding){
 		group.tick();
@@ -490,7 +503,7 @@ function doFrame() {
 		stats.update();
 		cutsceneFrames++;
 		// console.log(cutsceneFrames);
-		if(cutsceneFrames < 6000 ){
+		if(cutsceneFrames < 0 ){
 			requestAnimationFrame(doFrame);
 		} else {
 			cutscenePlaying = false;
