@@ -90,7 +90,7 @@ function exitMenu(){
 	document.removeEventListener("mousedown", menuInteraction);
 
 	if(menu == menusArr.startMenu){
-		startMusic.pause();
+		
 		//playingSound.play();
 		window.alert(level.lore);
 		var currLevelSprite;
@@ -108,6 +108,8 @@ function exitMenu(){
 				currLevelSprite = level1Sprite;
 		}
 		scene.remove(currLevelSprite)
+		startMusic.pause();
+		console.log("end of exit start menu")
 	} else if( menu == menusArr.pauseMenu ){
 		scene.remove(pausedSprite);
 	}
@@ -192,7 +194,7 @@ function displayMenu(menu){
 	if(mute == false){
 		console.log("changing sounds to pause sounds");
 		
-		if (menu = menusArr.startMenu) {
+		if (menu == menusArr.startMenu) {
 			startMusic.play();
 		} else {
 			console.log("pause bbbbbbbbbbbbbb")
