@@ -7,6 +7,7 @@
 <!-- <iframe src="starwars-gh-pages/index.html" class="frame" ></iframe>  -->
 </head>
 <audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>
+<audio id="exp" src="sounds/explosion.mp3" preload="auto"></audio>
 <script src="libs\three.js"></script>
 <script src="libs\OrbitControls.js"></script>
 <script src="libs\stats.min.js"></script>
@@ -20,6 +21,7 @@
 <script src="libs\GeometryUtils.js"></script>
 <script src="libs\BendModifier.js"></script>
 <script src="libs\dat.gui.min.js"></script>
+<script src="libs\SPE.min.js"></script>
 
 <script src="src\classes\level.js"></script>
 <script src="src\classes\alpha.js"></script>
@@ -46,9 +48,8 @@
 "use strict";
 
 var STARTING_LIVES = 3;
-var currLevel = 1; //level variable
+var currLevel = 3; //level variable
 var level;
-
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 /* General mechanics variables */
@@ -106,7 +107,11 @@ var text_object_container;
 var cubeCamera;			// for dynamic reflections
 var reflection_on_off; //turn cubeCam on or off
 
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CUTSCENE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// explosion stuff
+var exploding = false;
+var clock = new THREE.Clock();
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CUTSCENE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 var cutscenePlaying = true;
 var cutscene = new THREE.Scene();
 var cutsceneCamera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 100);
@@ -115,19 +120,6 @@ var box = new THREE.Mesh(
 		new THREE.MeshBasicMaterial({ color:0x4444ff })
 	);
 var cutsceneFrames = 0;
-
-
-// var loadingScreen = {
-// 	scene: new THREE.Scene(),
-// 	camera: new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 100),
-// 	box: new THREE.Mesh(
-// 		new THREE.BoxGeometry(0.5,0.5,0.5),
-// 		new THREE.MeshBasicMaterial({ color:0x4444ff })
-// 	)
-// };
-// var RESOURCES_LOADED = false;
-/////////////////////////////////////////////
-/////////////////////////////////////////////
 
 
 // for menu class
@@ -360,6 +352,19 @@ function modelLoader(geometry, materials) {
 function updateForFrame() {
 	frameNumber++;
 
+// if an explosion is happening, update the particle effects for 2 seconds, then call crash
+	if (exploding){
+		group.tick();
+		shockwaveGroup.tick();
+		console.log(clock.getElapsedTime());
+		if (clock.getElapsedTime() > 2) {
+			Crash();
+			return;
+		}
+	}
+	//group.tick(  );
+	//shockwaveGroup.tick(  );
+
 	if(currLevel == 4){
 		player.children[3].translateZ(-0.1);
 		player.children[3].translateX(Math.sin(frameNumber/10));
@@ -398,8 +403,10 @@ function updateForFrame() {
 
 	//check for death by atmosphere (lasers) (height) + some leeway
 	if(player.position.y > level.atmosphereHeight + 1){
-		Crash();
-		return;
+		if (!exploding) {
+			Explosion();
+			return;
+		}
 	}
 
 	// Slowly moving the camera back behind _alpha_
@@ -454,7 +461,10 @@ function updateForFrame() {
 	keyCheck();
 
 	//Collision
-	collisions();
+	if (!exploding){
+		collisions();
+	}
+
 	if(alpha == null){
 		return;
 	}
@@ -524,6 +534,7 @@ function finishInit() {
 
 	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
 	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);
+
     render();
 }
 
