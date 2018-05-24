@@ -83,11 +83,12 @@ function keyCheck(){
 			player.position.z
 		);
 
+		//bullet.rotation.z = player.rotation.z;
 		// set the velocity of the bullet
 		bullet.velocity = new THREE.Vector3(
-			0,
-			0,
-			-3
+			0.001*mainCamera.position.x,
+			0.001*mainCamera.position.y,
+			-0.001*mainCamera.position.z
 		);
 		bullet.rotation.set(mainCamera.rotation.x,mainCamera.rotation.y,mainCamera.rotation.z);
 		// remove bullets once they are too far
