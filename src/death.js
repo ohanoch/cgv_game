@@ -1,9 +1,9 @@
 "use strict";
 
 //create nelson sprite
-var spriteMap = new THREE.TextureLoader().load( "sprites/nelson.png" );
-var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap } );
-var sprite = new THREE.Sprite( spriteMaterial );
+var nelsonSpriteMap = new THREE.TextureLoader().load( "sprites/nelson.png" );
+var nelsonSpriteMaterial = new THREE.SpriteMaterial( { map: nelsonSpriteMap } );
+var nelsonSprite = new THREE.Sprite( nelsonSpriteMaterial );
 
 // explosion variables
 var group, shockwaveGroup, shockwave, debris, fireball, mist, flash;
@@ -77,10 +77,12 @@ function Crash() {
 	//	window.alert("C R A S H E D!\n Lives left: " + lives);
 	//	scene.remove( sprite );
 		alpha.respawn();
+
+		nelsonSprite.position.set( player.position.x, player.position.y, player.position.z);
+		nelsonSprite.scale.set( 16, 16, 1.0 ); // imageWidth, imageHeight
+		scene.add( nelsonSprite );
+
 		alpha.visible = true;
-		sprite.position.set( player.position.x, player.position.y, player.position.z);
-		sprite.scale.set( 16, 16, 1.0 ); // imageWidth, imageHeight
-		scene.add( sprite );
 	}
 	for(var i = 0; i < activePowerups.length; i++){
 		activePowerups[i].deactivatePower();

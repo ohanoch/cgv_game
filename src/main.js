@@ -1,7 +1,7 @@
 "use strict";
 
 var STARTING_LIVES = 3;
-var currLevel = 3; //level variable mostly for display purposes at the moment
+var currLevel = 2; //level variable mostly for display purposes at the moment
 var level;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -13,7 +13,7 @@ var minimapCamera;  //minimap variables
 var controls;  											// An OrbitControls object that is used to implement
               											// rotation of the scene using the mouse.  (It actually rotates
                											// the camera around the scene.)
-var listener, crashSound, playingSound, pauseSound;  //sound variables
+var listener, crashSound, playingSound, pauseSound, startMusic;  //sound variables
 
 /* flags for different instances */
 var fullscreen = false;
@@ -71,6 +71,7 @@ var clock = new THREE.Clock();
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CUTSCENE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 var cutscenePlaying = true;
 var cutscene = new THREE.Scene();
+var videoLength = 500;
 // var cutsceneCamera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 100);
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
@@ -139,10 +140,10 @@ function createWorld() {
 
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     mainCamera = new THREE.PerspectiveCamera(
-		30,
-		window.innerWidth/window.innerHeight,
-		0.1,
-		level.alphaCameraDistance * 20
+		30,												//aspect
+		window.innerWidth/window.innerHeight,			//fov - field of view
+		0.1,											//near
+		level.alphaCameraDistance * 20					//far
 	);
   	mainCamera.position.z = level.alphaCameraDistance;
   	player.add(mainCamera);
@@ -156,6 +157,7 @@ function createWorld() {
 	crashSound = new THREE.Audio( listener );
 	playingSound = new THREE.Audio( listener );
 	pauseSound = new THREE.Audio( listener );
+	startMusic = new THREE.Audio( listener );
 
 	addSounds();
 	//-------------------------------------------- LIGHTING ------------------------------------------------
@@ -370,9 +372,13 @@ function updateForFrame() {
 	//shockwaveGroup.tick(  );
 
 	if(currLevel == 4){
-		player.children[3].translateZ(-0.1);
+		player.children[3].translateZ(-0.15);
 		player.children[3].translateX(Math.sin(frameNumber/10));
-		player.children[3].translateY(Math.cos(frameNumber/15));
+		player.children[3].translateY(Math.sin(frameNumber/15));
+		if(player.children[3].position.z < -1 * level.alphaCameraDistance * 20){
+			window.alert("Awwwwww...\nIt seems Walt is still scared of you and got away before you could persuade him with carrots.\nBetter luck next time.\n\n Final Score: " + score);
+			restartGame(1);
+		}
 	}
 
 	// make dynamic reflections
@@ -503,11 +509,13 @@ function doFrame() {
 		stats.update();
 		cutsceneFrames++;
 		// console.log(cutsceneFrames);
-		if(cutsceneFrames < 0 ){
+
+		if(cutsceneFrames < videoLength ){
 			requestAnimationFrame(doFrame);
 		} else {
 			cutscenePlaying = false;
-			finishInit();
+			video.pause();
+			render();
 		}
 	}
 
@@ -517,22 +525,6 @@ function doFrame() {
 		stats.update();
         requestAnimationFrame(doFrame);
     }
-}
-
- /*/////////////////////////////////////////////////////////////////////////////////////
-	Finishes initialisation of the world after cutscene is done.
-	Called by doFrame
-	INPUT: none
-	OUTPUT: none
- //////////////////////////////////////////////////////////////////////////////////////*/
-function finishInit() {
-
-	createWorld();
-    installOrbitControls();
-
-	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
-	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);
-    render();
 }
 
 
@@ -569,4 +561,11 @@ function init() {
 
 	cutscene.add(cutsceneCamera);		//starwars
 	requestAnimationFrame(doFrame);
+		
+	createWorld();
+    installOrbitControls();
+
+	document.addEventListener("mousedown", function(){resetCameraFlag = false}, false);
+	document.addEventListener("mouseup", function(){resetCameraFlag = true}, false);
+    render();
 }

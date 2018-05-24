@@ -23,6 +23,11 @@ function addSounds(){
         playingSound.setLoop( true );
         playingSound.setVolume( 0.5 );
     });
+    audioLoader.load( 'sounds/everything_is_awesome_8bit.mp3', function( buffer ) {
+        startMusic.setBuffer( buffer );
+        startMusic.setLoop( true );
+        startMusic.setVolume( 0.5 );
+    });
 }
 
 /* /////////////////////////////////////////////////////////////
@@ -149,7 +154,7 @@ function waltLoader(geometry, materials){
 		vertexColors: THREE.FaceColors,             // use colors from the geometry
 	});
 	var walt = new THREE.Mesh(geometry,material);
-	walt.position.set(0,0,-5);
+	walt.position.set(0,0,-15);
 	walt.scale.set(0.05, 0.05, 0.05);
 	player.add(walt);
 }

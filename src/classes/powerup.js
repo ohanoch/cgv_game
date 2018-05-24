@@ -36,11 +36,13 @@ class Powerup extends THREE.Mesh{
 
 	activatePower( ) {
 	// test powerup. make your own!
-		if (this.type == 1){
+		if(this.type == 1){
 			alpha.scale.set(0.01,0.01,0.01);
 			alpha.collisionLeeway *= 0.01;
-		} else if (this.type == 2 ) {
+		} else if(this.type == 2 ) {
 			alpha.setMinSpeedY(0);
+		} else if(this.type == 3){
+			mainCamera.far = level.alphaCameraDistance * 200;
 		}
 	}
 
@@ -53,6 +55,8 @@ class Powerup extends THREE.Mesh{
 			);
 		} else if(this.type == 2) {
 			alpha.setMinSpeedY(-1000);
+		} else if(this.type == 3){
+			mainCamera.far = level.alphaCameraDistance * 20;
 		}
 	}
 

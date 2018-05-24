@@ -55,9 +55,9 @@ function createLevel(levelNum){
 			20,											//alphaCameraDistance
 			4,											//numRandomLights
 			0x900036,									//alphaLightColour
-			0.55,										//mapBuildingRatio
+			0.5,										//mapBuildingRatio
 			'models/oil_drum/oil_drum',							//collectibleURL
-			['models/ship/ship', 'models/car/car'], 	//buildingModelURLs
+			['models/ship/ship', 'models/car/car', 'models/dead_tree/dead_tree'], 	//buildingModelURLs
 			"models/horse.js",							//alphaModelURL
 			"textures/floors/lava_floor.png",						//floorTextureURL
 			"textures/skyboxes/mp_mercury/", 			//backgroundURL
@@ -97,9 +97,9 @@ function createLevel(levelNum){
 			'models/wine/Wine_Bottle_White',							//collectibleURL
 			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
 			"models/stork.js",							//alphaModelURL
-			"textures/skyboxes/mp_whirlpool/yneg.png",						//floorTextureURL
-			"textures/skyboxes/mp_whirlpool/", 			//backgroundURL
-			0x028ea8,									//fog colour
+			"textures/floors/seamless_space.PNG",						//floorTextureURL
+			"textures/skyboxes/space/", 			//backgroundURL
+			0x000000,									//fog colour
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,											//collectiblesToWin
@@ -115,10 +115,10 @@ function createLevel(levelNum){
 			-0.01,										//gravity
 			window.innerHeight/5,						//minimapWidth
 			window.innerHeight/5,						//minimapHeight
-			"textures/skyboxes/mp_midnight/",	//pauseMenuTextureURL
+			"textures/skyboxes/mp_orbital/",	//pauseMenuTextureURL
 			"sounds/haha.wav",							//crashSoundURL
-			"sounds/under_the_sea_8bit.mp3",				//pauseSoundURL
-			"sounds/blue_8bit.mp3",				//playingSoundURL
+			"sounds/wii_8bit.mp3",				//pauseSoundURL
+			"sounds/imperial_march_8bit.mp3",				//playingSoundURL
 			lore2										//lore for level story
 		);
 	} else if (levelNum == 3) {		//niambh
