@@ -97,9 +97,9 @@ function createLevel(levelNum){
 			'models/wine/Wine_Bottle_White',							//collectibleURL
 			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
 			"models/stork.js",							//alphaModelURL
-			"textures/skyboxes/mp_whirlpool/yneg.png",						//floorTextureURL
-			"textures/skyboxes/mp_whirlpool/", 			//backgroundURL
-			0x028ea8,									//fog colour
+			"textures/floors/seamless_space.PNG",						//floorTextureURL
+			"textures/skyboxes/space/", 			//backgroundURL
+			0x000000,									//fog colour
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,											//collectiblesToWin
