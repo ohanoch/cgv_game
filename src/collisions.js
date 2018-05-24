@@ -48,7 +48,7 @@ function  collisions() {
 			!BuildingCollisionResults[0].point.equals(new THREE.Vector3(0,0,0))
 		){ // TODO: adjust this offset (-1 currently)
 			console.log("hit");
-			Crash();
+			Explosion();
 			break;
 		}
 
