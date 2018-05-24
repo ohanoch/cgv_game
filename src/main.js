@@ -71,7 +71,7 @@ var clock = new THREE.Clock();
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CUTSCENE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 var cutscenePlaying = true;
 var cutscene = new THREE.Scene();
-var videoLength = 500;
+var videoLength = 4000;
 // var cutsceneCamera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 100);
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
@@ -89,13 +89,13 @@ var video, videoImage, videoImageContext, videoTexture;
 	video = document.createElement( 'video' );
 	// video.id = 'video';
 	// video.type = ' video/ogg; codecs="theora, vorbis" ';
-	video.src = "videos/sw2.ogv";
+	video.src = "videos/sw3.ogv";
 	video.load(); // must call after setting/changing source
-	// video.play();
+	video.play();
 
 	videoImage = document.createElement( 'canvas' );
-	videoImage.width = 	480;
-	videoImage.height = 204;
+	videoImage.width = 	496;
+	videoImage.height = 278;
 
 	videoImageContext = videoImage.getContext( '2d' );
 	// background color if no video present
@@ -109,7 +109,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
 	// the geometry on which the movie will be displayed;
 	// 		movie image will be scaled to fit these dimensions.
-	var movieGeometry = new THREE.PlaneGeometry( 480, 204, 4, 4 );
+	var movieGeometry = new THREE.PlaneGeometry( videoImage.width, videoImage.height, 4, 4 );
 	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
 	movieScreen.position.set(0,50,0);
 	// movieScreen.rotateX(-Math.PI/3);
