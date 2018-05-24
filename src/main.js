@@ -1,7 +1,7 @@
 "use strict";
 
 var STARTING_LIVES = 3;
-var currLevel = 3; //level variable mostly for display purposes at the moment
+var currLevel = 2; //level variable mostly for display purposes at the moment
 var level;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -13,7 +13,7 @@ var minimapCamera;  //minimap variables
 var controls;  											// An OrbitControls object that is used to implement
               											// rotation of the scene using the mouse.  (It actually rotates
                											// the camera around the scene.)
-var listener, crashSound, playingSound, pauseSound;  //sound variables
+var listener, crashSound, playingSound, pauseSound, startMusic;  //sound variables
 
 /* flags for different instances */
 var fullscreen = false;
@@ -154,6 +154,7 @@ function createWorld() {
 	crashSound = new THREE.Audio( listener );
 	playingSound = new THREE.Audio( listener );
 	pauseSound = new THREE.Audio( listener );
+	startMusic = new THREE.Audio( listener );
 
 	addSounds();
 	//-------------------------------------------- LIGHTING ------------------------------------------------
@@ -496,6 +497,7 @@ function doFrame() {
 			requestAnimationFrame(doFrame);
 		} else {
 			cutscenePlaying = false;
+			video.pause();
 			render();
 		}
 

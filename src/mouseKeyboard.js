@@ -102,7 +102,11 @@ function keysPressed(e) {
 		if(mute == true){
 			mute = false;
 			if (openMenu() != null){
-				pauseSound.play();
+				if (openMenu() == menusArr.startMenu) {
+					startMusic.play();
+				} else {
+					pauseSound.play();
+				}
 			} else {
 				playingSound.play();
 			}
@@ -110,6 +114,7 @@ function keysPressed(e) {
 			mute = true;
 			playingSound.pause();
 			pauseSound.pause();
+			startMusic.pause();
 		}
 	}
 
