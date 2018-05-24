@@ -356,9 +356,13 @@ function updateForFrame() {
 	//shockwaveGroup.tick(  );
 
 	if(currLevel == 4){
-		player.children[3].translateZ(-0.1);
+		player.children[3].translateZ(-0.15);
 		player.children[3].translateX(Math.sin(frameNumber/10));
-		player.children[3].translateY(Math.cos(frameNumber/15));
+		player.children[3].translateY(Math.sin(frameNumber/15));
+		if(player.children[3].position.z < -1 * level.alphaCameraDistance * 20){
+			window.alert("Awwwwww...\nIt seems Walt is still scared of you and got away before you could persuade him with carrots.\nBetter luck next time.\n\n Final Score: " + score);
+			restartGame(1);
+		}
 	}
 
 	// make dynamic reflections

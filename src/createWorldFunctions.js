@@ -154,7 +154,7 @@ function waltLoader(geometry, materials){
 		vertexColors: THREE.FaceColors,             // use colors from the geometry
 	});
 	var walt = new THREE.Mesh(geometry,material);
-	walt.position.set(0,0,-5);
+	walt.position.set(0,0,-15);
 	walt.scale.set(0.05, 0.05, 0.05);
 	player.add(walt);
 }

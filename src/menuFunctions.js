@@ -73,6 +73,10 @@ function openMenu(){
 	OUTPUT: none
 //////////////////////////////////////////////////////////////////////////////////*/
 function exitMenu(){
+	if(cutscenePlaying){
+		video.pause();
+		cutscenePlaying = false;
+	}
 	var menu = openMenu();
 	
 	console.log("exiting menu");
