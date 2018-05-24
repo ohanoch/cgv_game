@@ -137,10 +137,10 @@ function createWorld() {
 
     // -------------------------------------- MAKE MAIN CAMERA -------------------------------------
     mainCamera = new THREE.PerspectiveCamera(
-		30,
-		window.innerWidth/window.innerHeight,
-		0.1,
-		level.alphaCameraDistance * 20
+		30,												//aspect
+		window.innerWidth/window.innerHeight,			//fov - field of view
+		0.1,											//near
+		level.alphaCameraDistance * 20					//far
 	);
   	mainCamera.position.z = level.alphaCameraDistance;
   	player.add(mainCamera);
