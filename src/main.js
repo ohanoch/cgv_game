@@ -56,10 +56,14 @@ var text;
 var text_height;
 var text_size;
 
-var curveSegments;	
-var text_object_container;			
+var curveSegments;
+var text_object_container;
 var cubeCamera;			// for dynamic reflections
 var reflection_on_off; //turn cubeCam on or off
+
+// explosion stuff
+var exploding = false;
+var clock = new THREE.Clock();
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CUTSCENE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 var cutscenePlaying = true;
@@ -76,7 +80,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	///////////
 	// VIDEO //
 	///////////
-	
+
 	// create the video element
 	video = document.createElement( 'video' );
 	// video.id = 'video';
@@ -84,7 +88,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	video.src = "videos/sw2.ogv";
 	video.load(); // must call after setting/changing source
 	video.play();
-	
+
 	videoImage = document.createElement( 'canvas' );
 	videoImage.width = 	480;
 	videoImage.height = 204;
@@ -97,7 +101,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	videoTexture = new THREE.Texture( videoImage );
 	videoTexture.minFilter = THREE.LinearFilter;
 	videoTexture.magFilter = THREE.LinearFilter;
-	
+
 	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
 	// the geometry on which the movie will be displayed;
 	// 		movie image will be scaled to fit these dimensions.
@@ -106,7 +110,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	movieScreen.position.set(0,50,0);
 	// movieScreen.rotateX(-Math.PI/3);
 	cutscene.add(movieScreen);
-	
+
 	cutsceneCamera.position.set(0,50,200);
 	cutsceneCamera.lookAt(movieScreen.position);
 
@@ -240,16 +244,16 @@ function createWorld() {
 	curveSegments = 4;
 	font = undefined;
 
-	text_object_container = new THREE.Group();	
+	text_object_container = new THREE.Group();
 	text_object_container.position.set(-8,0,7);	// -8,0,7 is the magic tuple to get the text to rotate around the sphere.
 
 	loadFont();
 	joshSucks.add(text_object_container);
-	joshSucks.children[1].rotateZ(0.2);	
+	joshSucks.children[1].rotateZ(0.2);
 	// joshSucks.add( stick );
 	// var temp_test = player.position.clone();
 	joshSucks.position.set(1,12,3.8);	//center the sphere
-	
+
 ///// cube cam for reflections
 	cubeCamera	= new THREEx.CubeCamera(discoBall);
 	cubeCamera.update(renderer, scene);
@@ -267,10 +271,12 @@ function createWorld() {
 	//----------------------------------- CREATE THE PLAYER --------------------------------------------
 
 	// alpha is created by modelLoader function and added to player
-
 	var loader = new THREE.JSONLoader();					// create loader for .js models
 
 	loader.load(level.alphaModelURL, modelLoader);			// load model and call model_loader
+	if(currLevel == 4){
+		loader.load("models/WaltHeadLo.js", waltLoader);
+	}
 
 
 //------------------------------------- CREATE POWERUPS -----------------------------------------------
@@ -334,17 +340,24 @@ function modelLoader(geometry, materials) {
 function updateForFrame() {
 	frameNumber++;
 
-	// This block runs while resources are loading.
-	// if( loading === true ){
-	// // 	//console.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
-	// 	renderer.setClearColor("black");
-	// 	box.position.x -= 0.05;
-	// 	if( box.position.x < -10 ){
-	// 		box.position.x = 10;
-	// 	} 
-	// 	box.position.y = Math.sin(box.position.x);
-	// 	return; // Stop the function here.
-	// }
+// if an explosion is happening, update the particle effects for 2 seconds, then call crash
+	if (exploding){
+		group.tick();
+		shockwaveGroup.tick();
+		console.log(clock.getElapsedTime());
+		if (clock.getElapsedTime() > 2) {
+			Crash();
+			return;
+		}
+	}
+	//group.tick(  );
+	//shockwaveGroup.tick(  );
+
+	if(currLevel == 4){
+		player.children[3].translateZ(-0.1);
+		player.children[3].translateX(Math.sin(frameNumber/10));
+		player.children[3].translateY(Math.cos(frameNumber/15));
+	}
 
 	// make dynamic reflections
 	if(reflection_on_off == true){
@@ -378,8 +391,10 @@ function updateForFrame() {
 
 	//check for death by atmosphere (lasers) (height) + some leeway
 	if(player.position.y > level.atmosphereHeight + 1){
-		Crash();
-		return;
+		if (!exploding) {
+			Explosion();
+			return;
+		}
 	}
 
 	// Slowly moving the camera back behind _alpha_
@@ -434,16 +449,21 @@ function updateForFrame() {
 	keyCheck();
 
 	//Collision
-	collisions();
+	if (!exploding){
+		collisions();
+	}
+
 	if(alpha == null){
 		return;
 	}
 
-	// Score update: TODO: ut in function and tidy up
-	if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
-		score++;
-	} else {
-		score = score - 5;
+	if(currLevel != 4){
+			// Score update: TODO: ut in function and tidy up
+			if(Math.abs(player.position.x) <= level.worldWidth / 2 && Math.abs(player.position.z) <= level.worldDepth){
+				score++;
+			} else {
+				score = score - 5;
+			}
 	}
 
 	document.getElementById("s0").innerHTML = "Level: " + level.levelNum;
@@ -462,23 +482,18 @@ function updateForFrame() {
 //////////////////////////////////////////////////////////////////////////////////*/
 function doFrame() {
 	if (cutscenePlaying) {
-      	renderer.setClearColor("black");
-		// box.position.x -= 0.05;
-		// if( box.position.x < -10 ){
-		// 	box.position.x = 10;
-		// } 
-		// box.position.y = Math.sin(box.position.x);
-        render();
+    renderer.setClearColor("black");
+    render();
 		stats.update();
 		cutsceneFrames++;
 		// console.log(cutsceneFrames);
-		if(cutsceneFrames < 3000 ){
+		if(cutsceneFrames < 6000 ){
 			requestAnimationFrame(doFrame);
 		} else {
 			cutscenePlaying = false;
 			finishInit();
 		}
-        
+
 	}
 
     if (animating) {

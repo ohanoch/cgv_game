@@ -6,7 +6,8 @@
 <style> body { margin: 0px 0px 0px 0px; } canvas { width: 100%; height: 100% } </style>
 <!-- <iframe src="starwars-gh-pages/index.html" class="frame" ></iframe>  -->
 </head>
-<audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>	
+<audio id="xyz" src="sounds/haha.wav" preload="auto"></audio>
+<audio id="exp" src="sounds/explosion.mp3" preload="auto"></audio>
 <script src="libs\three.js"></script>
 <script src="libs\OrbitControls.js"></script>
 <script src="libs\stats.min.js"></script>
@@ -20,8 +21,8 @@
 <script src="libs\GeometryUtils.js"></script>
 <script src="libs\BendModifier.js"></script>
 <script src="libs\dat.gui.min.js"></script>
-<script src="libs\CSS3DRenderer.js"></script>
-<script src="libs\THREEx.WindowResize.js"></script>
+<script src="libs\SPE.min.js"></script>
+
 <script src="src\classes\level.js"></script>
 <script src="src\classes\alpha.js"></script>
 <script src="src\classes\map.js"></script>
@@ -30,6 +31,7 @@
 <script src="src\classes\collectible.js"></script>
 
 <script src="src\render.js"></script>
+<script src="src\lore.js"></script>
 <script src="src\createLevels.js"></script>
 <script src="src\mouseKeyboard.js"></script>
 <script src="src\createWorldFunctions.js"></script>
@@ -39,12 +41,7 @@
 <script src="src\fuckingText.js"></script>
 <script src="src\customSubroutines.js"></script>
 
-
-
 <script src="src\main.js"></script>
-
-
-
 
 <body onload="init()">
  	<div class="container">
@@ -58,5 +55,3 @@
 	</div>
 </body>
 </html>
-
-

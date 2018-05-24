@@ -37,7 +37,7 @@ function splitNumToParts(num, numParts){
 function randomPlace(){
 	var move = [];
 	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.width / 2));
-	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * worldMap.atmosphereHeight + 5);
+	move.push(Math.random() * worldMap.atmosphereHeight + 5);
 	move.push(Math.pow(-1, Math.floor(Math.random() * 2 + 1)) * Math.random() * (worldMap.depth / 2));
 	return new THREE.Vector3(move[0],move[1],move[2]);
 
