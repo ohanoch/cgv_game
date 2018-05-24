@@ -1,7 +1,7 @@
 "use strict";
 
 var STARTING_LIVES = 3;
-var currLevel = 2; //level variable mostly for display purposes at the moment
+var currLevel = 1; //level variable mostly for display purposes at the moment
 var level;
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< G L O B A L    V A R I A B L E S >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

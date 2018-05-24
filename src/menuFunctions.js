@@ -161,7 +161,7 @@ function menuInteraction(e){
 		} else if(intersections[0].object.name == "exit_button"){
 			window.alert("This is, sadly, a web game.\nIf you want to close it you are welcome to close this browser tab.\nJust know that it cannot be proven that exiting this game will not result in you being dead one month later\nYou have been warned");
 		} else if(intersections[0].object.name == "controls_button"){
-			window.alert("P - Play/Pause\nM - mute/unmute\nJ - turn cube camera on and off\n\nMovement:\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe\n\n\Powerups:\nGreen - gravity off\nBlue - minimize __alpha__\nRed - shooting, cause its pretty");
+			window.alert("P - Play/Pause\nM - mute/unmute\nJ - turn cube camera on and off\n\nMovement:\nZ - jump\nLeft/Right Arrows - rotate\nUp/Down Arrows - move forward back\nWASD - strafe\nSpace - shoot\n\nPowerups:\nGreen - gravity off\nBlue - minimize __alpha__\nWhite - farsight");
 		} else if(intersections[0].object.name == "credits_button"){
 			window.alert("This game was technically made by Avi Bank, Niambh Blundell, Or Hanoch but..\nIt was actually brought to life by the awesome Dr. Richard Klein, Phd, who taught us everything we know and inspired us to be better people. Everything we Do we owe to him.\nWE LOVE YOU RICHARD!");
 		}

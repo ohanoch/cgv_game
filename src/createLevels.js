@@ -53,11 +53,11 @@ function createLevel(levelNum){
 			1000,										//depth
 			400,										//atmosphereHeight
 			20,											//alphaCameraDistance
-			4,											//numRandomLights
+			2,											//numRandomLights
 			0x900036,									//alphaLightColour
 			0.5,										//mapBuildingRatio
 			'models/oil_drum/oil_drum',							//collectibleURL
-			['models/ship/ship', 'models/car/car', 'models/dead_tree/dead_tree'], 	//buildingModelURLs
+			['models/ship/ship', 'models/car/car', 'models/dead_tree/dead_tree', 'models/tree/tree'], 	//buildingModelURLs
 			"models/horse.js",							//alphaModelURL
 			"textures/floors/lava_floor.png",						//floorTextureURL
 			"textures/skyboxes/mp_mercury/", 			//backgroundURL
@@ -65,12 +65,12 @@ function createLevel(levelNum){
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,                                          //collectiblesToWin
-			[1,2],	 									//powerupsTypes
+			[1,2,3],	 									//powerupsTypes
 			0.8,											//alphaMaxSpeedY
 			-3,										//alphaMinSpeedY
 			-7,											//alphaMaxSpeedZ
-			-3.5,										//alphaMinSpeedZ
-			0.9,											//changeSpeedY
+			-1.5,										//alphaMinSpeedZ
+			1.2,											//changeSpeedY
 			0.007,										//changeSpeedZ
 			1.2,											//rotateSpeed
 			0.5,										//strafeSpeed
@@ -87,27 +87,27 @@ function createLevel(levelNum){
 	} else if (levelNum == 2) {		//avi
 		level = new Level(
 			levelNum,									//levelNum
-			1000,										//width
-			1000,										//depth
+			1500,										//width
+			1500,										//depth
 			300,										//atmosphereHeight
 			20,											//alphaCameraDistance
-			0,											//numRandomLights
-			0x00ffff,									//alphaLightColour
-			0.55,										//mapBuildingRatio
+			3,											//numRandomLights
+			0xff0000,									//alphaLightColour
+			0.56,										//mapBuildingRatio
 			'models/wine/Wine_Bottle_White',							//collectibleURL
-			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
-			"models/stork.js",							//alphaModelURL
+			['models/building/building'], 	//buildingModelURLs
+			"models/tief.js",							//alphaModelURL
 			"textures/floors/seamless_space.PNG",						//floorTextureURL
 			"textures/skyboxes/space/", 			//backgroundURL
-			0x000000,									//fog colour
-			30, 										//numPowerups
-			30, 										//numCollectibles
+			0xffffff,									//fog colour
+			20, 										//numPowerups
+			20, 										//numCollectibles
 			1,											//collectiblesToWin
-			[1,2],	 									//powerupsTypes
+			[1,2,3],	 									//powerupsTypes
 			1,											//alphaMaxSpeedY
 			-10,										//alphaMinSpeedY
-			-2,											//alphaMaxSpeedZ
-			-0.01,										//alphaMinSpeedZ
+			-8,											//alphaMaxSpeedZ
+			-0.5,										//alphaMinSpeedZ
 			1,											//changeSpeedY
 			0.01,										//changeSpeedZ
 			1,											//rotateSpeed
@@ -124,23 +124,23 @@ function createLevel(levelNum){
 	} else if (levelNum == 3) {		//niambh
 		level = new Level(
 			levelNum,									//levelNum
-			1000,										//width
-			1000,										//depth
+			1200,										//width
+			1200,										//depth
 			300,										//atmosphereHeight
 			20,											//alphaCameraDistance
 			0,											//numRandomLights
 			0x00ffff,									//alphaLightColour
 			0.55,										//mapBuildingRatio
 			'models/carrot/Carrot',							//collectibleURL
-			['models/building/building', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
-			"models/tief.js",							//alphaModelURL
+			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
+			"models/stork.js",							//alphaModelURL
 			"textures/skyboxes/mp_whirlpool/yneg.png",						//floorTextureURL
 			"textures/skyboxes/mp_whirlpool/", 			//backgroundURL
 			0x028ea8,									//fog colour
 			30, 										//numPowerups
 			30, 										//numCollectibles
 			1,											//collectiblesToWin
-			[2],	 									//powerupsTypes
+			[1,2,3],	 									//powerupsTypes
 			1,											//alphaMaxSpeedY
 			-10,										//alphaMinSpeedY
 			-2,											//alphaMaxSpeedZ
@@ -192,47 +192,9 @@ function createLevel(levelNum){
 			window.innerHeight/5,						//minimapHeight
 			"textures/skyboxes/mp_midnight/",	//pauseMenuTextureURL
 			"sounds/haha.wav",							//crashSoundURL
-			"sounds/under_the_sea_8bit.mp3",				//pauseSoundURL
-			"sounds/blue_8bit.mp3",				//playingSoundURL
+			"sounds/we_are_the_champions_8bit.mp3",				//pauseSoundURL
+			"sounds/my_heart_will_go_on_8bit.mp3",				//playingSoundURL
 			lore4									//lore for level story
-		);
-	}else if (levelNum == 3) {
-		lore = "level 3";
-		level = new Level(
-			levelNum,									//levelNum
-			1000,										//width
-			1000,										//depth
-			300,										//atmosphereHeight
-			20,											//alphaCameraDistance
-			0,											//numRandomLights
-			0x00ffff,									//alphaLightColour
-			0.55,										//mapBuildingRatio
-			'models/asdf2/Lightsaber_Scene',		//collectibleURL
-			['models/blue_shards/blue_shards', 'models/mill/mill', 'models/crystal/Crystal'], 	//buildingModelURLs
-			"models/stork.js",							//alphaModelURL
-			"textures/skyboxes/mp_whirlpool/yneg.png",	//floorTextureURL
-			"textures/skyboxes/mp_whirlpool/", 			//backgroundURL
-			0x028ea8,									//fog colour
-			30, 										//numPowerups
-			30, 										//numCollectibles
-			1,											//collectiblesToWin
-			[1],	 									//powerupsTypes
-			1,											//alphaMaxSpeedY
-			-10,										//alphaMinSpeedY
-			-2,											//alphaMaxSpeedZ
-			-0.01,										//alphaMinSpeedZ
-			1,											//changeSpeedY
-			0.01,										//changeSpeedZ
-			1,											//rotateSpeed
-			0.5,										//strafeSpeed
-			-0.01,										//gravity
-			window.innerHeight/5,						//minimapWidth
-			window.innerHeight/5,						//minimapHeight
-			"textures/skyboxes/mp_midnight/",			//pauseMenuTextureURL
-			"sounds/haha.wav",							//crashSoundURL
-			"sounds/under_the_sea_8bit.mp3",			//pauseSoundURL
-			"sounds/blue_8bit.mp3",						//playingSoundURL
-			lore										//lore for level story
 		);
 	}
 }
