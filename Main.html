@@ -137,7 +137,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	video = document.createElement( 'video' );
 	// video.id = 'video';
 	// video.type = ' video/ogg; codecs="theora, vorbis" ';
-	video.src = "videos/sintel.ogv";
+	video.src = "videos/sw2.ogv";
 	video.load(); // must call after setting/changing source
 	video.play();
 	
@@ -150,8 +150,8 @@ var video, videoImage, videoImageContext, videoTexture;
 	// video = document.getElementById( 'myVideo' );
 	
 	videoImage = document.createElement( 'canvas' );
-	videoImage.width = 500;
-	videoImage.height = 500;
+	videoImage.width = 	480;
+	videoImage.height = 204;
 
 	videoImageContext = videoImage.getContext( '2d' );
 	// background color if no video present
@@ -165,7 +165,7 @@ var video, videoImage, videoImageContext, videoTexture;
 	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
 	// the geometry on which the movie will be displayed;
 	// 		movie image will be scaled to fit these dimensions.
-	var movieGeometry = new THREE.PlaneGeometry( 240, 100, 4, 4 );
+	var movieGeometry = new THREE.PlaneGeometry( 480, 204, 4, 4 );
 	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
 	movieScreen.position.set(0,50,0);
 	// movieScreen.rotateX(-Math.PI/3);
